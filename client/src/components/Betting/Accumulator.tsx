@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_ACCUM } from "../../queries";
-import { selectUserid } from "../../redux/userSlice";
+import { selectBalance, selectUserid } from "../../redux/userSlice";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 export default function Accumulator() {
@@ -27,6 +27,7 @@ export default function Accumulator() {
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false);
   const user_id = useAppSelector(selectUserid);
   const bets = useAppSelector(selectAccum);
+  const balance = useAppSelector(selectBalance);
 
   const [betCompleted, setBetCompleted] = React.useState<boolean>(false);
 
@@ -53,24 +54,26 @@ export default function Accumulator() {
     return (
       <>
         <div className="Accum">
-          Spillet ditt ble satt! <br />
-          <br />
-          <Button
-            variant="contained"
-            onClick={() => {
-              afterAccumPlaced(true);
-            }}
-          >
-            Behold valg
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              afterAccumPlaced(false);
-            }}
-          >
-            Lukk
-          </Button>
+          <div style={{ padding: 20 }}>
+            Spillet ditt ble satt! <br />
+            <br />
+            <Button
+              variant="contained"
+              onClick={() => {
+                afterAccumPlaced(true);
+              }}
+            >
+              Behold valg
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                afterAccumPlaced(false);
+              }}
+            >
+              Lukk
+            </Button>
+          </div>
         </div>
       </>
     );
@@ -91,7 +94,6 @@ export default function Accumulator() {
         {!isCollapsed ? (
           <>
             <div style={{ padding: "20px" }}>
-                <div id="stickyButton">
               <Button
                 size="small"
                 variant="contained"
@@ -101,7 +103,6 @@ export default function Accumulator() {
               >
                 Show less
               </Button>
-              </div>
               <br />
               <br />
               {bets.map((bet: AccumBetOption) => {
@@ -133,7 +134,12 @@ export default function Accumulator() {
                 );
               })}
               <TextField
-                sx={{ width: "70%" }}
+                error={balance < Number(stake) ? true : false}
+                helperText={
+                  balance < Number(stake)
+                    ? "Innsats overstiger din balanse"
+                    : ""
+                }
                 value={stake}
                 type="number"
                 onChange={(e) => {
@@ -144,15 +150,31 @@ export default function Accumulator() {
                 variant="outlined"
               />{" "}
               <br />
-              Totalodds: {totalodds.toFixed(2)} <br />
+              <div style={{ marginTop: 10, marginBottom: 10 }}>
+                <Chip
+                  sx={{ backgroundColor: "white" }}
+                  label={"Totalodds: " + totalodds.toFixed(2)}
+                ></Chip>
+              </div>
+              <div style={{ marginTop: 10, marginBottom: 10 }}>
+                <Chip
+                  sx={{ backgroundColor: "#388e3c", color: "white" }}
+                  label={
+                    "Mulig utbetaling: " +
+                    (totalodds * Number(stake ? stake : 0)).toLocaleString() +
+                    " NOK"
+                  }
+                ></Chip>
+              </div>
               <Button
+                disabled={balance < Number(stake) ? true : false}
                 variant="contained"
                 onClick={() => {
                   createAccum({
                     variables: {
                       input: {
                         stake: Number(stake),
-                        total_odds: totalodds.toFixed(2),
+                        total_odds: totalodds,
                         user: {
                           connect: {
                             where: {
@@ -175,6 +197,7 @@ export default function Accumulator() {
         ) : (
           <div style={{ padding: "20px" }}>
             <Button
+              sx={{}}
               size="small"
               variant="contained"
               onClick={() => {
