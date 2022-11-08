@@ -1,10 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./userSlice";
+import accumReducer from "./accumSlice"
+
 
 // Create Redux store
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    accum: accumReducer,
   },
 });
 

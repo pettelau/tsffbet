@@ -4,6 +4,8 @@ import { AppBar, Box, Toolbar, Typography, IconButton } from "@mui/material/";
 // Icons
 import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import Tooltip from "@mui/material/Tooltip";
 
 export default function NavBar() {
@@ -46,6 +48,32 @@ export default function NavBar() {
             }}
           >
             <PersonIcon />
+          </IconButton>
+          <IconButton
+            id="betting-button"
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+            onClick={() => {
+              navigate("/bettinghome");
+            }}
+          >
+            <LocalAtmIcon />
+          </IconButton>
+          <IconButton
+            id="betting-button"
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+            onClick={() => {
+              navigate("/bettingmyaccums");
+            }}
+          >
+            <ReceiptIcon />
           </IconButton>
         </Toolbar>
       </AppBar>

@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@apollo/server": "^4.0.0",
+    "@neo4j/graphql": "^3.12.0",
+    "apoc": "^2.1.6",
+    "apollo-server": "^3.11.1",
+    "graphql": "^16.6.0",
+    "neo4j-driver": "^5.2.0"
+  },
+  "type": "module",
+  "scripts": {
+    "compile": "tsc",
+    "postinstall": "npm run compile",
+    "start": "npm run compile && node ./dist/index.js"
+  }
+}

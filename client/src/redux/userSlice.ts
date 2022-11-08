@@ -2,11 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
 
 interface UserState {
+    user_id: number
     username: string
 }
 // Initial User state, all values are empty initially
 const initialState: UserState = {
-  username: "",
+  user_id: 1,
+  username: "plauvrak",
 };
 
 // Redux User Slice
@@ -27,7 +29,8 @@ export const { setUsername } =
 
 // Get data from Redux state
 const selectUsername = (state: RootState) => state.user.username;
+const selectUserid = (state: RootState) => state.user.user_id;
 
-export { selectUsername };
+export { selectUsername, selectUserid };
 
 export default userSlice.reducer;
