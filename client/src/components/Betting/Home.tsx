@@ -5,9 +5,15 @@ import { GET_BETS } from "../../queries";
 import { Bet, BetOption } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { addBet, removeBet, selectAccum } from "../../redux/accumSlice";
+import { selectBalance, selectFirstname, selectLastname } from "../../redux/userSlice";
 
 export default function BettingHome() {
   const dispatch = useAppDispatch();
+
+  const firstname = useAppSelector(selectFirstname);
+  const lastname = useAppSelector(selectLastname);
+  const balance = useAppSelector(selectBalance);
+  console.log(firstname);
 
   const [bets, setBets] = React.useState<Bet[]>([]);
   const accumBets = useAppSelector(selectAccum);

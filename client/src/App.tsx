@@ -12,8 +12,11 @@ import { setUsername } from "./redux/userSlice";
 import BettingHome from "./components/Betting/Home";
 import MyAccums from "./components/Betting/MyAccums";
 import Accumulator from "./components/Betting/Accumulator";
+import Login from "./components/Login";
+import UserReg from "./components/UserReg";
 
 export default function App() {
+  
   return (
     <Provider store={store}>
       <div className="App">
@@ -23,6 +26,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="bettinghome" element={<BettingHome />} />
             <Route path="bettingmyaccums" element={<MyAccums />} />
+            <Route path="Login" element={<Login />} />
+            <Route path="UserReg" element={<UserReg />} />
           </Routes>
         </Router>
         <Accumulator />

@@ -44,4 +44,26 @@ type AccumBetDetails = {
     title: string;
 }
 
+import { AlertColor } from "@mui/material/Alert";
+
+// Alert type
+export type AlertT = {
+  type: AlertColor;
+  msg: string;
+};
+
+// Alert properties
+export interface AlertProps {
+  setAlert: (alert: boolean) => void;
+  _alert: boolean;
+  _alertType: AlertT;
+  toggleAlert: (prop: boolean) => void;
+}
+
+export type UserDetails = {
+    username: string,
+    balance: number,
+    firstname: string,
+    lastname: string,
+}
 

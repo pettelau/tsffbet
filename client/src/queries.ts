@@ -57,5 +57,40 @@ mutation CreateAccums($input: [AccumCreateInput!]!) {
     }
 }`
 
+// Query for fetching one username
+export const GET_USER = gql`
+  query User($where: UserWhere) {
+    users(where: $where) {
+      username
+      firstname
+      lastname
+      balance
+    }
+  }
+`;
+
+// Query for fetching the hased password for a specific user
+export const GET_HASH = gql`
+  query UserPass($where: UserWhere) {
+    users(where: $where) {
+      password
+    }
+  }
+`;
+
+// Query for adding a new user
+export const ADD_USER = gql`
+  mutation CreateUsers($input: [UserCreateInput!]!) {
+    createUsers(input: $input) {
+      users {
+        firstname
+        lastname
+        username
+        password
+      }
+    }
+  }
+`;
+
 
 

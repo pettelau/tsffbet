@@ -17,15 +17,16 @@ import {
 } from "@mui/material";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_ACCUM } from "../../queries";
-import { selectBalance, selectUserid } from "../../redux/userSlice";
+import { selectBalance, selectUsername } from "../../redux/userSlice";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 export default function Accumulator() {
   const dispatch = useAppDispatch();
 
+  const username = useAppSelector(selectUsername);
+
   const [stake, setStake] = React.useState<string>();
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false);
-  const user_id = useAppSelector(selectUserid);
   const bets = useAppSelector(selectAccum);
   const balance = useAppSelector(selectBalance);
 
@@ -178,7 +179,7 @@ export default function Accumulator() {
                         user: {
                           connect: {
                             where: {
-                              node: { user_id: user_id },
+                              node: { username: username },
                             },
                           },
                         },

@@ -2,69 +2,15 @@ import neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 import { ApolloServer } from "apollo-server";
 import { gql } from "apollo-server";
-// const typeDefs = gql `
-// type Accum {
-//   accum_id: Int
-//   bets: [Bet!]! @relationship(type: "BETS", properties: "betOptions", direction: OUT)
-//   directedMovies: [Bet!]! @relationship(type: "DIRECTED", direction: OUT)
-// }
-
-// type Bet {
-//   title: String!
-//   released: Int!
-//   actors: [Accum!]! @relationship(type: "BETS", properties: "betOptions", direction: IN)
-//   director: Accum! @relationship(type: "DIRECTED", direction: IN)
-// }
-
-// interface betOptions @relationshipProperties {
-//   user_option: String
-//   user_odds: Int
-// }`
-// const typeDefs = gql `
-// type User {
-//   user_id: Int
-//   username: String
-//   password: String
-//   balance: Int
-//   accums: [Accum!]! @relationship(type: "OWNER", direction: OUT)
-// }
-  
-// type Accum {
-//   accum_id: Int
-//   stake: Int
-//   user: User! @relationship(type: "OWNER", direction: IN)
-//   timestamp: Date
-//   total_odds: Int
-//   bets: [Bet!]! @relationship(type: "BETS", properties: "betOptions", direction: OUT)
-// }
-  
-// type Bet {
-//   bet_id: Int
-//   title: String
-//   category: String
-//   bet_status: Int
-//   options: [Option!]!
-//   accums: [Accum!]! @relationship(type: "BETS", properties: "betOptions", direction: IN)
-// }
-
-// interface betOptions @relationshipProperties {
-//   user_option: String
-//   user_odds: Int
-//   option_status: Int
-// }
-
-// interface Option {
-//   option: String
-//   latest_odds: Int
-//   option_status: Int
-// }
 
 const typeDefs = gql `
 type User {
   user_id: ID! @id
-  username: String
-  password: String
-  balance: Int
+  firstname: String
+  lastname: String
+  username: String!
+  password: String!
+  balance: Int! @default(value:1000)
   accums: [Accum!]! @relationship(type: "OWNER", direction: OUT)
 }
   
@@ -77,10 +23,10 @@ type Accum {
 }
   
 type Bet {
-  bet_id: Int
-  title: String
+  bet_id: ID! @id
+  title: String!
   category: String
-  bet_status: Int
+  bet_status: Int! @default(value:1)
   bet_options: [BetOption!]! @relationship(type: "BETOPTIONS", direction: OUT)
 }
 
@@ -89,11 +35,11 @@ interface userOdds @relationshipProperties {
 }
 
 type BetOption {
-  option_id: Int 
+  option_id: ID! @id
   bet: Bet! @relationship(type: "BETOPTIONS", direction: IN)
   option: String
   latest_odds: Float
-  option_status: Int
+  option_status: Int! @default(value:1)
   accums: [Accum!]! @relationship(type: "PLACED_OPTIONS", properties: "userOdds", direction: IN)
 }
 
