@@ -3,6 +3,7 @@ import { Neo4jGraphQL } from "@neo4j/graphql";
 import { ApolloServer } from "apollo-server";
 import { gql } from "apollo-server";
 
+
 const typeDefs = gql `
 type User {
   user_id: ID! @id
@@ -89,3 +90,22 @@ schema.getSchema().then((schema) => {
 // } finally {
 //   await session.close();
 // }
+
+
+// // EXPRESS BELOW
+// import express from 'express';
+
+// const app = express()
+// const port = 5555;
+
+// app.use(express.json());
+
+// app.post('/api/updateBet', (req, res) => {
+//   console.log(req.body);
+//   // res.json({
+//   //   email: faker.internet.email(),
+//   //   name: faker.name.findName(),
+//   // });
+// });
+
+// app.listen(port, () => console.log(`HTTP server is listening on http://localhost:${port}`));

@@ -14,6 +14,7 @@ import MyAccums from "./components/Betting/MyAccums";
 import Accumulator from "./components/Betting/Accumulator";
 import Login from "./components/Login";
 import UserReg from "./components/UserReg";
+import BettingAdmin from "./components/Betting/BettingAdmin";
 
 export default function App() {
   
@@ -28,6 +29,7 @@ export default function App() {
             <Route path="bettingmyaccums" element={<MyAccums />} />
             <Route path="Login" element={<Login />} />
             <Route path="UserReg" element={<UserReg />} />
+            <Route path="bettingAdmin" element={<BettingAdmin />} />
           </Routes>
         </Router>
         <Accumulator />

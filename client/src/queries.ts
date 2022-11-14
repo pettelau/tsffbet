@@ -92,5 +92,16 @@ export const ADD_USER = gql`
   }
 `;
 
+// export const UPDATE_BET = gql`
+// fragment Payload on REST {
+//   betID: Number
+// }
+//   query UpdateBet {
+//     bet(input: $input) @rest(type: "UpdateBet", method: "POST", path: "updateBet") {
+//       name
+//     }
+//   }
+// `;
+
 
 
