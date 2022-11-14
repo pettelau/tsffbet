@@ -1,5 +1,27 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import psycopg2
+
+from .credentials import Credentials
+
+
+# conn = psycopg2.connect(
+#     host=Credentials.host,
+#     database=Credentials.db,
+#     user=Credentials.user,
+#     password=Credentials.password,
+# )
+# # create a cursor
+# cur = conn.cursor()
+
+
+# # execute a statement
+# print("PostgreSQL database version:")
+# cur.execute("SELECT * from accounts;")
+
+# # display the PostgreSQL database server version
+# db_version = cur.fetchone()
+# print(db_version)
 
 
 app = FastAPI()
