@@ -9,7 +9,7 @@ import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { useEffect } from "react";
 import { setUsername } from "./redux/userSlice";
-import BettingHome from "./components/Betting/Home";
+import BettingHome from "./components/Betting/BettingHome";
 import MyAccums from "./components/Betting/MyAccums";
 import Accumulator from "./components/Betting/Accumulator";
 import Login from "./components/Login";
