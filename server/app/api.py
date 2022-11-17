@@ -66,9 +66,9 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["root"])
-async def read_root() -> dict:
-    return {"message": "Welcome to your todo list."}
+# @app.get("/", tags=["root"])
+# async def read_root() -> dict:
+#     return {"message": "Welcome to your todo list."}
 
 
 # @app.get("/openbets")
@@ -125,9 +125,9 @@ async def read_root() -> dict:
 #     return accums_with_options
 
 
-@app.get("/admin/allaccums")
-async def read_root() -> dict:
-    return {"message": "Admin"}
+# @app.get("/admin/allaccums")
+# async def read_root() -> dict:
+#     return {"message": "Admin"}
 
 
 # @app.get("/userAvailability/{user}")
