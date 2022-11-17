@@ -6,7 +6,7 @@ import express from 'express';
 const router = express.Router();
 
 router.get('/bets', async (_request: any, response: any) => {
-  response.send("hello world")
+  response.send({"message": "hello world"})
 });
 
 

@@ -23,9 +23,9 @@ export default function BettingHome() {
   const accumBets = useAppSelector(selectAccum);
 
   const fetchBets = async () => {
-    const response = await fetch("http://localhost:8000/openbets");
+    const response = await fetch("api/v1/bets");
     const resp = await response.json();
-    setBets(resp);
+    // setBets(resp);
     console.log(resp);
   };
 
