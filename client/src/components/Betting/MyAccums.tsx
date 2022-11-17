@@ -1,21 +1,21 @@
 import { useQuery } from "@apollo/client";
 import { Button, Card } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { GET_ACCUMS } from "../../queries";
 import { Accums } from "../../types";
 
 export default function MyAccums() {
   const [accums, setAccums] = React.useState<Accums[]>([]);
-  const { loading, error, data } = useQuery(GET_ACCUMS, {
-    fetchPolicy: "network-only",
-    onCompleted: (data: any) => {
-      setAccums(data.accums);
-      console.log(data);
-    },
-  });
-  if (loading) {
-    return <>Laster dine kuponger...</>;
-  }
+  const fetchBets = async () => {
+    const response = await fetch("http://localhost:8000/accums/1");
+    const resp = await response.json();
+    setAccums(resp);
+    console.log(resp);
+  };
+
+  useEffect(() => {
+    fetchBets();
+  }, []);
   return (
     <>
       {accums.map((accum) => {
@@ -23,19 +23,23 @@ export default function MyAccums() {
           <>
             <Card sx={{ maxWidth: 345 }}>
               Accum ID: {accum.accum_id} <br />
-              {accum.bet_optionsConnection.edges.map((bet) => {
+              <br />
+              {accum.accumBets.map((bet) => {
                 return (
                   <>
-                    <b>{bet.node.bet.category}</b> <br />
-                    {bet.node.bet.title} <br />
-                    {bet.node.option} - {bet.user_odds}
+                    {bet.bet} <br />
+                    {bet.chosen_option} - {bet.user_odds}
+                    <br />
+                    Status: {bet.option_status}
+                    <br />
                     <br />
                   </>
                 );
               })}
               Stake: {accum.stake} <br />
               Totalodds: {accum.total_odds.toFixed(2)} <br />
-              Potensiell utbetaling: {(accum.stake * accum.total_odds).toFixed(2)}kr
+              Potensiell utbetaling:{" "}
+              {(accum.stake * accum.total_odds).toFixed(2)}kr <br />
               <br />
             </Card>
             <br></br>

@@ -11,10 +11,11 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { setUsername } from "../redux/userSlice";
 import AlertComp from "./Alert";
-import { AlertT } from "../types";
+import { AlertT, UserAvailability } from "../types";
 import { AccountCircle } from "@mui/icons-material";
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import KeyIcon from "@mui/icons-material/Key";
+import { createSuper } from "typescript";
 
 interface FetchedUserData {
   users: string[];
@@ -46,39 +47,21 @@ function UserReg() {
     msg: "",
   });
 
-  //fetched user from neo4j
-  const [_fetchedUser, setFetchedUser] = useState<FetchedUserData>();
-  //fetch user with username {user}
-  const [userAvailability] = useLazyQuery(GET_USER, {
-    //jævla caching
-    fetchPolicy: "network-only",
-    onCompleted: (result) => {
-      setFetchedUser(result);
-    },
-    onError: (error) => {
-      console.log(JSON.stringify(error, null, 2));
-      alertmsg = "Something went wrong, check cl";
-      toggleAlert(true, alertmsg);
-    },
+  // //fetched user from neo4j
+  const [userAvailability, setUserAvailability] = useState<UserAvailability>({
+    checkedDB: false,
+    userTaken: false,
   });
 
-  //set user with username and hashed password
-  const [setUserDB] = useMutation(ADD_USER, {
-    onCompleted: (result) => {
-      // When complete, set all user logged in parameters
-      alertmsg = `User ${user} created`;
-      toggleAlert(true, alertmsg, "success");
-      localStorage.setItem("userLoggedIn", user.toLowerCase());
-      dispatch(setUsername(user.toLowerCase()));
-      // Navigate to login page
-      navigate("/login");
-    },
-    onError: (error) => {
-      console.log(JSON.stringify(error, null, 2));
-      alertmsg = "Something went wrong, check cl";
-      toggleAlert(true, alertmsg, "error");
-    },
-  });
+  const fetchUserAvailability = async (user: string) => {
+    const response = await fetch(
+      `http://localhost:8000/userAvailability/${user}`
+    );
+    const resp = await response.json();
+
+    setUserAvailability({ checkedDB: true, userTaken: resp["userTaken"] });
+    console.log(resp["userTaken"]);
+  };
 
   // Toggle error with message
   function toggleAlert(
@@ -104,7 +87,7 @@ function UserReg() {
         // Check if password fulfills criterias
         if (LoginUtils.verifyPass(pass)) {
           // Check if that username exists from before in DB
-          userAvailability({ variables: { where: { username: user } } });
+          fetchUserAvailability(user.toLowerCase());
         } else {
           alertmsg = "Passordet må være minst 6 tegn langt";
           toggleAlert(true, alertmsg, "error");
@@ -121,26 +104,39 @@ function UserReg() {
   // If _fetchedUser is empty, it means username is not taken -> create user in DB
   useEffect(() => {
     //if username already taken
-    if (_fetchedUser) {
-      if (_fetchedUser.users.length > 0) {
+    if (userAvailability["checkedDB"]) {
+      if (userAvailability["userTaken"]) {
         alertmsg = `User '${user}' is taken, please try something else`;
         toggleAlert(true, alertmsg, "error");
       } else {
+        console.log("here in useEffect");
         //hash pass and set to neo4j
         let hashedPass = LoginUtils.salthash(pass);
-        setUserDB({
-          variables: {
-            input: {
-              firstname: firstname,
-              lastname: lastname,
-              username: user.toLowerCase(),
-              password: hashedPass,
-            },
-          },
-        });
+        let newUser = {
+          username: user,
+          firstname: firstname,
+          password: hashedPass,
+        };
+        if (lastname !== "") {
+          Object.assign(newUser, { lastname: lastname });
+        }
+        console.log(newUser);
+
+        createUser(newUser);
       }
     }
-  }, [_fetchedUser]);
+  }, [userAvailability]);
+
+  const createUser = async (newUser: Object) => {
+    const response = await fetch("http://localhost:8000/createUser", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newUser),
+    });
+
+    const resp = await response.json();
+    console.log(resp);
+  };
 
   return (
     <>

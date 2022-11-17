@@ -1,11 +1,15 @@
 import { useQuery } from "@apollo/client";
 import { Button } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { GET_BETS } from "../../queries";
 import { Bet, BetOption } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { addBet, removeBet, selectAccum } from "../../redux/accumSlice";
-import { selectBalance, selectFirstname, selectLastname } from "../../redux/userSlice";
+import {
+  selectBalance,
+  selectFirstname,
+  selectLastname,
+} from "../../redux/userSlice";
 
 export default function BettingHome() {
   const dispatch = useAppDispatch();
@@ -18,19 +22,16 @@ export default function BettingHome() {
   const [bets, setBets] = React.useState<Bet[]>([]);
   const accumBets = useAppSelector(selectAccum);
 
-  //TODO: choose category
-  //TODO: add only alive bets to query option (status 1)
+  const fetchBets = async () => {
+    const response = await fetch("http://localhost:8000/openbets");
+    const resp = await response.json();
+    setBets(resp);
+    console.log(resp);
+  };
 
-  const { loading, error, data } = useQuery(GET_BETS, {
-    onCompleted: (data: any) => {
-      console.log(data);
-      setBets(data.bets);
-    },
-  });
-
-  if (loading) {
-    return <>Loading...</>;
-  }
+  useEffect(() => {
+    fetchBets();
+  }, []);
 
   function addToAccum(bet: string, option: BetOption, index: number) {
     if (index == -1) {

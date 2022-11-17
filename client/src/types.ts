@@ -17,32 +17,26 @@ export type AccumBetOption = {
     option: BetOption;
 }
 
+export type UserAvailability = {
+    checkedDB: boolean;
+    userTaken: boolean;
+}
+
+
+export type AccumBets = {
+    bet: string;
+    user_odds: number,
+    chosen_option: string;
+    option_status: 1 | 2 | 3 | 4
+}
+
 export type Accums = {
     accum_id: number;
     stake: number;
     total_odds: number;
-    bet_optionsConnection: Edges;
+    accumBets: AccumBets[];
 }
 
-type Edges = {
-    edges: AccumBet[]
-}
-
-type AccumBet = {
-    user_odds: number;
-    node: BetNode;
-}
-
-type BetNode = {
-    option: string;
-    bet: AccumBetDetails
-}
-
-type AccumBetDetails = {
-    bet_status: 1 | 2 | 3 | 4;
-    category: string;
-    title: string;
-}
 
 import { AlertColor } from "@mui/material/Alert";
 
