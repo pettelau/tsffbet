@@ -3,9 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from .postgresPool import pool
 from string import Template
-from starlette.applications import Starlette
-from starlette.routing import Mount
-from starlette.staticfiles import StaticFiles
 
 # try:
 #     connection = pool.getconn()
@@ -48,12 +45,6 @@ from starlette.staticfiles import StaticFiles
 
 app = FastAPI()
 
-routes = [
-    Mount("/static", app=StaticFiles(directory="/tmp/build"), name="static"),
-]
-
-app = Starlette(routes=routes)
-
 origins = ["http://localhost:3000", "localhost:3000"]
 
 
@@ -66,9 +57,14 @@ app.add_middleware(
 )
 
 
-# @app.get("/", tags=["root"])
-# async def read_root() -> dict:
-#     return {"message": "Welcome to your todo list."}
+@app.get("/", tags=["root"])
+async def read_root() -> dict:
+    return {"message": "Welcome to your todo list."}
+
+
+@app.get("/testing", tags=["root"])
+async def read_root() -> dict:
+    return {"melding": "Welcome to testing."}
 
 
 # @app.get("/openbets")
