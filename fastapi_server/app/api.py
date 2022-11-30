@@ -152,6 +152,8 @@ async def add_user(loginDetails: dict) -> dict:
 
 @app.post("/api/createUser")
 async def add_user(user: dict) -> dict:
+    print(user["password"])
+    print(user["username"])
     hashed = bcrypt.hashpw(user["password"], bcrypt.gensalt())
     # print(
     #     Template(
