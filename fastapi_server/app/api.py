@@ -56,6 +56,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app = FastAPI(root_path="/api")
+
 
 @app.get("/", tags=["root"])
 async def read_root() -> dict:
