@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { LoginUtils } from "../utils";
 import { Link, Navigate } from "react-router-dom";
+import axios from "axios";
 
 import TextField from "@mui/material/TextField";
 import { AlertTitle, Button, InputAdornment } from "@mui/material";
@@ -12,10 +13,11 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { setUsername } from "../redux/userSlice";
 import AlertComp from "./Alert";
 import { AlertT, UserAvailability } from "../types";
-import { AccountCircle } from "@mui/icons-material";
+import { AccountCircle, ConstructionOutlined } from "@mui/icons-material";
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import KeyIcon from "@mui/icons-material/Key";
 import { createSuper } from "typescript";
+import { selectPath } from "../redux/envSlice";
 
 interface FetchedUserData {
   users: string[];
@@ -26,6 +28,8 @@ function UserReg() {
   const navigate = useNavigate();
 
   let alertmsg = "";
+
+  const url_path = useAppSelector(selectPath);
 
   const [missingUsername, setMissingUsername] = useState<boolean>(false);
   const [missingFirstname, setMissingFirstname] = useState<boolean>(false);
@@ -54,10 +58,9 @@ function UserReg() {
   });
 
   const fetchUserAvailability = async (user: string) => {
-    const response = await fetch(
-      `http://localhost:8000/userAvailability/${user}`
-    );
+    const response = await fetch(`${url_path}api/userAvailability/${user}`);
     const resp = await response.json();
+    console.log(resp);
 
     setUserAvailability({ checkedDB: true, userTaken: resp["userTaken"] });
     console.log(resp["userTaken"]);
@@ -111,7 +114,7 @@ function UserReg() {
       } else {
         console.log("here in useEffect");
         //hash pass and set to neo4j
-        let hashedPass = LoginUtils.salthash(pass);
+        let hashedPass = LoginUtils.hashPass(pass);
         let newUser = {
           username: user,
           firstname: firstname,
@@ -128,13 +131,24 @@ function UserReg() {
   }, [userAvailability]);
 
   const createUser = async (newUser: Object) => {
-    const response = await fetch("http://localhost:8000/createUser", {
+    // const response = await fetch("http://localhost:8000/api/createUser", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(newUser),
+    // });
+    const response = await fetch(`${url_path}api/createUser`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUser),
     });
 
     const resp = await response.json();
+    if (resp.userCreated) {
+      navigate("/login");
+    } else {
+      alertmsg = `Bruker ble ikke opprettet, noe gikk galt. Send melding til Lau. Error message: ${resp}`;
+      toggleAlert(true, alertmsg, "error");
+    }
     console.log(resp);
   };
 

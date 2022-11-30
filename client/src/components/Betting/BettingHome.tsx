@@ -10,9 +10,12 @@ import {
   selectFirstname,
   selectLastname,
 } from "../../redux/userSlice";
+import { selectPath } from "../../redux/envSlice";
 
 export default function BettingHome() {
   const dispatch = useAppDispatch();
+
+  const url_path = useAppSelector(selectPath);
 
   const firstname = useAppSelector(selectFirstname);
   const lastname = useAppSelector(selectLastname);
@@ -23,7 +26,7 @@ export default function BettingHome() {
   const accumBets = useAppSelector(selectAccum);
 
   const fetchBets = async () => {
-    const response = await fetch("api/testing");
+    const response = await fetch(`${url_path}api/testing`);
     const resp = await response.json();
     // setBets(resp);
     console.log(resp);
@@ -50,7 +53,7 @@ export default function BettingHome() {
             Bet: {bet.title} <br />
             {bet.bet_options.map((option: BetOption) => {
               let index = accumBets
-                .map((c) => c.option.option_id)
+                .map((c: any) => c.option.option_id)
                 .indexOf(option.option_id);
               return (
                 <>

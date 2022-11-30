@@ -21,6 +21,7 @@ import { AlertColor } from "@mui/material/Alert";
 import AlertComp from "./Alert";
 import { AlertT, UserDetails } from "../types";
 import { deepPurple } from "@mui/material/colors";
+import { selectPath } from "../redux/envSlice";
 
 interface UserPassData {
   __typename: string;
@@ -40,6 +41,7 @@ function Login() {
   });
 
   const dispatch = useAppDispatch();
+  const url_path = useAppSelector(selectPath);
 
   const loggedInUser = useAppSelector(selectUsername);
   const firstname = useAppSelector(selectFirstname);
@@ -52,47 +54,44 @@ function Login() {
   const [user, setUser] = useState("");
   //fetched password local component state
   const [_fetchedPass, setFetchedPass] = useState<FetchedUserPass>();
-  //get users password from neo4j
-  const [getHash] = useLazyQuery(GET_HASH, {
-    fetchPolicy: "network-only",
-    onCompleted: (result) => {
-      setFetchedPass(result);
-    },
-    onError: (error) => {
-      console.log(JSON.stringify(error, null, 2));
-    },
-  });
 
   // Init login part 1
-  function initLogin() {
-    if (user && pass)
-      getHash({ variables: { where: { username: user.toLowerCase() } } });
-    else toggleAlert(true, "Need username and pass", "error");
+  async function initLogin() {
+    if (user && pass) {
+      let hashedPass = LoginUtils.hashPass(pass);
+      const response = await fetch(`${url_path}api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, password: hashedPass }),
+      });
+      const resp = await response.json();
+      console.log(resp);
+    } else toggleAlert(true, "Need username and pass", "error");
   }
 
-  // Login part 2 init on user password fetched from neo4j
-  useEffect(() => {
-    // If not inital declaration
-    if (_fetchedPass) {
-      // If username matched in db
-      if (_fetchedPass.users.length > 0) {
-        // If password matches hash from db
-        if (LoginUtils.verifyHash(pass, _fetchedPass.users[0].password)) {
-          // Set global state to logged in
-          localStorage.setItem("userLoggedIn", user.toLowerCase());
-          dispatch(setUsername(user.toLowerCase()));
-          getUserDetails({
-            variables: { where: { username: user.toLowerCase() } },
-          });
-          toggleAlert(false);
-        } else {
-          toggleAlert(true, "Wrong password or username", "error");
-        }
-      } else {
-        toggleAlert(true, "Wrong password or username", "error");
-      }
-    }
-  }, [_fetchedPass]);
+  // // Login part 2 init on user password fetched from neo4j
+  // useEffect(() => {
+  //   // If not inital declaration
+  //   if (_fetchedPass) {
+  //     // If username matched in db
+  //     if (_fetchedPass.users.length > 0) {
+  //       // If password matches hash from db
+  //       if (LoginUtils.verifyHash(pass, _fetchedPass.users[0].password)) {
+  //         // Set global state to logged in
+  //         localStorage.setItem("userLoggedIn", user.toLowerCase());
+  //         dispatch(setUsername(user.toLowerCase()));
+  //         getUserDetails({
+  //           variables: { where: { username: user.toLowerCase() } },
+  //         });
+  //         toggleAlert(false);
+  //       } else {
+  //         toggleAlert(true, "Wrong password or username", "error");
+  //       }
+  //     } else {
+  //       toggleAlert(true, "Wrong password or username", "error");
+  //     }
+  //   }
+  // }, [_fetchedPass]);
 
   const [getUserDetails] = useLazyQuery(GET_USER, {
     fetchPolicy: "network-only",
@@ -149,11 +148,11 @@ function Login() {
               textAlign: "center",
             }}
           >
-              <Avatar sx={{ bgcolor: deepPurple[500] }}>
-                {firstname.charAt(0)}
-                {lastname == "" ? firstname.charAt(1) : lastname.charAt(0)}
-              </Avatar>
-              {loggedInUser}
+            <Avatar sx={{ bgcolor: deepPurple[500] }}>
+              {firstname.charAt(0)}
+              {lastname == "" ? firstname.charAt(1) : lastname.charAt(0)}
+            </Avatar>
+            {loggedInUser}
             Fornavn: {firstname}
             Etternavn: {lastname}
             Saldo: {balance}

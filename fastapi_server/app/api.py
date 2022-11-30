@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from .postgresPool import pool
 from string import Template
+import bcrypt
 
 try:
     connection = pool.getconn()
@@ -50,16 +51,16 @@ origins = ["http://localhost:3000", "localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# @app.get("/", tags=["root"])
-# async def read_root() -> dict:
-#     return {"message": "Welcome to your todo list."}
+@app.get("/", tags=["root"])
+async def read_root() -> dict:
+    return {"message": "Welcome to your todo list."}
 
 
 @app.get("/api/testing", tags=["root"])
@@ -135,8 +136,23 @@ async def read_root(user: str) -> dict:
         return {"userTaken": False}
 
 
+@app.post("/api/login")
+async def add_user(loginDetails: dict) -> dict:
+    user_pass = fetchDB(
+        Template(
+            "select password from users where username = $username"
+        ).safe_substitute({"username": loginDetails["username"]})
+    )
+
+    if bcrypt.checkpw(loginDetails["password"], user_pass):
+        return {"login": True}
+    else:
+        return {"login": False}
+
+
 @app.post("/api/createUser")
 async def add_user(user: dict) -> dict:
+    hashed = bcrypt.hashpw(user["password"], bcrypt.gensalt())
     # print(
     #     Template(
     #         "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 1000, '$firstname', '$lastname')"
@@ -155,7 +171,7 @@ async def add_user(user: dict) -> dict:
         ).safe_substitute(
             {
                 "username": user["username"],
-                "password": user["password"],
+                "password": hashed,
                 "firstname": user["firstname"],
                 "lastname": user["lastname"],
             }
