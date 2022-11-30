@@ -43,7 +43,7 @@ def insertDB(query):
 # print(db_version)
 
 
-app = FastAPI()
+app = FastAPI(root_path="/api")
 
 origins = ["http://localhost:3000", "localhost:3000"]
 
@@ -56,15 +56,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app = FastAPI(root_path="/api")
-
 
 @app.get("/", tags=["root"])
 async def read_root() -> dict:
     return {"message": "Welcome to your todo list."}
 
 
-@app.get("/testing", tags=["root"])
+@app.get("api/testing", tags=["root"])
 async def read_root() -> dict:
     return {"melding": "Welcome to testing."}
 
