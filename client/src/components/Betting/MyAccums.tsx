@@ -7,7 +7,7 @@ import { Accums } from "../../types";
 export default function MyAccums() {
   const [accums, setAccums] = React.useState<Accums[]>([]);
   const fetchBets = async () => {
-    const response = await fetch("http://localhost:8000/accums/1");
+    const response = await fetch("api/accums/1");
     const resp = await response.json();
     setAccums(resp);
     console.log(resp);

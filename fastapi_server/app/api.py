@@ -43,7 +43,7 @@ def insertDB(query):
 # print(db_version)
 
 
-app = FastAPI(root_path="/api")
+app = FastAPI()
 
 origins = ["http://localhost:3000", "localhost:3000"]
 
@@ -57,17 +57,17 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["root"])
-async def read_root() -> dict:
-    return {"message": "Welcome to your todo list."}
+# @app.get("/", tags=["root"])
+# async def read_root() -> dict:
+#     return {"message": "Welcome to your todo list."}
 
 
-@app.get("api/testing", tags=["root"])
+@app.get("/api/testing", tags=["root"])
 async def read_root() -> dict:
     return {"melding": "Welcome to testing."}
 
 
-@app.get("/openbets")
+@app.get("/api/openbets")
 async def read_root() -> dict:
     bets = fetchDB("select * from bets where bet_status = 1")
     bets_with_options = []
@@ -94,7 +94,7 @@ async def read_root() -> dict:
     return bets_with_options
 
 
-@app.get("/accums/{user_id}")
+@app.get("/api/accums/{user_id}")
 async def read_root(user_id) -> dict:
     accums = fetchDB(
         f"select accum_id, stake, total_odds from accums where user_id={user_id}"
@@ -126,7 +126,7 @@ async def read_root(user_id) -> dict:
 #     return {"message": "Admin"}
 
 
-@app.get("/userAvailability/{user}")
+@app.get("/api/userAvailability/{user}")
 async def read_root(user: str) -> dict:
     res = fetchDB(f"select exists(select 1 from users where username = '{user}')")
     if res[0][0]:
@@ -135,7 +135,7 @@ async def read_root(user: str) -> dict:
         return {"userTaken": False}
 
 
-@app.post("/createUser")
+@app.post("/api/createUser")
 async def add_user(user: dict) -> dict:
     # print(
     #     Template(
