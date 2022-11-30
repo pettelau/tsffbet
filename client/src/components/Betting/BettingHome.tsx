@@ -23,7 +23,7 @@ export default function BettingHome() {
   const accumBets = useAppSelector(selectAccum);
 
   const fetchBets = async () => {
-    const response = await fetch("api/v1/bets");
+    const response = await fetch("api/testing");
     const resp = await response.json();
     // setBets(resp);
     console.log(resp);

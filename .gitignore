@@ -1,6 +1,6 @@
 /laubet_venv
 __pycache__
-/server/app/credentials.py
+/fastapi_server/app/credentials.py
 nginx.conf
 **/.DS_Store
 node_modules
