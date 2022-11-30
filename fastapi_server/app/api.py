@@ -154,7 +154,7 @@ async def add_user(loginDetails: dict) -> dict:
 async def add_user(user: dict) -> dict:
     print(user["password"])
     print(user["username"])
-    hashed = bcrypt.hashpw(bytes(user["password"]), bcrypt.gensalt())
+    hashed = bcrypt.hashpw(bytes(user["password"], encoding="utf-8"), bcrypt.gensalt())
     # print(
     #     Template(
     #         "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 1000, '$firstname', '$lastname')"
