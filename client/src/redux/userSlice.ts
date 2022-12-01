@@ -21,7 +21,9 @@ export const userSlice = createSlice({
     setUsername: (state, action: PayloadAction<string>) => {
       state.username = action.payload;
     },
-   
+    setBalance: (state, action: PayloadAction<number>) => {
+      state.balance = state.balance - action.payload;
+    },
     logOut: (state) => {
       state.username = "";
       state.balance = 0;

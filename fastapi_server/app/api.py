@@ -214,9 +214,12 @@ async def place_bet(
         cursor.execute(balance_query)
         connection.commit()
     else:
-        return {"error": "insufficient balance"}
+        return {
+            "placeBet": False,
+            "errorMsg": "Ikke nok penger på konto. Feil? Snakk med Lau",
+        }
 
-    return {"Message": "OK"}
+    return {"placeBet": True}
 
 
 @app.post("/api/createUser")
