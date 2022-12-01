@@ -18,6 +18,7 @@ import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import KeyIcon from "@mui/icons-material/Key";
 import { createSuper } from "typescript";
 import { selectPath } from "../redux/envSlice";
+import { mode } from "crypto-js";
 
 interface FetchedUserData {
   users: string[];
@@ -58,7 +59,9 @@ function UserReg() {
   });
 
   const fetchUserAvailability = async (user: string) => {
-    const response = await fetch(`${url_path}api/userAvailability/${user}`);
+    const response = await fetch(
+      `http://localhost:8000/api/userAvailability/${user}`
+    );
     const resp = await response.json();
     console.log(resp);
 
@@ -136,7 +139,7 @@ function UserReg() {
     //   headers: { "Content-Type": "application/json" },
     //   body: JSON.stringify(newUser),
     // });
-    const response = await fetch(`${url_path}api/createUser`, {
+    const response = await fetch(`http://localhost:8000/api/createUser`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUser),

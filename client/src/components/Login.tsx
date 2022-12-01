@@ -59,13 +59,22 @@ function Login() {
   async function initLogin() {
     if (user && pass) {
       let hashedPass = LoginUtils.hashPass(pass);
-      const response = await fetch(`${url_path}api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: user, password: hashedPass }),
-      });
+      const response = await fetch(
+        `${url_path}api/login?` +
+          new URLSearchParams({ user: user, password: hashedPass }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       const resp = await response.json();
-      console.log(resp);
+
+      if (resp["loggedIn"]) {
+        console.log("logged in!");
+        localStorage.setItem("userLoggedIn", user.toLowerCase());
+        dispatch(setUsername(user.toLowerCase()));
+      } else {
+        toggleAlert(true, "Feil brukernavn eller passord", "error");
+      }
     } else toggleAlert(true, "Need username and pass", "error");
   }
 

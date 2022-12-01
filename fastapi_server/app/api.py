@@ -46,12 +46,12 @@ def insertDB(query):
 
 app = FastAPI()
 
-origins = ["http://localhost:3000", "localhost:3000"]
+origins = ["*"]
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,6 +61,17 @@ app.add_middleware(
 @app.get("/", tags=["root"])
 async def read_root() -> dict:
     return {"message": "Welcome to your todo list."}
+
+
+@app.get("/api/testfetch", tags=["root"])
+async def read_root() -> dict:
+    return {"message": "Testing response"}
+
+
+@app.post("/api/testpost", tags=["root"])
+async def read_root(dict: dict) -> dict:
+    print(dict)
+    return {"message": "Testing response POST"}
 
 
 @app.get("/api/testing", tags=["root"])
@@ -136,44 +147,36 @@ async def read_root(user: str) -> dict:
         return {"userTaken": False}
 
 
-@app.post("/api/login")
-async def add_user(loginDetails: dict) -> dict:
+@app.get("/api/login/")
+async def add_user(user, password) -> dict:
     user_pass = fetchDB(
         Template(
-            "select password from users where username = $username"
-        ).safe_substitute({"username": loginDetails["username"]})
+            "select password from users where username = '$username'"
+        ).safe_substitute({"username": user})
     )
 
-    if bcrypt.checkpw(loginDetails["password"], user_pass):
-        return {"login": True}
+    try:
+        user_pass = user_pass[0][0]
+    except IndexError:
+        return {"loggedIn": False}
+    if bcrypt.checkpw(password.encode("utf-8"), user_pass.encode("utf-8")):
+        return {"loggedIn": True}
     else:
-        return {"login": False}
+        return {"loggedIn": False}
 
 
 @app.post("/api/createUser")
 async def add_user(user: dict) -> dict:
-    print(user["password"])
-    print(user["username"])
+
     hashed = bcrypt.hashpw(bytes(user["password"], encoding="utf-8"), bcrypt.gensalt())
-    # print(
-    #     Template(
-    #         "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 1000, '$firstname', '$lastname')"
-    #     ).safe_substitute(
-    #         {
-    #             "username": user["username"],
-    #             "password": user["password"],
-    #             "firstname": user["firstname"],
-    #             "lastname": user["lastname"],
-    #         }
-    #     )
-    # )
+
     res = insertDB(
         Template(
             "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 1000, '$firstname', '$lastname')"
         ).safe_substitute(
             {
                 "username": user["username"],
-                "password": hashed,
+                "password": hashed.decode("utf-8"),
                 "firstname": user["firstname"],
                 "lastname": user["lastname"],
             }
