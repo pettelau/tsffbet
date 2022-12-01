@@ -6,6 +6,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import ReceiptIcon from "@mui/icons-material/Receipt";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import Tooltip from "@mui/material/Tooltip";
 
 export default function NavBar() {
@@ -86,7 +87,7 @@ export default function NavBar() {
               navigate("/bettingadmin");
             }}
           >
-            <ReceiptIcon />
+            <AdminPanelSettingsIcon />
           </IconButton>
         </Toolbar>
       </AppBar>

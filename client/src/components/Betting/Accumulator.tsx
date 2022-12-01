@@ -19,6 +19,7 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_ACCUM } from "../../queries";
 import { selectBalance, selectUsername } from "../../redux/userSlice";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { selectPath } from "../../redux/envSlice";
 
 export default function Accumulator() {
   const dispatch = useAppDispatch();
@@ -32,23 +33,37 @@ export default function Accumulator() {
 
   const [betCompleted, setBetCompleted] = React.useState<boolean>(false);
 
-  const [createAccum] = useMutation(CREATE_ACCUM, {
-    onCompleted: (res) => {
-      setBetCompleted(true);
-    },
-  });
-  let accum_option_connect: any = [];
+  // const [createAccum] = useMutation(CREATE_ACCUM, {
+  //   onCompleted: (res) => {
+  //     setBetCompleted(true);
+  //   },
+  // });
+
   let totalodds = 1;
   bets.map((bet: AccumBetOption) => {
     totalodds = totalodds * bet.option.latest_odds;
-    accum_option_connect.push({
-      where: { node: { option_id: bet.option.option_id } },
-      edge: { user_odds: bet.option.latest_odds },
-    });
   });
+  const url_path = useAppSelector(selectPath);
+
+  console.log(totalodds);
 
   if (bets.length == 0) {
     return <></>;
+  }
+
+  async function createAccum() {
+    let bet_packet: any = { bets: bets, stake: stake, totalodds: totalodds };
+    console.log(JSON.stringify(bet_packet));
+    const response = await fetch(`${url_path}api/placebet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(bet_packet),
+    });
+
+    const resp = await response.json();
   }
 
   if (betCompleted) {
@@ -87,7 +102,6 @@ export default function Accumulator() {
     if (!keep) dispatch(removeAccum());
   }
 
-  console.log(accum_option_connect);
   return (
     <>
       {console.log("hei")}
@@ -171,24 +185,7 @@ export default function Accumulator() {
                 disabled={balance < Number(stake) ? true : false}
                 variant="contained"
                 onClick={() => {
-                  createAccum({
-                    variables: {
-                      input: {
-                        stake: Number(stake),
-                        total_odds: totalodds,
-                        user: {
-                          connect: {
-                            where: {
-                              node: { username: username },
-                            },
-                          },
-                        },
-                        bet_options: {
-                          connect: accum_option_connect,
-                        },
-                      },
-                    },
-                  });
+                  createAccum();
                 }}
               >
                 Sett spill

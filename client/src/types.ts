@@ -59,5 +59,6 @@ export type UserDetails = {
     balance: number,
     firstname: string,
     lastname: string,
+    admin: boolean,
 }
 

@@ -2,16 +2,21 @@ import { useQuery } from "@apollo/client";
 import { Button, Card } from "@mui/material";
 import React, { useEffect } from "react";
 import { GET_ACCUMS } from "../../queries";
+import { selectPath } from "../../redux/envSlice";
+import { useAppSelector } from "../../redux/hooks";
 import { Accums } from "../../types";
 
 export default function MyAccums() {
   const [accums, setAccums] = React.useState<Accums[]>([]);
   const fetchBets = async () => {
-    const response = await fetch("api/accums/1");
+    const response = await fetch(`${url_path}api/accums`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
+    });
     const resp = await response.json();
     setAccums(resp);
     console.log(resp);
   };
+  const url_path = useAppSelector(selectPath);
 
   useEffect(() => {
     fetchBets();

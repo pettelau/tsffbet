@@ -7,8 +7,9 @@ import { RootState } from "./store";
 const initialState: UserDetails = {
   username: "",
   balance: 0,
-  firstname: "njinjj",
+  firstname: "",
   lastname: "",
+  admin: false
 };
 
 // Redux User Slice
@@ -20,6 +21,7 @@ export const userSlice = createSlice({
     setUsername: (state, action: PayloadAction<string>) => {
       state.username = action.payload;
     },
+   
     logOut: (state) => {
       state.username = "";
       state.balance = 0;
@@ -29,6 +31,7 @@ export const userSlice = createSlice({
       state.firstname = action.payload.firstname
       state.lastname = action.payload.lastname
       state.balance = action.payload.balance
+      state.admin = action.payload.admin
     }
   },
 });
@@ -41,8 +44,9 @@ const selectUsername = (state: RootState) => state.user.username;
 const selectBalance = (state: RootState) => state.user.balance;
 const selectFirstname = (state: RootState) => state.user.firstname;
 const selectLastname = (state: RootState) => state.user.lastname;
+const selectAdmin = (state: RootState) => state.user.admin;
 const selectUserState = (state: RootState) => state.user;
 
-export { selectUsername, selectBalance, selectFirstname, selectLastname, selectUserState };
+export { selectUsername, selectBalance, selectFirstname, selectLastname, selectAdmin, selectUserState };
 
 export default userSlice.reducer;

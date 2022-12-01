@@ -55,6 +55,19 @@ function Login() {
   //fetched password local component state
   const [_fetchedPass, setFetchedPass] = useState<FetchedUserPass>();
 
+  async function loginDetails() {
+    const response = await fetch(`${url_path}api/login/details`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
+    });
+    const resp = await response.json();
+    console.log(resp);
+    dispatch(setUserDetails(resp[0]));
+  }
+
+  useEffect(() => {
+    loginDetails();
+  }, [loggedInUser]);
+
   // Init login part 1
   async function initLogin() {
     if (user && pass) {
@@ -67,10 +80,12 @@ function Login() {
         }
       );
       const resp = await response.json();
+      console.log(resp);
 
       if (resp["loggedIn"]) {
         console.log("logged in!");
         localStorage.setItem("userLoggedIn", user.toLowerCase());
+        localStorage.setItem("jwt", resp["jwt"]);
         dispatch(setUsername(user.toLowerCase()));
       } else {
         toggleAlert(true, "Feil brukernavn eller passord", "error");
@@ -78,50 +93,11 @@ function Login() {
     } else toggleAlert(true, "Need username and pass", "error");
   }
 
-  // // Login part 2 init on user password fetched from neo4j
-  // useEffect(() => {
-  //   // If not inital declaration
-  //   if (_fetchedPass) {
-  //     // If username matched in db
-  //     if (_fetchedPass.users.length > 0) {
-  //       // If password matches hash from db
-  //       if (LoginUtils.verifyHash(pass, _fetchedPass.users[0].password)) {
-  //         // Set global state to logged in
-  //         localStorage.setItem("userLoggedIn", user.toLowerCase());
-  //         dispatch(setUsername(user.toLowerCase()));
-  //         getUserDetails({
-  //           variables: { where: { username: user.toLowerCase() } },
-  //         });
-  //         toggleAlert(false);
-  //       } else {
-  //         toggleAlert(true, "Wrong password or username", "error");
-  //       }
-  //     } else {
-  //       toggleAlert(true, "Wrong password or username", "error");
-  //     }
-  //   }
-  // }, [_fetchedPass]);
 
-  const [getUserDetails] = useLazyQuery(GET_USER, {
-    fetchPolicy: "network-only",
-    onCompleted: (res: any) => {
-      let userDetails: UserDetails = res.users[0];
-      dispatch(
-        setUserDetails({
-          username: userDetails.username,
-          balance: userDetails.balance,
-          firstname: userDetails.firstname,
-          lastname: userDetails.lastname,
-        })
-      );
-    },
-    onError: (error) => {
-      console.log(JSON.stringify(error, null, 2));
-    },
-  });
   // Function for logging out user. Removes all data stored on client side
   function onClickLogOut() {
     localStorage.removeItem("userLoggedIn");
+    localStorage.removeItem("jwt");
     dispatch(logOut());
     setPass("");
     setUser("");
@@ -162,9 +138,9 @@ function Login() {
               {lastname == "" ? firstname.charAt(1) : lastname.charAt(0)}
             </Avatar>
             {loggedInUser}
-            Fornavn: {firstname}
-            Etternavn: {lastname}
-            Saldo: {balance}
+            Fornavn: {firstname} <br />
+            Etternavn: {lastname} <br />
+            Saldo: {balance} <br />
           </div>
           <div>
             <Button
