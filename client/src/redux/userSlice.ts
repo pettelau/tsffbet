@@ -29,8 +29,8 @@ export const userSlice = createSlice({
       state.balance = 0;
     },
     setUserDetails: (state, action: PayloadAction<UserDetails>) => {
-      state.username = action.payload.username
       state.firstname = action.payload.firstname
+      state.username = action.payload.username
       state.lastname = action.payload.lastname
       state.balance = action.payload.balance
       state.admin = action.payload.admin

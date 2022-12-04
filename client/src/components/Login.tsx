@@ -90,9 +90,8 @@ function Login() {
       } else {
         toggleAlert(true, "Feil brukernavn eller passord", "error");
       }
-    } else toggleAlert(true, "Need username and pass", "error");
+    } else toggleAlert(true, "Skriv inn både brukernavn og passord", "error");
   }
-
 
   // Function for logging out user. Removes all data stored on client side
   function onClickLogOut() {
@@ -133,11 +132,11 @@ function Login() {
               textAlign: "center",
             }}
           >
-            <Avatar sx={{ bgcolor: deepPurple[500] }}>
+            <h2>Du er logget inn som {loggedInUser}</h2>
+            {/* <Avatar sx={{ bgcolor: deepPurple[500] }}>
               {firstname.charAt(0)}
               {lastname == "" ? firstname.charAt(1) : lastname.charAt(0)}
-            </Avatar>
-            {loggedInUser}
+            </Avatar> */}
             Fornavn: {firstname} <br />
             Etternavn: {lastname} <br />
             Saldo: {balance} <br />
@@ -157,7 +156,7 @@ function Login() {
                 },
               }}
             >
-              <b> Log out </b>
+              <b> Logg ut </b>
             </Button>
           </div>
         </>
@@ -166,19 +165,19 @@ function Login() {
         <>
           <div className="login">
             <div>
-              <h1>Log into your user here</h1>
+              <h1>Logg inn på brukeren din her</h1>
               <div className="login-fields">
                 <TextField
                   id="login-username"
                   className=""
-                  label="Username"
+                  label="Brukernavn"
                   value={user}
                   onChange={(e) => setUser(e.target.value)}
                 />
                 <TextField
                   id="login-password"
                   type={"password"}
-                  label="Password"
+                  label="Passord"
                   value={pass}
                   onChange={(e) => setPass(e.target.value)}
                 />
@@ -199,7 +198,7 @@ function Login() {
                     },
                   }}
                 >
-                  <b> Log in </b>
+                  <b> Logg inn </b>
                 </Button>
               </div>
               <div>
@@ -216,7 +215,7 @@ function Login() {
                     },
                   }}
                 >
-                  <b>Not a user? click here</b>
+                  <b>Ikke bruker enda? Klikk her</b>
                 </Button>
               </div>
             </div>

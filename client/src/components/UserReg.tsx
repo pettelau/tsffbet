@@ -112,7 +112,7 @@ function UserReg() {
     //if username already taken
     if (userAvailability["checkedDB"]) {
       if (userAvailability["userTaken"]) {
-        alertmsg = `User '${user}' is taken, please try something else`;
+        alertmsg = `Bruker '${user}' er tatt, vennligst velg et annet brukernavn`;
         toggleAlert(true, alertmsg, "error");
       } else {
         console.log("here in useEffect");

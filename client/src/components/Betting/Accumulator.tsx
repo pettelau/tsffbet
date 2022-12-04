@@ -66,7 +66,6 @@ export default function Accumulator() {
     const resp = await response.json();
     if (resp["placeBet"]) {
       setBetCompleted(true);
-      
     } else {
       toggleAlert(true, resp["errorMsg"], "error");
     }
@@ -122,7 +121,7 @@ export default function Accumulator() {
                   setIsCollapsed(true);
                 }}
               >
-                Show less
+                Vis mindre
               </Button>
               <br />
               <br />
@@ -208,7 +207,7 @@ export default function Accumulator() {
                 setIsCollapsed(false);
               }}
             >
-              Show more
+              Vis mer
             </Button>
           </div>
         )}
@@ -219,4 +218,3 @@ export default function Accumulator() {
 function toggleAlert(arg0: boolean, arg1: any, arg2: string) {
   throw new Error("Function not implemented.");
 }
-

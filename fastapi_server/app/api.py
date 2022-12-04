@@ -165,7 +165,7 @@ async def add_user(user, password) -> dict:
 async def add_user(token: str = Depends(authUtils.validate_access_token)) -> dict:
     res = fetchDBJson(
         Template(
-            "select balance, firstname, lastname, admin from users where username = '$username'"
+            "select username, balance, firstname, lastname, admin from users where username = '$username'"
         ).safe_substitute({"username": token["user"]})
     )
     return res
