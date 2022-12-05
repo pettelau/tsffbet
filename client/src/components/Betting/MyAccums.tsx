@@ -5,6 +5,7 @@ import { GET_ACCUMS } from "../../queries";
 import { selectPath } from "../../redux/envSlice";
 import { useAppSelector } from "../../redux/hooks";
 import { AccumBets, Accums } from "../../types";
+import NoAccess from "../NoAccess";
 
 function getAccumStatus(accum: Accums) {
   let hasWon: boolean = false;
@@ -35,13 +36,22 @@ function getAccumStatus(accum: Accums) {
 
 export default function MyAccums() {
   const [accums, setAccums] = React.useState<Accums[]>([]);
+
+  const [responseCode, setResponseCode] = React.useState<number>();
+  const [responseText, setResponseText] = React.useState<number>();
+
   const fetchBets = async () => {
     const response = await fetch(`${url_path}api/accums`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    setAccums(resp);
-    console.log(resp);
+    setResponseCode(response.status);
+    if (response.status == 200) {
+      setAccums(resp);
+      console.log(resp);
+    } else {
+      setResponseText(resp.detail);
+    }
   };
   const url_path = useAppSelector(selectPath);
 
@@ -62,7 +72,9 @@ export default function MyAccums() {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setChosenAccums(newValue);
   };
-
+  if (responseCode !== 200) {
+    return <NoAccess responseCode={responseCode} responseText={responseText} />;
+  }
   return (
     <>
       <h2>Mine kuponger</h2>
@@ -93,13 +105,16 @@ export default function MyAccums() {
               <>
                 <div>
                   <Card
-                    sx={{ backgroundColor: status[0], padding: 1, width: 345 }}
+                    sx={{
+                      backgroundColor: status[0],
+                      padding: 1,
+                      width: 345,
+                    }}
                   >
                     <Chip
                       sx={{
                         backgroundColor: "#d6d6d6",
                         color: "black",
-                        marginRight: 1,
                       }}
                       label={"Kupong ID: " + accum.accum_id}
                     ></Chip>

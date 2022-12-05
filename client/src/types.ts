@@ -62,3 +62,16 @@ export type UserDetails = {
     admin: boolean,
 }
 
+
+  // {category: "string", title: "string", options: [{latest_odds: number, option: "string"}]}
+
+  export type NewBetType = {
+    title: string,
+    category: string,
+    options: NewOptionType[]
+  }
+
+export type NewOptionType = {
+    latest_odds: number | null,
+    option: string
+}

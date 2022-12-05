@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from time import sleep
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -162,13 +163,75 @@ async def add_user(user, password) -> dict:
 
 
 @app.get("/api/login/details")
-async def add_user(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def add_user(
+    token: str = Depends(authUtils.validate_access_token_nowhitelist),
+) -> dict:
+
     res = fetchDBJson(
         Template(
             "select username, balance, firstname, lastname, admin from users where username = '$username'"
         ).safe_substitute({"username": token["user"]})
     )
     return res
+
+
+def is_admin(username):
+    res = fetchDBJson(
+        Template(
+            "select admin from users where username = '$username'"
+        ).safe_substitute({"username": username})
+    )
+    if res[0]["admin"]:
+        return True
+    else:
+        return False
+
+
+@app.get("/api/admin/getusers/")
+async def get_users(token: str = Depends(authUtils.validate_access_token)) -> dict:
+
+    if is_admin(token["user"]):
+        res = fetchDBJson("select * from users")
+        return res
+    else:
+        raise HTTPException(status_code=403, detail="You are not admin")
+
+
+# {category: "string", title: "string", options: [{latest_odds: number, option: "string"}]}
+@app.post("/api/admin/createbet/")
+async def create_bet(
+    bet: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+
+    if is_admin(token["user"]):
+        # create bet
+        cursor = connection.cursor()
+        query1 = Template(
+            "insert into bets(category, title) values ('$category', '$title') RETURNING bet_id"
+        ).safe_substitute(
+            {
+                "category": bet["category"],
+                "title": bet["title"],
+            }
+        )
+        cursor.execute(query1)
+        id_of_bet = cursor.fetchone()[0]
+
+        for option in bet["options"]:
+            query2 = Template(
+                "insert into bet_options(latest_odds, option, bet) values ($latest_odds, '$option', $bet)"
+            ).safe_substitute(
+                {
+                    "latest_odds": float(option["latest_odds"]),
+                    "option": option["option"],
+                    "bet": id_of_bet,
+                }
+            )
+            cursor.execute(query2)
+        connection.commit()
+        return {"createBet": True}
+    else:
+        return {"createBet": False, "errorMsg": "Du er ikke admin"}
 
 
 @app.post("/api/placebet/")

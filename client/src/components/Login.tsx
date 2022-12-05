@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LoginUtils } from "../utils";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLazyQuery } from "@apollo/client";
 import { GET_HASH, GET_USER } from "../queries";
 
@@ -10,6 +10,7 @@ import { Avatar, Button, Card, Typography } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import {
   logOut,
+  selectAdmin,
   selectBalance,
   selectFirstname,
   selectLastname,
@@ -48,12 +49,16 @@ function Login() {
   const lastname = useAppSelector(selectLastname);
   const balance = useAppSelector(selectBalance);
 
+  const isAdmin = useAppSelector(selectAdmin);
+
   //user password local component state
   const [pass, setPass] = useState("");
   //user local component state
   const [user, setUser] = useState("");
   //fetched password local component state
   const [_fetchedPass, setFetchedPass] = useState<FetchedUserPass>();
+
+  const navigate = useNavigate();
 
   async function loginDetails() {
     const response = await fetch(`${url_path}api/login/details`, {
@@ -139,8 +144,16 @@ function Login() {
             </Avatar> */}
             Fornavn: {firstname} <br />
             Etternavn: {lastname} <br />
-            Saldo: {balance} <br />
+            Saldo: {balance} <br /> <br />
           </div>
+          <Button
+            variant="contained"
+            onClick={() => {
+              navigate("/admin");
+            }}
+          >
+            Gå til adminside
+          </Button>
           <div>
             <Button
               variant="contained"

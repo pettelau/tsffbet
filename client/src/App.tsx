@@ -14,12 +14,13 @@ import MyAccums from "./components/Betting/MyAccums";
 import Accumulator from "./components/Betting/Accumulator";
 import Login from "./components/Login";
 import UserReg from "./components/UserReg";
-import BettingAdmin from "./components/Betting/BettingAdmin";
 import AppAppBar from "./components/AppAppBar";
 import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { selectPath } from "./redux/envSlice";
+import AdminHome from "./components/Admin/AdminHome";
+import NewBet from "./components/Admin/NewBet";
 
 const THEME = createTheme({
   typography: {
@@ -77,7 +78,8 @@ export default function App() {
               <Route path="myaccums" element={<MyAccums />} />
               <Route path="login" element={<Login />} />
               <Route path="userReg" element={<UserReg />} />
-              <Route path="bettingAdmin" element={<BettingAdmin />} />
+              <Route path="admin" element={<AdminHome />} />
+              <Route path="admin/newbet" element={<NewBet />} />
             </Routes>
           </Router>
           <Accumulator />

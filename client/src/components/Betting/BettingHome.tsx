@@ -19,6 +19,7 @@ import {
 } from "../../redux/userSlice";
 import { selectPath } from "../../redux/envSlice";
 import useWindowDimensions from "../../utils/deviceSizeInfo";
+import NoAccess from "../NoAccess";
 
 export default function BettingHome() {
   const dispatch = useAppDispatch();
@@ -32,24 +33,34 @@ export default function BettingHome() {
   const balance = useAppSelector(selectBalance);
 
   const [bets, setBets] = React.useState<Bet[]>([]);
+
   const [categories, setCategories] = React.useState<string[]>([]);
   const [chosenCategory, setChosenCategory] =
     React.useState<string>("Alle kategorier");
   const accumBets = useAppSelector(selectAccum);
+
+  const [responseCode, setResponseCode] = React.useState<number>();
+  const [responseText, setResponseText] = React.useState<number>();
 
   const fetchBets = async () => {
     const response = await fetch(`${url_path}api/openbets`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    setBets(resp);
-    let cats: string[] = ["Alle kategorier"];
-    resp.forEach((bet: Bet) => {
-      if (cats.indexOf(bet.category) === -1) {
-        cats.push(bet.category);
-      }
-    });
-    setCategories(cats);
+    console.log(response.status);
+    setResponseCode(response.status);
+    if (response.status == 200) {
+      setBets(resp);
+      let cats: string[] = ["Alle kategorier"];
+      resp.forEach((bet: Bet) => {
+        if (cats.indexOf(bet.category) === -1) {
+          cats.push(bet.category);
+        }
+      });
+      setCategories(cats);
+    } else {
+      setResponseText(resp.detail);
+    }
   };
 
   useEffect(() => {
@@ -67,7 +78,9 @@ export default function BettingHome() {
     console.log(newValue);
     setChosenCategory(newValue);
   };
-
+  if (responseCode !== 200) {
+    return <NoAccess responseCode={responseCode} responseText={responseText} />;
+  }
   return (
     <>
       <div>
