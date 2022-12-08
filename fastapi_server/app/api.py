@@ -70,13 +70,8 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["root"])
-async def read_root() -> dict:
-    return {"message": "Welcome to your todo list."}
-
-
 @app.get("/api/openbets")
-async def read_root(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_all_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
     bets = fetchDB("select * from bets where bet_status = 1")
     bets_with_options = []
     for bet in bets:
@@ -102,8 +97,40 @@ async def read_root(token: str = Depends(authUtils.validate_access_token)) -> di
     return bets_with_options
 
 
+@app.get("/api/admin/allbets")
+async def get_all_admin_bets(
+    token: str = Depends(authUtils.validate_access_token),
+) -> dict:
+    if is_admin(token["user"]):
+        bets = fetchDB("select * from bets")
+        bets_with_options = []
+        for bet in bets:
+            bet_with_option = {
+                "title": bet[2],
+                "bet_status": bet[3],
+                "bet_id": bet[0],
+                "category": bet[1],
+            }
+            options = fetchDB(f"select * from bet_options where bet = {bet[0]}")
+            options_list = []
+            for option in options:
+                option_dict = {
+                    "latest_odds": option[1],
+                    "option": option[3],
+                    "option_id": option[0],
+                    "option_status": option[2],
+                }
+                options_list.append(option_dict)
+            bet_with_option["bet_options"] = options_list
+            bets_with_options.append(bet_with_option)
+
+        return bets_with_options
+    else:
+        raise HTTPException(status_code=403, detail="You are not admin")
+
+
 @app.get("/api/accums")
-async def read_root(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> dict:
     accums = fetchDB(
         f"select accum_id, stake, total_odds from accums where user_id={token['user_id']}"
     )
@@ -187,7 +214,7 @@ def is_admin(username):
         return False
 
 
-@app.get("/api/admin/getusers/")
+@app.get("/api/admin/getusers")
 async def get_users(token: str = Depends(authUtils.validate_access_token)) -> dict:
 
     if is_admin(token["user"]):
@@ -198,7 +225,7 @@ async def get_users(token: str = Depends(authUtils.validate_access_token)) -> di
 
 
 # {category: "string", title: "string", options: [{latest_odds: number, option: "string"}]}
-@app.post("/api/admin/createbet/")
+@app.post("/api/admin/createbet")
 async def create_bet(
     bet: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
@@ -229,12 +256,94 @@ async def create_bet(
             )
             cursor.execute(query2)
         connection.commit()
-        return {"createBet": True}
+        return {"settleBet": True}
     else:
-        return {"createBet": False, "errorMsg": "Du er ikke admin"}
+        # TODO:
+        # change to this and implement frontend to support:
+        # raise HTTPException(status_code=403, detail="You are not admin")
+        return {"settleBet": False, "errorMsg": "Du er ikke admin"}
 
 
-@app.post("/api/placebet/")
+@app.post("/api/admin/settlebet")
+async def settle_bet(
+    bet: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    print(bet)
+    if is_admin(token["user"]):
+        # settle bet
+        cursor = connection.cursor()
+        query1 = Template(
+            "update bets set bet_status = 2 where bet_id = $bet_id"
+        ).safe_substitute(
+            {
+                "bet_id": bet["bet_id"],
+            }
+        )
+        cursor.execute(query1)
+        for option in bet["bet_options"]:
+            query2 = Template(
+                "update bet_options set option_status = $option_status where option_id = $option_id"
+            ).safe_substitute(
+                {
+                    "option_status": option["option_status"],
+                    "option_id": option["option_id"],
+                }
+            )
+            cursor.execute(query2)
+        query_accum_ids = Template(
+            "select distinct accum_id from accums natural join accum_options natural join bet_options where bet = $bet_id"
+        ).safe_substitute(
+            {
+                "bet_id": bet["bet_id"],
+            }
+        )
+        accum_ids = fetchDBJson(query_accum_ids)
+        for accum in accum_ids:
+            accum_id = accum["accum_id"]
+            query_accum = Template(
+                "select option_status, stake, total_odds, user_id from accum_options left join bet_options on accum_options.option_id = bet_options.option_id left join accums on accum_options.accum_id = accums.accum_id where accums.accum_id = $accum_id"
+            ).safe_substitute(
+                {
+                    "accum_id": accum_id,
+                }
+            )
+            accum = fetchDBJson(query_accum)
+            bet_went_in = True
+            for option in accum:
+                print(option)
+                if option["option_status"] != 2:
+                    bet_went_in = False
+                    break
+            if bet_went_in:
+                user_id = accum[0]["user_id"]
+                pay_out_sum = accum[0]["stake"] * accum[0]["total_odds"]
+                query_update_balance = Template(
+                    "update users set balance = balance + $pay_out_sum where user_id = $user_id"
+                ).safe_substitute(
+                    {
+                        "pay_out_sum": pay_out_sum,
+                        "user_id": user_id,
+                    }
+                )
+                cursor.execute(query_update_balance)
+                query_set_paid_out = Template(
+                    "update accums set paid_out = true where accum_id = $accum_id"
+                ).safe_substitute(
+                    {
+                        "accum_id": accum_id,
+                    }
+                )
+                cursor.execute(query_set_paid_out)
+        connection.commit()
+        return {"settleBet": True}
+    else:
+        # TODO:
+        # change to this and implement frontend to support:
+        # raise HTTPException(status_code=403, detail="You are not admin")
+        return {"settleBet": False, "errorMsg": "Du er ikke admin"}
+
+
+@app.post("/api/placebet")
 async def place_bet(
     bet: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
@@ -288,8 +397,9 @@ async def place_bet(
 @app.post("/api/createUser")
 async def add_user(user: dict) -> dict:
 
-    hashed = authUtils.create_hashed_password(user["password"])
-
+    # hashed = authUtils.create_hashed_password(user["password"])
+    hashed = bcrypt.hashpw(bytes(user["password"], encoding="utf-8"), bcrypt.gensalt())
+    print(hashed)
     res = insertDB(
         Template(
             "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 1000, '$firstname', '$lastname')"

@@ -21,6 +21,7 @@ import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { selectPath } from "./redux/envSlice";
 import AdminHome from "./components/Admin/AdminHome";
 import NewBet from "./components/Admin/NewBet";
+import EditBet from "./components/Admin/EditBet";
 
 const THEME = createTheme({
   typography: {
@@ -80,6 +81,7 @@ export default function App() {
               <Route path="userReg" element={<UserReg />} />
               <Route path="admin" element={<AdminHome />} />
               <Route path="admin/newbet" element={<NewBet />} />
+              <Route path="admin/editbet" element={<EditBet />} />
             </Routes>
           </Router>
           <Accumulator />

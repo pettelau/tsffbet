@@ -58,7 +58,7 @@ class AuthUtils:
         credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
     ):
         token = credentials.credentials
-
+        print("er her")
         try:
             payload = jwt.decode(
                 token, self.JWT_SECRET_KEY, algorithms=[self.JWT_ALGORITHM]
@@ -72,8 +72,10 @@ class AuthUtils:
             )
             print(res[0])
             if res[0]["whitelist"]:
+                print("inni if")
                 return payload
             else:
+                print("inni else")
                 raise HTTPException(status_code=403, detail="You are not whitelisted")
         except JOSEError as e:
             print(e)

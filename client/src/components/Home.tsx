@@ -17,10 +17,7 @@ import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import SportsTennisIcon from "@mui/icons-material/SportsTennis";
 import QuizIcon from "@mui/icons-material/Quiz";
 
-
 export default function Home() {
-  const [input, setInput] = useState("");
-
   return (
     <>
       <div>
@@ -74,10 +71,10 @@ export default function Home() {
           </div>
           <div>
             <QuizIcon sx={{ fontSize: 80 }} /> <br />
-            <h3>QuizDuel (kommer kanskje)</h3>
-            Min gode venn Jacob Theisen jobber for tiden med et quiz-spill hvor man
-            spiller live mot én eller flere venner i en gitt kategori. Dette er
-            noe vi håper vi kan få implementert inn i LauBet etter hvert...
+            <h3>TopicDuel (kommer kanskje)</h3>
+            Min gode venn Jacob Theisen jobber for tiden med et quiz-spill hvor
+            man spiller live mot én eller flere venner i en gitt kategori. Dette
+            er noe vi håper vi kan få implementert inn i LauBet etter hvert...
           </div>
         </div>
       </div>

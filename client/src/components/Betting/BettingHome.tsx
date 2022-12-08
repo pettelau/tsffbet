@@ -47,7 +47,7 @@ export default function BettingHome() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(response.status);
+    console.log(resp);
     setResponseCode(response.status);
     if (response.status == 200) {
       setBets(resp);

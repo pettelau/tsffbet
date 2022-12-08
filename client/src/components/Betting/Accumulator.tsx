@@ -17,7 +17,11 @@ import {
 } from "@mui/material";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_ACCUM } from "../../queries";
-import { selectBalance, selectUsername } from "../../redux/userSlice";
+import {
+  setBalance,
+  selectBalance,
+  selectUsername,
+} from "../../redux/userSlice";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { selectPath } from "../../redux/envSlice";
 
@@ -65,6 +69,9 @@ export default function Accumulator() {
 
     const resp = await response.json();
     if (resp["placeBet"]) {
+      let new_balance = balance - Number(stake);
+      dispatch(setBalance(new_balance));
+
       setBetCompleted(true);
     } else {
       toggleAlert(true, resp["errorMsg"], "error");

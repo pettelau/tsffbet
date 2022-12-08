@@ -22,7 +22,7 @@ export const userSlice = createSlice({
       state.username = action.payload;
     },
     setBalance: (state, action: PayloadAction<number>) => {
-      state.balance = state.balance - action.payload;
+      state.balance = action.payload;
     },
     logOut: (state) => {
       state.username = "";
@@ -38,7 +38,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const { setUsername, logOut, setUserDetails } =
+export const { setUsername, logOut, setUserDetails, setBalance } =
   userSlice.actions;
 
 // Get data from Redux state

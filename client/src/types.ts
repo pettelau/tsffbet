@@ -10,7 +10,24 @@ export type BetOption = {
     latest_odds: number;
     option: string;
     option_id: number;
+    option_status: 1 | 2 | 3 | 4
+
 }
+
+// export type AdminBet = {
+//     title: string;
+//     bet_status: 1 | 2 | 3 | 4;
+//     bet_id: number;
+//     category: string;
+//     bet_options: AdminBetOption[];
+// }
+
+// export type AdminBetOption = {
+//     latest_odds: number;
+//     option: string;
+//     option_id: number;
+//     option_status: 1 | 2 | 3 | 4
+// }
 
 export type AccumBetOption = {
     bet: string;
