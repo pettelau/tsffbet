@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { queryAllByAltText } from "@testing-library/react";
 import {
   AlertColor,
   Button,

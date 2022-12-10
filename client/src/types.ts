@@ -3,6 +3,7 @@ export type Bet = {
     bet_status: 1 | 2 | 3 | 4;
     bet_id: number;
     category: string;
+    close_time: Date;
     bet_options: BetOption[];
 }
 

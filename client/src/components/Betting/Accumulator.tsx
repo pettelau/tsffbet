@@ -15,8 +15,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useLazyQuery, useMutation } from "@apollo/client";
-import { CREATE_ACCUM } from "../../queries";
 import {
   setBalance,
   selectBalance,

@@ -1,7 +1,5 @@
-import { useQuery } from "@apollo/client";
 import { Button, Card, Chip, Divider, Paper, Tab, Tabs } from "@mui/material";
 import React, { useEffect } from "react";
-import { GET_ACCUMS } from "../../queries";
 import { selectPath } from "../../redux/envSlice";
 import { useAppSelector } from "../../redux/hooks";
 import { AccumBets, Accums } from "../../types";

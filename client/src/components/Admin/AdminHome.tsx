@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { queryAllByAltText } from "@testing-library/react";
 import { Button } from "@mui/material";
 import { useAppSelector } from "../../redux/hooks";
 import { selectPath } from "../../redux/envSlice";

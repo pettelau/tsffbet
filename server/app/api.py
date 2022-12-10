@@ -8,6 +8,10 @@ from string import Template
 import bcrypt
 from .auth_utils import authUtils
 from psycopg2.extras import RealDictCursor
+import datetime
+import pytz
+from dateutil import parser
+from zoneinfo import ZoneInfo
 
 
 try:
@@ -71,15 +75,19 @@ app.add_middleware(
 
 
 @app.get("/api/openbets")
-async def get_all_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
-    bets = fetchDB("select * from bets where bet_status = 1")
+async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
+    bets = fetchDB(
+        "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL"
+    )
     bets_with_options = []
+    print(bets)
     for bet in bets:
         bet_with_option = {
             "title": bet[2],
             "bet_status": bet[3],
             "bet_id": bet[0],
             "category": bet[1],
+            "close_time": bet[7],
         }
         options = fetchDB(f"select * from bet_options where bet = {bet[0]}")
         options_list = []
@@ -229,16 +237,26 @@ async def get_users(token: str = Depends(authUtils.validate_access_token)) -> di
 async def create_bet(
     bet: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
-
+    # date_time_obj = datetime.datetime.strptime(
+    #     bet["close_date"], "%Y-%m-%d %H:%M:%S.%f"
+    # )
+    close_date = parser.parse(bet["close_date"])
+    # close_date = parser.parse(bet["close_date"]).replace(
+    #     tzinfo=ZoneInfo("Europe/Berlin")
+    # )
+    print(close_date)
+    # print(bet["close_date"].astimezone(pytz.timezone("Europe/Oslo")))
     if is_admin(token["user"]):
         # create bet
         cursor = connection.cursor()
         query1 = Template(
-            "insert into bets(category, title) values ('$category', '$title') RETURNING bet_id"
+            "insert into bets(category, title, submitter, close_timestamp) values ('$category', '$title', '$submitter', '$close_date') RETURNING bet_id"
         ).safe_substitute(
             {
                 "category": bet["category"],
                 "title": bet["title"],
+                "submitter": token["user"],
+                "close_date": close_date,
             }
         )
         cursor.execute(query1)
@@ -353,6 +371,8 @@ async def place_bet(
             "select balance from users where username = '$username'"
         ).safe_substitute({"username": token["user"]})
     )
+    #TODO add check if closetime is in future and closed_early is none
+    
     if res[0]["balance"] >= bet["totalodds"]:
         cursor = connection.cursor()
         query1 = Template(

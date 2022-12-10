@@ -8,7 +8,6 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import React, { useEffect } from "react";
-import { GET_BETS } from "../../queries";
 import { Bet, BetOption } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { addBet, removeBet, selectAccum } from "../../redux/accumSlice";
@@ -23,6 +22,21 @@ import NoAccess from "../NoAccess";
 
 export default function BettingHome() {
   const dispatch = useAppDispatch();
+
+  const MONTHS = [
+    "januar",
+    "februar",
+    "mars",
+    "april",
+    "mai",
+    "juni",
+    "juli",
+    "august",
+    "september",
+    "oktober",
+    "november",
+    "desember",
+  ];
 
   const { width } = useWindowDimensions();
 
@@ -51,6 +65,7 @@ export default function BettingHome() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setBets(resp);
+      console.log(resp);
       let cats: string[] = ["Alle kategorier"];
       resp.forEach((bet: Bet) => {
         if (cats.indexOf(bet.category) === -1) {
@@ -101,6 +116,8 @@ export default function BettingHome() {
         </Tabs>
         <div className="bet-flex-container">
           {bets.map((bet: Bet) => {
+            console.log(new Date(bet.close_time));
+
             if (
               chosenCategory == "Alle kategorier" ||
               chosenCategory == bet.category
@@ -109,34 +126,46 @@ export default function BettingHome() {
                 <>
                   <div>
                     <Card sx={{ padding: 2 }}>
-                      {bet.title} <br />
-                      {bet.bet_options.map((option: BetOption) => {
-                        let index = accumBets
-                          .map((c: any) => c.option.option_id)
-                          .indexOf(option.option_id);
-                        return (
-                          <>
-                            <Button
-                              variant={index == -1 ? "outlined" : "contained"}
-                              // variant="contained"
-                              onClick={() => {
-                                addToAccum(bet.title, option, index);
-                              }}
-                              sx={{
-                                m: 1,
-                                mt: 1,
-                                ":hover": {
-                                  color: "#ffffff",
-                                  backgroundColor: "#1d2528",
-                                  borderColor: "#1d2528",
-                                },
-                              }}
-                            >
-                              {option.option} - {option.latest_odds}
-                            </Button>
-                          </>
-                        );
-                      })}
+                      <>
+                        {bet.title} <br />
+                        Bettet stenger {new Date(
+                          bet.close_time
+                        ).getDate()}.{" "}
+                        {MONTHS[new Date(bet.close_time).getMonth()]}{" "}
+                        {new Date(bet.close_time).getFullYear()} kl.{" "}
+                        {("0" + new Date(bet.close_time).getHours()).slice(-2)}:
+                        {("0" + new Date(bet.close_time).getMinutes()).slice(
+                          -2
+                        )}
+                        <br />
+                        {bet.bet_options.map((option: BetOption) => {
+                          let index = accumBets
+                            .map((c: any) => c.option.option_id)
+                            .indexOf(option.option_id);
+                          return (
+                            <>
+                              <Button
+                                variant={index == -1 ? "outlined" : "contained"}
+                                // variant="contained"
+                                onClick={() => {
+                                  addToAccum(bet.title, option, index);
+                                }}
+                                sx={{
+                                  m: 1,
+                                  mt: 1,
+                                  ":hover": {
+                                    color: "#ffffff",
+                                    backgroundColor: "#1d2528",
+                                    borderColor: "#1d2528",
+                                  },
+                                }}
+                              >
+                                {option.option} - {option.latest_odds}
+                              </Button>
+                            </>
+                          );
+                        })}
+                      </>
                     </Card>
                   </div>
                 </>

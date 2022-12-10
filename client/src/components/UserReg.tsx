@@ -5,8 +5,6 @@ import axios from "axios";
 
 import TextField from "@mui/material/TextField";
 import { AlertTitle, Button, InputAdornment } from "@mui/material";
-import { useLazyQuery, useMutation } from "@apollo/client";
-import { GET_USER, ADD_USER } from "../queries";
 import Alert, { AlertColor } from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
@@ -16,13 +14,7 @@ import { AlertT, UserAvailability } from "../types";
 import { AccountCircle, ConstructionOutlined } from "@mui/icons-material";
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import KeyIcon from "@mui/icons-material/Key";
-import { createSuper } from "typescript";
 import { selectPath } from "../redux/envSlice";
-import { mode } from "crypto-js";
-
-interface FetchedUserData {
-  users: string[];
-}
 
 function UserReg() {
   const dispatch = useAppDispatch();

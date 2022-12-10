@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { queryAllByAltText } from "@testing-library/react";
 import { AlertColor, Button, TextField } from "@mui/material";
 import { useAppSelector } from "../../redux/hooks";
 import { selectPath } from "../../redux/envSlice";
@@ -10,6 +8,10 @@ import NoAccess from "../NoAccess";
 import { AlertT, NewBetType, NewOptionType } from "../../types";
 import { SendToMobileTwoTone } from "@mui/icons-material";
 import AlertComp from "../Alert";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 export default function NewBet() {
   const url_path = useAppSelector(selectPath);
@@ -21,6 +23,10 @@ export default function NewBet() {
 
   const [title, setTitle] = React.useState<string>("");
   const [category, setCategory] = React.useState<string>("");
+  const [closeDate, setCloseDate] = React.useState<Dayjs | null>(dayjs());
+
+  console.log(closeDate);
+
   const [options, setOptions] = React.useState<NewOptionType[]>([
     { option: "", latest_odds: null },
   ]);
@@ -43,7 +49,6 @@ export default function NewBet() {
 
   const navigate = useNavigate();
 
- 
   function updateOption(value: string, index: number) {
     let optionsCopy = [...options];
     optionsCopy[index].option = value;
@@ -62,28 +67,35 @@ export default function NewBet() {
   }
 
   async function sendBet() {
-    let bet_packet: any = {
-      title: title,
-      category: category,
-      options: options,
-    };
-    const response = await fetch(`${url_path}api/admin/createbet`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-      body: JSON.stringify(bet_packet),
-    });
-
-    const resp = await response.json();
-    if (resp["createBet"]) {
-      toggleAlert(true, "Bettet ble opprettet!", "success");
-      setOptions([{ option: "", latest_odds: null }]);
-      setTitle("");
-      setCategory("");
+    if (closeDate == null) {
+      toggleAlert(true, "Must include close date", "error");
     } else {
-      toggleAlert(true, resp["errorMsg"], "error");
+      console.log(closeDate);
+      console.log(typeof closeDate.toDate());
+      let bet_packet: any = {
+        title: title,
+        category: category,
+        close_date: closeDate,
+        options: options,
+      };
+      const response = await fetch(`${url_path}api/admin/createbet`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+        body: JSON.stringify(bet_packet),
+      });
+
+      const resp = await response.json();
+      if (resp["createBet"]) {
+        toggleAlert(true, "Bettet ble opprettet!", "success");
+        setOptions([{ option: "", latest_odds: null }]);
+        setTitle("");
+        setCategory("");
+      } else {
+        toggleAlert(true, resp["errorMsg"], "error");
+      }
     }
   }
   let totalodds = 0;
@@ -123,6 +135,17 @@ export default function NewBet() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           />
+          <br />
+          <br />
+          <h3>Forventet tidspunkt for spillstopp:</h3>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              value={closeDate}
+              onChange={(newValue) => setCloseDate(newValue)}
+              renderInput={(params) => <TextField {...params} />}
+              ampm={false}
+            />
+          </LocalizationProvider>
           <br />
           <br />
           <h3>Options:</h3>

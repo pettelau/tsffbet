@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LoginUtils } from "../utils";
 import { Link, useNavigate } from "react-router-dom";
-import { useLazyQuery } from "@apollo/client";
-import { GET_HASH, GET_USER } from "../queries";
 
 import TextField from "@mui/material/TextField";
 import { Avatar, Button, Card, Typography } from "@mui/material";
