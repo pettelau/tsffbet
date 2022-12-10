@@ -169,7 +169,7 @@ async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> d
 
 
 @app.get("/api/userAvailability/{user}")
-async def read_root(user: str) -> dict:
+async def user_availability(user: str) -> dict:
     res = fetchDB(f"select exists(select 1 from users where username = '{user}')")
     if res[0][0]:
         return {"userTaken": True}
