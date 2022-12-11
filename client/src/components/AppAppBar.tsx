@@ -29,7 +29,7 @@ import { selectBalance, selectUsername } from "../redux/userSlice";
 import useWindowDimensions from "../utils/deviceSizeInfo";
 import { AlignHorizontalCenter } from "@mui/icons-material";
 
-
+// test
 
 export default function AppAppBar() {
   const SIZE = useWindowDimensions();
