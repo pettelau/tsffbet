@@ -29,11 +29,7 @@ import { selectBalance, selectUsername } from "../redux/userSlice";
 import useWindowDimensions from "../utils/deviceSizeInfo";
 import { AlignHorizontalCenter } from "@mui/icons-material";
 
-const rightLink = {
-  fontSize: 16,
-  color: "common.white",
-  ml: 3,
-};
+
 
 export default function AppAppBar() {
   const SIZE = useWindowDimensions();
