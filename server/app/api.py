@@ -110,11 +110,47 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -
     return bets_with_options
 
 
-@app.get("/api/leaderboard/")
-async def get_open_bets(
-    fromDate, toDate, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
-    print(fromDate, toDate)
+# leaderboard date range, currently not implemented
+# @app.get("/api/leaderboard/")
+# async def get_open_bets(
+#     fromDate, toDate, token: str = Depends(authUtils.validate_access_token)
+# ) -> dict:
+#     print(fromDate, toDate)
+
+
+@app.get("/api/leaderboard")
+async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
+    leaderboard_data = []
+    users = fetchDBJson("select username, user_id, balance from users")
+    for user in users:
+        user_data = {"username": user["username"], "balance": user["balance"]}
+        won_accums = fetchDBJson(
+            Template(
+                "select count(*) from accums where user_id = $user_id and paid_out=true"
+            ).safe_substitute({"user_id": user["user_id"]})
+        )
+        total_accums = fetchDBJson(
+            Template(
+                "select count(*) from accums where user_id = $user_id"
+            ).safe_substitute({"user_id": user["user_id"]})
+        )
+        user_data["won_accums"] = won_accums[0]["count"]
+        user_data["total_accums"] = total_accums[0]["count"]
+
+        leaderboard_data.append(user_data)
+    return leaderboard_data
+
+
+def is_admin(username):
+    res = fetchDBJson(
+        Template(
+            "select admin from users where username = '$username'"
+        ).safe_substitute({"username": username})
+    )
+    if res[0]["admin"]:
+        return True
+    else:
+        return False
 
 
 @app.get("/api/admin/allbets")
@@ -123,7 +159,7 @@ async def get_all_admin_bets(
 ) -> dict:
     if is_admin(token["user"]):
         bets = fetchDBJson("select * from bets")
-        bets_with_options = [] 
+        bets_with_options = []
         for bet in bets:
             options = fetchDBJson(
                 Template(
@@ -137,6 +173,35 @@ async def get_all_admin_bets(
         return bets_with_options
     else:
         raise HTTPException(status_code=403, detail="You are not admin")
+
+
+@app.get("/api/dictionary")
+async def get_dictionary(token: str = Depends(authUtils.validate_access_token)) -> dict:
+    res = fetchDBJson("select * from dictionary")
+    return res
+
+
+@app.post("/api/submitword")
+async def get_dictionary(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    try:
+        cursor = connection.cursor()
+        query = Template(
+            "insert into dictionary(frequency, description, submitter, word) values ($frequency, '$description', '$submitter', '$word')"
+        ).safe_substitute(
+            {
+                "frequency": payload["frequency"],
+                "description": payload["description"],
+                "submitter": token["user"],
+                "word": payload["word"],
+            }
+        )
+        cursor.execute(query)
+        connection.commit()
+        return {"submitWord": True}
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Something went wrong")
 
 
 @app.get("/api/accums")
@@ -210,18 +275,6 @@ async def add_user(
         ).safe_substitute({"username": token["user"]})
     )
     return res
-
-
-def is_admin(username):
-    res = fetchDBJson(
-        Template(
-            "select admin from users where username = '$username'"
-        ).safe_substitute({"username": username})
-    )
-    if res[0]["admin"]:
-        return True
-    else:
-        return False
 
 
 @app.get("/api/admin/users")

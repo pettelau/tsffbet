@@ -1,11 +1,11 @@
 .App {
   text-align: center;
   /* font-family: 'Quicksand', sans-serif; */
-  background-color: #ffeecd;
+  background-color: #fdf1da;
 }
 
 body, html {
-  background-color: #ffeecd;
+  background-color: #fdf1da;
   /* font-family: 'Quicksand', sans-serif; */
 
 
@@ -90,4 +90,8 @@ body, html {
 h3 {
   margin-top: 3px;
   margin-bottom: 5px;
+}
+
+.Table {
+ max-width: 500px;
 }

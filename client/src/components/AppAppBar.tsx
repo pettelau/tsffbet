@@ -24,6 +24,7 @@ import PaidIcon from "@mui/icons-material/Paid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useAppSelector } from "../redux/hooks";
@@ -66,7 +67,14 @@ export default function AppAppBar() {
             <Box
               sx={{ flex: 1, display: "flex", justifyContent: "flex-start" }}
             >
-              <IconButton
+              <img
+                onClick={() => {
+                  navigate("/");
+                }}
+                style={{ maxHeight: 45, marginRight: 25 }}
+                src={"/laubet_simple.png"}
+              />
+              {/* <IconButton
                 size="large"
                 edge="start"
                 color="inherit"
@@ -80,7 +88,7 @@ export default function AppAppBar() {
                 <Typography sx={{ color: "white", marginLeft: 1 }}>
                   Hjem
                 </Typography>
-              </IconButton>
+              </IconButton> */}
               <IconButton
                 id="betting-button"
                 size="large"
@@ -141,17 +149,24 @@ export default function AppAppBar() {
                   Leaderboard
                 </Typography>
               </IconButton>
+              <IconButton
+                id="dict-button"
+                size="large"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                onClick={() => {
+                  navigate("/dictionary");
+                }}
+              >
+                <MenuBookIcon />
+                <Typography sx={{ color: "white", marginLeft: 1 }}>
+                  Ordboka
+                </Typography>
+              </IconButton>
             </Box>
-            <Box sx={{ flex: 1 }}>
-              {/* <Link
-              variant="h6"
-              underline="none"
-              color="inherit"
-              href="/premium-themes/onepirate/"
-              sx={{ fontSize: 24 }}
-            >
-              {"LauBet"}
-            </Link> */}
+            {/* <Box sx={{ flex: 1 }}>
+              
               <img
                 onClick={() => {
                   navigate("/");
@@ -159,7 +174,7 @@ export default function AppAppBar() {
                 style={{ maxHeight: 45 }}
                 src={"/laubet_simple.png"}
               />
-            </Box>
+            </Box> */}
             <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
               <IconButton
                 id="login-button"

@@ -96,6 +96,13 @@ export type NewOptionType = {
     option: string
 }
 
+export type DictionaryT = {
+  frequency: number;
+  word: string;
+  description: string;
+  submitter: string;
+}
+
 export type AdminUserDetails = {
   user_id: boolean;
   username: string;
@@ -106,4 +113,11 @@ export type AdminUserDetails = {
   last_login: undefined | Date;
   firstname: undefined | string;
   lastname: undefined | string;
+}
+
+export type LeaderboardData = {
+  username: string;
+  balance: number;
+  won_accums: number;
+  total_accums: number;
 }

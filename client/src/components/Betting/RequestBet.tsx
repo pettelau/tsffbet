@@ -21,7 +21,9 @@ export default function RequestBet() {
 
   const [title, setTitle] = React.useState<string>("");
   const [category, setCategory] = React.useState<string>("");
-  const [closeDate, setCloseDate] = React.useState<Dayjs | null>(dayjs());
+  const [closeDate, setCloseDate] = React.useState<Dayjs | null>(
+    dayjs().add(7, "day")
+  );
 
   console.log(closeDate);
 
@@ -138,6 +140,7 @@ export default function RequestBet() {
 
     const resp = await response.json();
     if (response.ok) {
+      fetchExistingReqs();
       toggleAlert(true, "Bettet ble requestet!", "success");
       setOptions([{ option: "", latest_odds: null }]);
       setTitle("");
@@ -172,12 +175,14 @@ export default function RequestBet() {
       <h2>Request et bet</h2>
       <TextField
         sx={{ width: 400 }}
+        multiline
         label="Bet"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <br />
       <TextField
+        sx={{ width: 400 }}
         label="Kateogri"
         value={category}
         onChange={(e) => setCategory(e.target.value)}
@@ -249,39 +254,46 @@ export default function RequestBet() {
       >
         Send Bet
       </Button>
-      <h2>Venter på godkjenning fra Lau:</h2>
-      <div className="bet-flex-container">
-        {bets.map((bet: Bet) => {
-          return (
-            <>
-              <div>
-                <Card sx={{ padding: 2 }}>
-                  <>
-                    {bet.title} <br />
-                    😈 Innsendt av: <b>{bet.submitter}</b> 😈 <br />
-                    {bet.bet_options.map((option: BetOption) => {
-                      return (
-                        <>
-                          <Button
-                            disabled={true}
-                            variant={"contained"}
-                            sx={{
-                              m: 1,
-                              mt: 1,
-                            }}
-                          >
-                            {option.option} - {option.latest_odds}
-                          </Button>
-                        </>
-                      );
-                    })}
-                  </>
-                </Card>
-              </div>
-            </>
-          );
-        })}
-      </div>
+      {bets.length > 0 ? (
+        <>
+          {" "}
+          <h2>Venter på godkjenning fra Lau:</h2>
+          <div className="bet-flex-container">
+            {bets.map((bet: Bet) => {
+              return (
+                <>
+                  <div>
+                    <Card sx={{ padding: 2 }}>
+                      <>
+                        {bet.title} <br />
+                        😈 Innsendt av: <b>{bet.submitter}</b> 😈 <br />
+                        {bet.bet_options.map((option: BetOption) => {
+                          return (
+                            <>
+                              <Button
+                                disabled={true}
+                                variant={"contained"}
+                                sx={{
+                                  m: 1,
+                                  mt: 1,
+                                }}
+                              >
+                                {option.option} - {option.latest_odds}
+                              </Button>
+                            </>
+                          );
+                        })}
+                      </>
+                    </Card>
+                  </div>
+                </>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        ""
+      )}
     </>
   );
 }
