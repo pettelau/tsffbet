@@ -108,8 +108,52 @@ export default function EditBet() {
     });
 
     const resp = await response.json();
-    if (resp["settleeBet"]) {
+    if (resp["settleBet"]) {
       toggleAlert(true, "Bettet ble settled!", "success");
+      console.log(resp);
+    } else {
+      toggleAlert(true, resp["errorMsg"], "error");
+    }
+  }
+
+  async function acceptBet(betindex: number) {
+    let bet_id = { bet_id: allBets[betindex]["bet_id"] };
+
+    console.log(bet_id);
+    const response = await fetch(`${url_path}api/admin/acceptbet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(bet_id),
+    });
+
+    const resp = await response.json();
+    if (response.ok) {
+      toggleAlert(true, "Bettet ble akseptert!", "success");
+      console.log(resp);
+    } else {
+      toggleAlert(true, resp["errorMsg"], "error");
+    }
+  }
+
+  async function closeBet(betindex: number) {
+    let bet_id = { bet_id: allBets[betindex]["bet_id"] };
+
+    console.log(bet_id);
+    const response = await fetch(`${url_path}api/admin/closebet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(bet_id),
+    });
+
+    const resp = await response.json();
+    if (response.ok) {
+      toggleAlert(true, "Bettet ble stengt!", "success");
       console.log(resp);
     } else {
       toggleAlert(true, resp["errorMsg"], "error");
@@ -181,6 +225,28 @@ export default function EditBet() {
                       Settle bet! (Irreversible)
                     </Button>
                     <br />
+                    {bet.is_accepted ? (
+                      ""
+                    ) : (
+                      <>
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            acceptBet(betindex);
+                          }}
+                        >
+                          Aksepter spill
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        closeBet(betindex);
+                      }}
+                    >
+                      Steng spill
+                    </Button>
                   </AccordionDetails>
                 </Accordion>
               </>

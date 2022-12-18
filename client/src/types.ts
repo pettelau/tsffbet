@@ -2,9 +2,11 @@ export type Bet = {
     title: string;
     bet_status: 1 | 2 | 3 | 4;
     bet_id: number;
+    submitter: string;
     category: string;
-    close_time: Date;
+    close_timestamp: Date;
     bet_options: BetOption[];
+    is_accepted: undefined | Boolean;
 }
 
 export type BetOption = {
@@ -92,4 +94,16 @@ export type UserDetails = {
 export type NewOptionType = {
     latest_odds: number | null,
     option: string
+}
+
+export type AdminUserDetails = {
+  user_id: boolean;
+  username: string;
+  admin: boolean;
+  whitelist: boolean;
+  balance: number;
+  created_on: Date;
+  last_login: undefined | Date;
+  firstname: undefined | string;
+  lastname: undefined | string;
 }

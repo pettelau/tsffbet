@@ -1,4 +1,3 @@
-import { useQuery } from "@apollo/client";
 import {
   Button,
   Card,
@@ -116,7 +115,6 @@ export default function BettingHome() {
         </Tabs>
         <div className="bet-flex-container">
           {bets.map((bet: Bet) => {
-            console.log(new Date(bet.close_time));
 
             if (
               chosenCategory == "Alle kategorier" ||
@@ -128,15 +126,16 @@ export default function BettingHome() {
                     <Card sx={{ padding: 2 }}>
                       <>
                         {bet.title} <br />
-                        Bettet stenger {new Date(
-                          bet.close_time
-                        ).getDate()}.{" "}
-                        {MONTHS[new Date(bet.close_time).getMonth()]}{" "}
-                        {new Date(bet.close_time).getFullYear()} kl.{" "}
-                        {("0" + new Date(bet.close_time).getHours()).slice(-2)}:
-                        {("0" + new Date(bet.close_time).getMinutes()).slice(
+                        Bettet stenger {new Date(bet.close_timestamp).getDate()}
+                        . {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
+                        {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
+                        {("0" + new Date(bet.close_timestamp).getHours()).slice(
                           -2
                         )}
+                        :
+                        {(
+                          "0" + new Date(bet.close_timestamp).getMinutes()
+                        ).slice(-2)}
                         <br />
                         {bet.bet_options.map((option: BetOption) => {
                           let index = accumBets

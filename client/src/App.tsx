@@ -22,6 +22,8 @@ import { selectPath } from "./redux/envSlice";
 import AdminHome from "./components/Admin/AdminHome";
 import NewBet from "./components/Admin/NewBet";
 import EditBet from "./components/Admin/EditBet";
+import RequestBet from "./components/Betting/RequestBet";
+import Leaderboard from "./components/Betting/Leaderboard";
 
 const THEME = createTheme({
   typography: {
@@ -79,6 +81,8 @@ export default function App() {
               <Route path="myaccums" element={<MyAccums />} />
               <Route path="login" element={<Login />} />
               <Route path="userReg" element={<UserReg />} />
+              <Route path="requestbet" element={<RequestBet />} />
+              <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="admin" element={<AdminHome />} />
               <Route path="admin/newbet" element={<NewBet />} />
               <Route path="admin/editbet" element={<EditBet />} />

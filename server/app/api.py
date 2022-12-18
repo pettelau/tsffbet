@@ -76,33 +76,45 @@ app.add_middleware(
 
 @app.get("/api/openbets")
 async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
-    bets = fetchDB(
+    bets = fetchDBJson(
         "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL"
     )
     bets_with_options = []
-    print(bets)
     for bet in bets:
-        bet_with_option = {
-            "title": bet[2],
-            "bet_status": bet[3],
-            "bet_id": bet[0],
-            "category": bet[1],
-            "close_time": bet[7],
-        }
-        options = fetchDB(f"select * from bet_options where bet = {bet[0]}")
-        options_list = []
-        for option in options:
-            option_dict = {
-                "latest_odds": option[1],
-                "option": option[3],
-                "option_id": option[0],
-                "option_status": option[2],
-            }
-            options_list.append(option_dict)
-        bet_with_option["bet_options"] = options_list
+        options = fetchDBJson(
+            Template(
+                "select option_id, latest_odds, option_status, option from bet_options where bet = $bet"
+            ).safe_substitute({"bet": bet["bet_id"]})
+        )
+        bet_with_option = bet
+        bet_with_option["bet_options"] = options
         bets_with_options.append(bet_with_option)
-
+    print(bets_with_options)
     return bets_with_options
+
+
+@app.get("/api/requestedbets")
+async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
+    bets = fetchDBJson("select * from bets where is_accepted = false")
+    bets_with_options = []
+    for bet in bets:
+        options = fetchDBJson(
+            Template(
+                "select option_id, latest_odds, option_status, option from bet_options where bet = $bet"
+            ).safe_substitute({"bet": bet["bet_id"]})
+        )
+        bet_with_option = bet
+        bet_with_option["bet_options"] = options
+        bets_with_options.append(bet_with_option)
+    print(bets_with_options)
+    return bets_with_options
+
+
+@app.get("/api/leaderboard/")
+async def get_open_bets(
+    fromDate, toDate, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    print(fromDate, toDate)
 
 
 @app.get("/api/admin/allbets")
@@ -110,28 +122,18 @@ async def get_all_admin_bets(
     token: str = Depends(authUtils.validate_access_token),
 ) -> dict:
     if is_admin(token["user"]):
-        bets = fetchDB("select * from bets")
-        bets_with_options = []
+        bets = fetchDBJson("select * from bets")
+        bets_with_options = [] 
         for bet in bets:
-            bet_with_option = {
-                "title": bet[2],
-                "bet_status": bet[3],
-                "bet_id": bet[0],
-                "category": bet[1],
-            }
-            options = fetchDB(f"select * from bet_options where bet = {bet[0]}")
-            options_list = []
-            for option in options:
-                option_dict = {
-                    "latest_odds": option[1],
-                    "option": option[3],
-                    "option_id": option[0],
-                    "option_status": option[2],
-                }
-                options_list.append(option_dict)
-            bet_with_option["bet_options"] = options_list
+            options = fetchDBJson(
+                Template(
+                    "select option_id, latest_odds, option_status, option from bet_options where bet = $bet"
+                ).safe_substitute({"bet": bet["bet_id"]})
+            )
+            bet_with_option = bet
+            bet_with_option["bet_options"] = options
             bets_with_options.append(bet_with_option)
-
+        print(bets_with_options)
         return bets_with_options
     else:
         raise HTTPException(status_code=403, detail="You are not admin")
@@ -222,11 +224,13 @@ def is_admin(username):
         return False
 
 
-@app.get("/api/admin/getusers")
+@app.get("/api/admin/users")
 async def get_users(token: str = Depends(authUtils.validate_access_token)) -> dict:
 
     if is_admin(token["user"]):
-        res = fetchDBJson("select * from users")
+        res = fetchDBJson(
+            "select user_id, username, balance, created_on, last_login, firstname, lastname, admin, whitelist from users"
+        )
         return res
     else:
         raise HTTPException(status_code=403, detail="You are not admin")
@@ -250,7 +254,7 @@ async def create_bet(
         # create bet
         cursor = connection.cursor()
         query1 = Template(
-            "insert into bets(category, title, submitter, close_timestamp) values ('$category', '$title', '$submitter', '$close_date') RETURNING bet_id"
+            "insert into bets(category, title, is_accepted, submitter, close_timestamp) values ('$category', '$title', true, '$submitter', '$close_date') RETURNING bet_id"
         ).safe_substitute(
             {
                 "category": bet["category"],
@@ -280,6 +284,111 @@ async def create_bet(
         # change to this and implement frontend to support:
         # raise HTTPException(status_code=403, detail="You are not admin")
         return {"settleBet": False, "errorMsg": "Du er ikke admin"}
+
+
+@app.post("/api/admin/acceptbet")
+async def accept_bet(
+    bet: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+
+    if is_admin(token["user"]):
+        try:
+            cursor = connection.cursor()
+            query = Template(
+                "update bets set is_accepted = true where bet_id = $bet_id"
+            ).safe_substitute({"bet_id": bet["bet_id"]})
+            cursor.execute(query)
+            connection.commit()
+            return {"closeBet": True}
+        except Exception as e:
+            raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.post("/api/admin/updatewl")
+async def accept_bet(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    print(payload)
+    if is_admin(token["user"]):
+        try:
+            cursor = connection.cursor()
+            query = Template(
+                "update users set whitelist = $whitelisted where user_id = $user_id"
+            ).safe_substitute(
+                {"whitelisted": payload["whitelisted"], "user_id": payload["user_id"]}
+            )
+            cursor.execute(query)
+            connection.commit()
+            return {"updateWhitelist": True}
+        except Exception as e:
+            raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.post("/api/admin/closebet")
+async def accept_bet(
+    bet: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    print(bet)
+
+    if is_admin(token["user"]):
+        print(bet)
+        try:
+            cursor = connection.cursor()
+            query = Template(
+                "update bets set closed_early = NOW() where bet_id = $bet_id"
+            ).safe_substitute({"bet_id": bet["bet_id"]})
+            cursor.execute(query)
+            connection.commit()
+            return {"acceptBet": True}
+        except Exception as e:
+            raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.post("/api/requestbet")
+async def create_bet(
+    bet: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    # date_time_obj = datetime.datetime.strptime(
+    #     bet["close_date"], "%Y-%m-%d %H:%M:%S.%f"
+    # )
+    try:
+        close_date = parser.parse(bet["close_date"])
+        # close_date = parser.parse(bet["close_date"]).replace(
+        #     tzinfo=ZoneInfo("Europe/Berlin")
+        # )
+        print(close_date)
+        # print(bet["close_date"].astimezone(pytz.timezone("Europe/Oslo")))
+        # create bet
+        cursor = connection.cursor()
+        query1 = Template(
+            "insert into bets(category, title, submitter, close_timestamp) values ('$category', '$title', '$submitter', '$close_date') RETURNING bet_id"
+        ).safe_substitute(
+            {
+                "category": bet["category"],
+                "title": bet["title"],
+                "submitter": token["user"],
+                "close_date": close_date,
+            }
+        )
+        cursor.execute(query1)
+        id_of_bet = cursor.fetchone()[0]
+
+        for option in bet["options"]:
+            query2 = Template(
+                "insert into bet_options(latest_odds, option, bet) values ($latest_odds, '$option', $bet)"
+            ).safe_substitute(
+                {
+                    "latest_odds": float(option["latest_odds"]),
+                    "option": option["option"],
+                    "bet": id_of_bet,
+                }
+            )
+            cursor.execute(query2)
+        connection.commit()
+        return {"requestBet": True}
+    except error as e:
+        # raise HTTPException(status_code=403, detail="You are not admin")
+        return {"requestBet": False, "errorMsg": e}
 
 
 @app.post("/api/admin/settlebet")
@@ -371,8 +480,8 @@ async def place_bet(
             "select balance from users where username = '$username'"
         ).safe_substitute({"username": token["user"]})
     )
-    #TODO add check if closetime is in future and closed_early is none
-    
+    # TODO add check if closetime is in future and closed_early is none
+
     if res[0]["balance"] >= bet["totalodds"]:
         cursor = connection.cursor()
         query1 = Template(

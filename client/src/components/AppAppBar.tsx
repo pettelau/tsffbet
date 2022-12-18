@@ -22,11 +22,14 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import PaidIcon from "@mui/icons-material/Paid";
 import MenuIcon from "@mui/icons-material/Menu";
+import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
+import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useAppSelector } from "../redux/hooks";
 import { selectBalance, selectUsername } from "../redux/userSlice";
 import useWindowDimensions from "../utils/deviceSizeInfo";
+
 import { AlignHorizontalCenter } from "@mui/icons-material";
 
 // test
@@ -106,6 +109,36 @@ export default function AppAppBar() {
                 <ReceiptIcon />
                 <Typography sx={{ color: "white", marginLeft: 1 }}>
                   Mine spill
+                </Typography>
+              </IconButton>
+              <IconButton
+                id="my-accums-button"
+                size="large"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                onClick={() => {
+                  navigate("/requestbet");
+                }}
+              >
+                <ScheduleSendIcon />
+                <Typography sx={{ color: "white", marginLeft: 1 }}>
+                  Request-a-bet
+                </Typography>
+              </IconButton>
+              <IconButton
+                id="leaderboard-button"
+                size="large"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                onClick={() => {
+                  navigate("/leaderboard");
+                }}
+              >
+                <LeaderboardIcon />
+                <Typography sx={{ color: "white", marginLeft: 1 }}>
+                  Leaderboard
                 </Typography>
               </IconButton>
             </Box>
@@ -222,6 +255,14 @@ export default function AppAppBar() {
                   }}
                 >
                   Mine spill
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/requestbet");
+                  }}
+                >
+                  Request-a-bet
                 </MenuItem>
               </Menu>
               {/* <IconButton
