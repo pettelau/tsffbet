@@ -164,6 +164,9 @@ export default function RequestBet() {
     setOptions(optionsCopy);
   }
 
+  if (responseCode !== 200) {
+    return <NoAccess responseCode={responseCode} responseText={responseText} />;
+  }
   return (
     <>
       {/* Alert component to show error/success messages */}

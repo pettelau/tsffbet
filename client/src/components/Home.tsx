@@ -16,6 +16,7 @@ import ForumIcon from "@mui/icons-material/Forum";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import SportsTennisIcon from "@mui/icons-material/SportsTennis";
 import QuizIcon from "@mui/icons-material/Quiz";
+import DynamicFeedIcon from "@mui/icons-material/DynamicFeed";
 
 export default function Home() {
   return (
@@ -44,10 +45,21 @@ export default function Home() {
             uttrykk.
           </div>
           <div>
+            <DynamicFeedIcon sx={{ fontSize: 80 }} /> <br />
+            <h3>BetFeed</h3>
+            Sjekk hvilke bonger de andre spillerne har levert inn!
+          </div>
+          <div>
             <ScheduleSendIcon sx={{ fontSize: 80 }} /> <br />
             <h3>Request-a-bet</h3>
             Dersom du ønsker å foreslå et bet som bør inn på LauBet er dette
             fortsatt mulig.
+          </div>
+          <div>
+            <LeaderboardIcon sx={{ fontSize: 80 }} /> <br />
+            <h3>Leaderboard</h3>
+            Sjekk hvem som har har mest cash på LauBet, og hvem som har flest
+            grønne bonger i portefølgen sin.
           </div>
           <div>
             <ForumIcon sx={{ fontSize: 80 }} /> <br />
@@ -56,12 +68,7 @@ export default function Home() {
             viser at de har null tro på deg i eksempelvis Padeltennis eller på
             byen? Legg igjen en kommentar og si din mening!
           </div>
-          <div>
-            <LeaderboardIcon sx={{ fontSize: 80 }} /> <br />
-            <h3>Leaderboard</h3>
-            Sjekk hvem som har har mest cash på LauBet, eller hvem som har gjort
-            det best i en gitt tidsperiode, f.eks. den siste måneden.
-          </div>
+
           <div>
             <SportsTennisIcon sx={{ fontSize: 80 }} /> <br />
             <h3>Interne bets (kommer)</h3>
@@ -69,13 +76,13 @@ export default function Home() {
             plasser LauCoins på at du selv kommer til å vinne. F.eks. et slag
             padeltennis eller FIFA.
           </div>
-          <div>
+          {/* <div>
             <QuizIcon sx={{ fontSize: 80 }} /> <br />
             <h3>TopicDuel (kommer kanskje)</h3>
             Min gode venn Jacob Theisen jobber for tiden med et quiz-spill hvor
             man spiller live mot én eller flere venner i en gitt kategori. Dette
             er noe vi håper vi kan få implementert inn i LauBet etter hvert...
-          </div>
+          </div> */}
         </div>
       </div>
       <br />

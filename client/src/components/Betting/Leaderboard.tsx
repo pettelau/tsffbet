@@ -36,6 +36,9 @@ export default function Leaderboard() {
 
   const url_path = useAppSelector(selectPath);
 
+  const [responseCode, setResponseCode] = React.useState<number>();
+  const [responseText, setResponseText] = React.useState<number>();
+
   const [fromDate, setFromDate] = React.useState<Dayjs | null>(
     dayjs().subtract(2, "month")
   );
@@ -62,10 +65,13 @@ export default function Leaderboard() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
+    setResponseCode(response.status);
 
     if (response.ok) {
       let sorted = resp.sort((a: any, b: any) => b.balance - a.balance);
       setLeaderboardData(sorted);
+    } else {
+      setResponseText(resp.detail);
     }
   }
 
@@ -86,6 +92,10 @@ export default function Leaderboard() {
       return "white";
     }
   }
+  if (responseCode !== 200) {
+    return <NoAccess responseCode={responseCode} responseText={responseText} />;
+  }
+
   return (
     <>
       <h1>Leaderboard</h1>

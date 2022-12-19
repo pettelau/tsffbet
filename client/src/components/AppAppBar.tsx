@@ -44,7 +44,6 @@ export default function AppAppBar() {
   const loggedInUser = useAppSelector(selectUsername);
   const balance = useAppSelector(selectBalance);
 
-
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -337,6 +336,7 @@ export default function AppAppBar() {
                   <MenuBookIcon sx={{ mr: 1 }} />
                   Ordboka
                 </MenuItem>
+                <Divider />
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);

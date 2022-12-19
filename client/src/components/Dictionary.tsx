@@ -23,6 +23,9 @@ export default function Dictionary() {
 
   const [dictionary, setDictinary] = React.useState<DictionaryT[]>([]);
 
+  const [responseCode, setResponseCode] = React.useState<number>();
+  const [responseText, setResponseText] = React.useState<number>();
+
   const [word, setWord] = React.useState<string>("");
   const [frequency, setFrequency] = React.useState<number>(5);
   const [description, setDescription] = React.useState<string>("");
@@ -31,11 +34,14 @@ export default function Dictionary() {
     const response = await fetch(`${url_path}api/dictionary`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
+
     const resp = await response.json();
+    setResponseCode(response.status);
+
     if (response.status == 200) {
       setDictinary(resp);
     } else {
-      toggleAlert(true, "Noe gikk galt", "error");
+      setResponseText(resp.detail);
     }
   }
 
@@ -89,6 +95,10 @@ export default function Dictionary() {
   useEffect(() => {
     fetchDictionary();
   }, []);
+
+  if (responseCode !== 200) {
+    return <NoAccess responseCode={responseCode} responseText={responseText} />;
+  }
   return (
     <>
       {/* Alert component to show error/success messages */}
