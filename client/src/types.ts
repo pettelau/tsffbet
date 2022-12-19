@@ -44,16 +44,18 @@ export type UserAvailability = {
 
 
 export type AccumBets = {
-    bet: string;
+    title: string;
     user_odds: number,
-    chosen_option: string;
+    option: string;
     option_status: 1 | 2 | 3 | 4
 }
 
 export type Accums = {
     accum_id: number;
     stake: number;
+    username: undefined | string;
     total_odds: number;
+    placed_timestamp: Date;
     accumBets: AccumBets[];
 }
 
@@ -80,6 +82,7 @@ export type UserDetails = {
     firstname: string,
     lastname: string,
     admin: boolean,
+    created_on: Date,
 }
 
 
@@ -113,6 +116,7 @@ export type AdminUserDetails = {
   last_login: undefined | Date;
   firstname: undefined | string;
   lastname: undefined | string;
+  number_of_logins: number;
 }
 
 export type LeaderboardData = {

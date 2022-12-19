@@ -13,6 +13,7 @@ import {
   selectFirstname,
   selectLastname,
   selectUsername,
+  selectCreatedOn,
   setUserDetails,
 } from "../redux/userSlice";
 import { setUsername } from "../redux/userSlice";
@@ -31,6 +32,21 @@ interface FetchedUserPass {
   users: UserPassData[];
 }
 
+const MONTHS = [
+  "januar",
+  "februar",
+  "mars",
+  "april",
+  "mai",
+  "juni",
+  "juli",
+  "august",
+  "september",
+  "oktober",
+  "november",
+  "desember",
+];
+
 function Login() {
   //error toggle
   const [_alert, setAlert] = useState<boolean>(false);
@@ -46,6 +62,7 @@ function Login() {
   const firstname = useAppSelector(selectFirstname);
   const lastname = useAppSelector(selectLastname);
   const balance = useAppSelector(selectBalance);
+  const created_on = useAppSelector(selectCreatedOn);
 
   const isAdmin = useAppSelector(selectAdmin);
 
@@ -129,20 +146,38 @@ function Login() {
         <>
           <div
             style={{
-              maxWidth: 500,
+              maxWidth: 800,
               display: "grid",
               margin: "auto",
               textAlign: "center",
             }}
           >
-            <h2>Du er logget inn som {loggedInUser}</h2>
-            {/* <Avatar sx={{ bgcolor: deepPurple[500] }}>
+            <>
+              <h1>Profilside</h1>
+              <h2>Brukerdetaljer:</h2>
+              {/* <Avatar sx={{ bgcolor: deepPurple[500] }}>
               {firstname.charAt(0)}
               {lastname == "" ? firstname.charAt(1) : lastname.charAt(0)}
             </Avatar> */}
-            Fornavn: {firstname} <br />
-            Etternavn: {lastname} <br />
-            Saldo: {balance} <br /> <br />
+              Brukernavn: <b>{loggedInUser} </b>
+              <br />
+              Fornavn: <b>{firstname} </b>
+              <br />
+              Etternavn: <b>{lastname} </b>
+              <br />
+              Saldo: <b>{balance} </b>
+              <br />
+              Bruker opprettet:
+              <br />
+              <b>
+                {new Date(created_on).getDate()}.{" "}
+                {MONTHS[new Date(created_on).getMonth()]}{" "}
+                {new Date(created_on).getFullYear()} kl.{" "}
+                {("0" + new Date(created_on).getHours()).slice(-2)}:
+                {("0" + new Date(created_on).getMinutes()).slice(-2)}
+              </b>
+              <br />
+            </>
           </div>
           <Button
             variant="contained"

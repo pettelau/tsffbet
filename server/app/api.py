@@ -89,7 +89,6 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -
         bet_with_option = bet
         bet_with_option["bet_options"] = options
         bets_with_options.append(bet_with_option)
-    print(bets_with_options)
     return bets_with_options
 
 
@@ -106,7 +105,6 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -
         bet_with_option = bet
         bet_with_option["bet_options"] = options
         bets_with_options.append(bet_with_option)
-    print(bets_with_options)
     return bets_with_options
 
 
@@ -169,7 +167,6 @@ async def get_all_admin_bets(
             bet_with_option = bet
             bet_with_option["bet_options"] = options
             bets_with_options.append(bet_with_option)
-        print(bets_with_options)
         return bets_with_options
     else:
         raise HTTPException(status_code=403, detail="You are not admin")
@@ -206,27 +203,43 @@ async def get_dictionary(
 
 @app.get("/api/accums")
 async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> dict:
-    accums = fetchDB(
-        f"select accum_id, stake, total_odds from accums where user_id={token['user_id']}"
+    accums = fetchDBJson(
+        Template(
+            "select accum_id, stake, total_odds, username, placed_timestamp from accums left join users on accums.user_id = users.user_id where accums.user_id = $user_id order by placed_timestamp DESC"
+        ).safe_substitute({"user_id": token["user_id"]})
     )
     accums_with_options = []
     for accum in accums:
-        accum_dict = {"accum_id": accum[0], "stake": accum[1], "total_odds": accum[2]}
-        accum_options = fetchDB(
-            f"select bets.title, accum_options.user_odds, bet_options.option, bet_options.option_status from bet_options natural join accum_options left join bets on bet_options.bet = bets.bet_id inner join accums on accum_options.accum_id = accums.accum_id where accums.accum_id = {accum[0]};"
+        accum = accum
+        accum_options = fetchDBJson(
+            Template(
+                "select bets.title, accum_options.user_odds, bet_options.option, bet_options.option_status from bet_options natural join accum_options left join bets on bet_options.bet = bets.bet_id inner join accums on accum_options.accum_id = accums.accum_id where accums.accum_id = $accum_id"
+            ).safe_substitute({"accum_id": accum["accum_id"]})
         )
-        options_list = []
-        for option in accum_options:
-            option_dict = {
-                "bet": option[0],
-                "user_odds": option[1],
-                "chosen_option": option[2],
-                "option_status": option[3],
-            }
-            options_list.append(option_dict)
-        accum_dict["accumBets"] = options_list
-        accums_with_options.append(accum_dict)
 
+        accum["accumBets"] = accum_options
+        accums_with_options.append(accum)
+    print(accums_with_options)
+    return accums_with_options
+
+
+@app.get("/api/allaccums")
+async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> dict:
+    accums = fetchDBJson(
+        "select accum_id, stake, total_odds, username, placed_timestamp from accums left join users on accums.user_id = users.user_id order by placed_timestamp DESC"
+    )
+    accums_with_options = []
+    for accum in accums:
+        accum = accum
+        accum_options = fetchDBJson(
+            Template(
+                "select bets.title, accum_options.user_odds, bet_options.option, bet_options.option_status from bet_options natural join accum_options left join bets on bet_options.bet = bets.bet_id inner join accums on accum_options.accum_id = accums.accum_id where accums.accum_id = $accum_id"
+            ).safe_substitute({"accum_id": accum["accum_id"]})
+        )
+
+        accum["accumBets"] = accum_options
+        accums_with_options.append(accum)
+    print(accums_with_options)
     return accums_with_options
 
 
@@ -259,6 +272,12 @@ async def add_user(user, password) -> dict:
         return {"loggedIn": False}
     if bcrypt.checkpw(password.encode("utf-8"), user_pass.encode("utf-8")):
         jwt = await authUtils.create_access_token(user, user_id)
+        update_last_login = Template(
+            "update users set last_login = NOW() where user_id = $user_id"
+        ).safe_substitute({"user_id": user_id})
+        cursor = connection.cursor()
+        cursor.execute(update_last_login)
+        connection.commit()
         return {"loggedIn": True, "jwt": jwt}
     else:
         return {"loggedIn": False}
@@ -271,9 +290,19 @@ async def add_user(
 
     res = fetchDBJson(
         Template(
-            "select username, balance, firstname, lastname, admin from users where username = '$username'"
+            "select username, balance, firstname, lastname, admin, created_on from users where username = '$username'"
         ).safe_substitute({"username": token["user"]})
     )
+    update_last_login = Template(
+        "update users set last_login = NOW() where user_id = $user_id"
+    ).safe_substitute({"user_id": token["user_id"]})
+    cursor = connection.cursor()
+    cursor.execute(update_last_login)
+    inc_numb_logins = Template(
+        "update users set number_of_logins = number_of_logins + 1 where user_id = $user_id"
+    ).safe_substitute({"user_id": token["user_id"]})
+    cursor.execute(inc_numb_logins)
+    connection.commit()
     return res
 
 
@@ -282,7 +311,7 @@ async def get_users(token: str = Depends(authUtils.validate_access_token)) -> di
 
     if is_admin(token["user"]):
         res = fetchDBJson(
-            "select user_id, username, balance, created_on, last_login, firstname, lastname, admin, whitelist from users"
+            "select user_id, username, balance, created_on, last_login, firstname, lastname, admin, whitelist, number_of_logins from users"
         )
         return res
     else:
@@ -301,8 +330,6 @@ async def create_bet(
     # close_date = parser.parse(bet["close_date"]).replace(
     #     tzinfo=ZoneInfo("Europe/Berlin")
     # )
-    print(close_date)
-    # print(bet["close_date"].astimezone(pytz.timezone("Europe/Oslo")))
     if is_admin(token["user"]):
         # create bet
         cursor = connection.cursor()
@@ -361,7 +388,6 @@ async def accept_bet(
 async def accept_bet(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
-    print(payload)
     if is_admin(token["user"]):
         try:
             cursor = connection.cursor()
@@ -381,10 +407,8 @@ async def accept_bet(
 async def accept_bet(
     bet: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
-    print(bet)
 
     if is_admin(token["user"]):
-        print(bet)
         try:
             cursor = connection.cursor()
             query = Template(
@@ -409,7 +433,6 @@ async def create_bet(
         # close_date = parser.parse(bet["close_date"]).replace(
         #     tzinfo=ZoneInfo("Europe/Berlin")
         # )
-        print(close_date)
         # print(bet["close_date"].astimezone(pytz.timezone("Europe/Oslo")))
         # create bet
         cursor = connection.cursor()
@@ -448,7 +471,6 @@ async def create_bet(
 async def settle_bet(
     bet: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
-    print(bet)
     if is_admin(token["user"]):
         # settle bet
         cursor = connection.cursor()
@@ -490,7 +512,6 @@ async def settle_bet(
             accum = fetchDBJson(query_accum)
             bet_went_in = True
             for option in accum:
-                print(option)
                 if option["option_status"] != 2:
                     bet_went_in = False
                     break
@@ -527,7 +548,6 @@ async def settle_bet(
 async def place_bet(
     bet: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
-    print(bet["stake"])
     res = fetchDBJson(
         Template(
             "select balance from users where username = '$username'"
@@ -549,7 +569,6 @@ async def place_bet(
         cursor.execute(query1)
         id_of_new_accum = cursor.fetchone()[0]
         for option in bet["bets"]:
-            print(bet)
             query = Template(
                 "insert into accum_options(option_id, accum_id, user_odds) values ($option_id, $accum_id, $user_odds)"
             ).safe_substitute(
@@ -581,7 +600,6 @@ async def add_user(user: dict) -> dict:
 
     # hashed = authUtils.create_hashed_password(user["password"])
     hashed = bcrypt.hashpw(bytes(user["password"], encoding="utf-8"), bcrypt.gensalt())
-    print(hashed)
     res = insertDB(
         Template(
             "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 1000, '$firstname', '$lastname')"

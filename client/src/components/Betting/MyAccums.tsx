@@ -20,13 +20,13 @@ function getAccumStatus(accum: Accums) {
     }
   });
   if (hasLost) {
-    return ["#a81a3f", 3];
+    return ["5px solid #a81a3f", 3];
   }
   if (hasOpen) {
     return ["white", 1];
   }
   if (hasWon) {
-    return ["#388e3c", 2];
+    return ["5px solid #388e3c", 2];
   } else {
     return ["white", 1];
   }
@@ -43,6 +43,7 @@ export default function MyAccums() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
+    console.log(resp);
     setResponseCode(response.status);
     if (response.status == 200) {
       setAccums(resp);
@@ -61,6 +62,21 @@ export default function MyAccums() {
     { label: "Avsluttede", id: 5 },
     { label: "Vunnede", id: 2 },
     { label: "Tapte", id: 3 },
+  ];
+
+  const MONTHS = [
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "mai",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "okt",
+    "nov",
+    "des",
   ];
 
   useEffect(() => {
@@ -104,19 +120,33 @@ export default function MyAccums() {
                 <div>
                   <Card
                     sx={{
-                      backgroundColor: status[0],
+                      border: status[0],
                       padding: 1,
                       width: 345,
                     }}
                   >
-                    <Chip
-                      sx={{
-                        backgroundColor: "#d6d6d6",
-                        color: "black",
-                      }}
-                      label={"Kupong ID: " + accum.accum_id}
-                    ></Chip>
-                    <br />
+                  <p
+                    style={{
+                      marginTop: 1,
+                      marginBottom: 1,
+                      color: "#828385",
+                    }}
+                  >
+                    <b>{"KupongID: " + accum.accum_id}</b> |{" "}
+                    {new Date(accum.placed_timestamp).getDate() +
+                      " " +
+                      MONTHS[new Date(accum.placed_timestamp).getMonth()] +
+                      " " +
+                      new Date(accum.placed_timestamp).getFullYear() +
+                      " " +
+                      ("0" + new Date(accum.placed_timestamp).getHours()).slice(
+                        -2
+                      ) +
+                      ":" +
+                      (
+                        "0" + new Date(accum.placed_timestamp).getMinutes()
+                      ).slice(-2)}
+                  </p>
                     {accum.accumBets.map((bet) => {
                       let border = "";
                       let status_color = "white";
@@ -135,7 +165,7 @@ export default function MyAccums() {
                           <Paper
                             sx={{
                               border: border,
-                              padding: 1,
+                              padding:  1,
                               marginLeft: 2,
                               marginRight: 2,
                               marginTop: 1,
@@ -143,14 +173,14 @@ export default function MyAccums() {
                             }}
                             elevation={3}
                           >
-                            <b>{bet.bet} </b>
+                            <b>{bet.title} </b>
                             <br />
                             <Chip
                               sx={{
                                 backgroundColor: status_color,
                                 color: text_color,
                               }}
-                              label={bet.chosen_option + " - " + bet.user_odds}
+                              label={bet.option + " - " + bet.user_odds}
                             ></Chip>
 
                             <br />

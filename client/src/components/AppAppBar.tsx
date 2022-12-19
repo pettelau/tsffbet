@@ -6,6 +6,7 @@ import Toolbar from "../components/Toolbar";
 import {
   Button,
   Chip,
+  Divider,
   Fade,
   IconButton,
   Menu,
@@ -25,6 +26,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import DynamicFeedIcon from "@mui/icons-material/DynamicFeed";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useAppSelector } from "../redux/hooks";
@@ -56,7 +58,7 @@ export default function AppAppBar() {
   return (
     <div>
       <AppBar position="fixed">
-        {SIZE.width > 815 ? (
+        {SIZE.width > 1100 ? (
           <Toolbar
             sx={{
               backgroundColor: "#303c6c",
@@ -71,7 +73,7 @@ export default function AppAppBar() {
                 onClick={() => {
                   navigate("/");
                 }}
-                style={{ maxHeight: 45, marginRight: 25 }}
+                style={{ maxHeight: 30, marginRight: 25, marginTop: 8 }}
                 src={"/laubet_simple.png"}
               />
               {/* <IconButton
@@ -164,6 +166,21 @@ export default function AppAppBar() {
                   Ordboka
                 </Typography>
               </IconButton>
+              <IconButton
+                id="feed-button"
+                size="large"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                onClick={() => {
+                  navigate("/betfeed");
+                }}
+              >
+                <DynamicFeedIcon />
+                <Typography sx={{ color: "white", marginLeft: 1 }}>
+                  BetFeed
+                </Typography>
+              </IconButton>
             </Box>
             {/* <Box sx={{ flex: 1 }}>
               
@@ -175,7 +192,13 @@ export default function AppAppBar() {
                 src={"/laubet_simple.png"}
               />
             </Box> */}
-            <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
               <IconButton
                 id="login-button"
                 size="large"
@@ -199,6 +222,7 @@ export default function AppAppBar() {
                       <Chip
                         icon={<PaidIcon />}
                         sx={{
+                          ":hover": { cursor: "pointer" },
                           backgroundColor: "white",
 
                           marginRight: 1,
@@ -207,7 +231,10 @@ export default function AppAppBar() {
                       ></Chip>
                       <Chip
                         icon={<PersonIcon />}
-                        sx={{ backgroundColor: "white" }}
+                        sx={{
+                          ":hover": { cursor: "pointer" },
+                          backgroundColor: "white",
+                        }}
                         label={loggedInUser}
                       ></Chip>
                     </>
@@ -253,31 +280,72 @@ export default function AppAppBar() {
                     navigate("/");
                   }}
                 >
+                  <HomeIcon sx={{ mr: 1 }} />
                   Hjem
                 </MenuItem>
+                <Divider />
+
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
                     navigate("/bettinghome");
                   }}
                 >
+                  <LocalAtmIcon sx={{ mr: 1 }} />
                   Odds
                 </MenuItem>
+                <Divider />
+
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
                     navigate("/myaccums");
                   }}
                 >
+                  <ReceiptIcon sx={{ mr: 1 }} />
                   Mine spill
                 </MenuItem>
+                <Divider />
+
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
                     navigate("/requestbet");
                   }}
                 >
+                  <ScheduleSendIcon sx={{ mr: 1 }} />
                   Request-a-bet
+                </MenuItem>
+                <Divider />
+
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/leaderboard");
+                  }}
+                >
+                  <LeaderboardIcon sx={{ mr: 1 }} />
+                  Leaderboard
+                </MenuItem>
+                <Divider />
+
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/dictionary");
+                  }}
+                >
+                  <MenuBookIcon sx={{ mr: 1 }} />
+                  Ordboka
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/betfeed");
+                  }}
+                >
+                  <DynamicFeedIcon sx={{ mr: 1 }} />
+                  BetFeed
                 </MenuItem>
               </Menu>
               {/* <IconButton
@@ -345,8 +413,12 @@ export default function AppAppBar() {
               <Typography sx={{ color: "white" }}>
                 {loggedInUser == "" ? (
                   <Chip
-                    icon={<PersonIcon />}
-                    sx={{ backgroundColor: "white" }}
+                    icon={
+                      <PersonIcon sx={{ ":hover": { cursor: "pointer" } }} />
+                    }
+                    sx={{
+                      backgroundColor: "white",
+                    }}
                     label={"Logg inn"}
                   ></Chip>
                 ) : (
@@ -356,7 +428,9 @@ export default function AppAppBar() {
                         navigate("/login");
                       }}
                       icon={<PersonIcon />}
-                      sx={{ backgroundColor: "white" }}
+                      sx={{
+                        backgroundColor: "white",
+                      }}
                       label={balance + " kr"}
                     ></Chip>
                   </>

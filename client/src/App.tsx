@@ -25,6 +25,7 @@ import EditBet from "./components/Admin/EditBet";
 import RequestBet from "./components/Betting/RequestBet";
 import Leaderboard from "./components/Betting/Leaderboard";
 import Dictionary from "./components/Dictionary";
+import BetFeed from "./components/Betting/BetFeed";
 
 const THEME = createTheme({
   typography: {
@@ -85,6 +86,7 @@ export default function App() {
               <Route path="requestbet" element={<RequestBet />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="dictionary" element={<Dictionary />} />
+              <Route path="betfeed" element={<BetFeed />} />
               <Route path="admin" element={<AdminHome />} />
               <Route path="admin/newbet" element={<NewBet />} />
               <Route path="admin/editbet" element={<EditBet />} />

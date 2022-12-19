@@ -24,11 +24,27 @@ body, html {
   width: 300px;
   max-height: 90%;
   overflow: auto;
+  border-radius: 20px 20px 0px 0px;
 }
 @media screen and (max-width: 430px) {
   .Accum {
     width: 94%;
     right: 3%
+  }
+}
+
+.AccumCollapsed {
+  /* padding: 20px; */
+  z-index: 99;
+  position: fixed;
+  bottom: 30px;
+  right: 40px;
+  overflow: auto;
+}
+@media screen and (max-width: 430px) {
+  .AccumCollapsed {
+    right: 3%;
+    bottom: 3%;
   }
 }
 

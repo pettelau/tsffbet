@@ -1,5 +1,12 @@
 import React, { useEffect } from "react";
-import { AlertColor, Button, Card, IconButton, TextField } from "@mui/material";
+import {
+  AlertColor,
+  Button,
+  Card,
+  Divider,
+  IconButton,
+  TextField,
+} from "@mui/material";
 import { useAppSelector } from "../../redux/hooks";
 import { selectPath } from "../../redux/envSlice";
 import { selectAdmin } from "../../redux/userSlice";
@@ -12,6 +19,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { flexbox } from "@mui/system";
 
 export default function RequestBet() {
   const url_path = useAppSelector(selectPath);
@@ -25,7 +33,6 @@ export default function RequestBet() {
     dayjs().add(7, "day")
   );
 
-  console.log(closeDate);
 
   const [options, setOptions] = React.useState<NewOptionType[]>([
     { option: "", latest_odds: null },
@@ -172,92 +179,100 @@ export default function RequestBet() {
         _alertType={_alertType}
         toggleAlert={toggleAlert}
       ></AlertComp>
-      <h2>Request et bet</h2>
-      <TextField
-        sx={{ width: 400 }}
-        multiline
-        label="Bet"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <br />
-      <TextField
-        sx={{ width: 400 }}
-        label="Kateogri"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      />
-      <br />
-      <br />
-      <h3>Forventet tidspunkt for spillstopp:</h3>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DateTimePicker
-          value={closeDate}
-          onChange={(newValue) => setCloseDate(newValue)}
-          renderInput={(params) => <TextField {...params} />}
-          ampm={false}
-        />
-      </LocalizationProvider>
-      <br />
-      <br />
-      <h3>Spillalternativer:</h3>
-      {options.map((option: NewOptionType, index: number) => {
-        return (
-          <>
-            <div>
-              <TextField
-                label="Bet option"
-                value={option.option}
-                onChange={(e) => updateOption(e.target.value, index)}
-              />
-              <TextField
-                type={"number"}
-                label="Odds"
-                value={option.latest_odds}
-                onChange={(e) => updateOdds(e.target.value, index)}
-              />
+      <div style={{ marginTop: 30, display: "flex", justifyContent: "center" }}>
+        <Card sx={{ minWidth: 400, maxWidth: 600 }}>
+          <h2>Request et bet</h2>
+          <TextField
+            sx={{ width: 370 }}
+            multiline
+            label="Bet"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <br />
+          <TextField
+            sx={{ width: 370 }}
+            label="Kateogri"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          />
+          <br />
+          <br />
+          <h3>Forventet tidspunkt for spillstopp:</h3>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              value={closeDate}
+              onChange={(newValue) => setCloseDate(newValue)}
+              renderInput={(params) => <TextField {...params} />}
+              ampm={false}
+            />
+          </LocalizationProvider>
+          <br />
+          <br />
+          <h3>Spillalternativer:</h3>
+          {options.map((option: NewOptionType, index: number) => {
+            return (
+              <>
+                <div>
+                  <TextField
+                    label="Bet option"
+                    value={option.option}
+                    onChange={(e) => updateOption(e.target.value, index)}
+                  />
+                  <TextField
+                    sx={{ width: 100 }}
+                    type={"number"}
+                    label="Odds"
+                    value={option.latest_odds}
+                    onChange={(e) => updateOdds(e.target.value, index)}
+                  />
 
-              <IconButton
-                onClick={() => {
-                  removeOption(index);
-                }}
-              >
-                <DeleteForeverIcon sx={{ fontSize: 40 }} />
-              </IconButton>
-              <br />
-              <br />
-            </div>
-          </>
-        );
-      })}
-      <br />
-      <Button
-        variant="outlined"
-        onClick={() => {
-          setOptions([...options, { option: "", latest_odds: null }]);
-        }}
-      >
-        Legg til alternativ
-      </Button>{" "}
-      <br />
-      <br />
-      {/* <div>
+                  <IconButton
+                    onClick={() => {
+                      removeOption(index);
+                    }}
+                  >
+                    <DeleteForeverIcon sx={{ fontSize: 40 }} />
+                  </IconButton>
+                  <br />
+                  <br />
+                </div>
+              </>
+            );
+          })}
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setOptions([...options, { option: "", latest_odds: null }]);
+            }}
+          >
+            Legg til alternativ
+          </Button>{" "}
+          <br />
+          <br />
+          {/* <div>
         Tilbakebetalingsprosent:{" "}
         {((totalodds / options.length - 1) * 100).toFixed(1)}%
       </div>
       <br /> */}
-      <Button
-        variant="outlined"
-        onClick={() => {
-          sendRequest();
-        }}
-      >
-        Send Bet
-      </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              sendRequest();
+            }}
+          >
+            Send Bet
+          </Button>
+          <br />
+          <br />
+        </Card>
+      </div>
+
+      <Divider />
+      <br />
       {bets.length > 0 ? (
         <>
-          {" "}
-          <h2>Venter på godkjenning fra Lau:</h2>
+          <h3>Venter på godkjenning fra Lau:</h3>
           <div className="bet-flex-container">
             {bets.map((bet: Bet) => {
               return (

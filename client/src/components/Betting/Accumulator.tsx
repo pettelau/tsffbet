@@ -23,6 +23,14 @@ import {
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { selectPath } from "../../redux/envSlice";
 
+import Box from "@mui/material/Box";
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import NavigationIcon from "@mui/icons-material/Navigation";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+
 export default function Accumulator() {
   const dispatch = useAppDispatch();
 
@@ -114,10 +122,9 @@ export default function Accumulator() {
 
   return (
     <>
-      {console.log("hei")}
-      <div className="Accum">
-        {!isCollapsed ? (
-          <>
+      {!isCollapsed ? (
+        <>
+          <div className="Accum">
             <div style={{ padding: "20px" }}>
               <Button
                 size="small"
@@ -126,7 +133,7 @@ export default function Accumulator() {
                   setIsCollapsed(true);
                 }}
               >
-                Vis mindre
+                Skjul kupong
               </Button>
               <br />
               <br />
@@ -201,22 +208,22 @@ export default function Accumulator() {
                 Sett spill
               </Button>
             </div>
-          </>
-        ) : (
-          <div style={{ padding: "20px" }}>
-            <Button
-              sx={{}}
-              size="small"
-              variant="contained"
-              onClick={() => {
-                setIsCollapsed(false);
-              }}
-            >
-              Vis mer
-            </Button>
           </div>
-        )}
-      </div>
+        </>
+      ) : (
+        <div className="AccumCollapsed">
+          <Fab
+            color="primary"
+            sx={{ backgroundColor: "#303c6c" }}
+            variant="extended"
+            onClick={() => {
+              setIsCollapsed(false);
+            }}
+          >
+            <ReceiptIcon sx={{ mr: 1 }} /> Vis kupong
+          </Fab>
+        </div>
+      )}
     </>
   );
 }

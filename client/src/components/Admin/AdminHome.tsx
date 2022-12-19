@@ -90,6 +90,21 @@ export default function AdminHome() {
     }
   }
 
+  const MONTHS = [
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "mai",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "okt",
+    "nov",
+    "des",
+  ];
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -142,8 +157,49 @@ export default function AdminHome() {
                       Username: {user.username} <br />
                       User_id: {user.user_id} <br />
                       Balance: {user.balance} <br />
-                      Created on: {user.created_on} <br />
-                      Last login: {user.last_login} <br />
+                      Created on:{" "}
+                      {new Date(user.created_on).getDate() +
+                        " " +
+                        MONTHS[new Date(user.created_on).getMonth()] +
+                        " " +
+                        new Date(user.created_on).getFullYear() +
+                        " " +
+                        ("0" + new Date(user.created_on).getHours()).slice(-2) +
+                        ":" +
+                        ("0" + new Date(user.created_on).getMinutes()).slice(
+                          -2
+                        )}{" "}
+                      <br />
+                      Last login:{" "}
+                      {new Date(
+                        user.last_login ? user.last_login : ""
+                      ).getDate() +
+                        " " +
+                        MONTHS[
+                          new Date(
+                            user.last_login ? user.last_login : ""
+                          ).getMonth()
+                        ] +
+                        " " +
+                        new Date(
+                          user.last_login ? user.last_login : ""
+                        ).getFullYear() +
+                        " " +
+                        (
+                          "0" +
+                          new Date(
+                            user.last_login ? user.last_login : ""
+                          ).getHours()
+                        ).slice(-2) +
+                        ":" +
+                        (
+                          "0" +
+                          new Date(
+                            user.last_login ? user.last_login : ""
+                          ).getMinutes()
+                        ).slice(-2)}
+                      <br />
+                      Number of Logins: {user.number_of_logins} <br />
                       Firstname: {user.firstname} <br />
                       Lastname: {user.lastname} <br />
                       Admin: {user.admin ? "Ja" : "Nei"} <br />
