@@ -33,7 +33,6 @@ export default function RequestBet() {
     dayjs().add(7, "day")
   );
 
-
   const [options, setOptions] = React.useState<NewOptionType[]>([
     { option: "", latest_odds: null },
   ]);
@@ -61,7 +60,6 @@ export default function RequestBet() {
   function updateOption(value: string, index: number) {
     let optionsCopy = [...options];
     optionsCopy[index].option = value;
-    console.log(optionsCopy);
     setOptions(optionsCopy);
   }
 
@@ -80,7 +78,6 @@ export default function RequestBet() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(resp);
     setResponseCode(response.status);
     if (response.status == 200) {
       setBets(resp);
@@ -128,14 +125,13 @@ export default function RequestBet() {
       toggleAlert(true, "Du må skrive inn selve bettet", "error");
       return;
     }
-    console.log(closeDate);
-    console.log(typeof closeDate.toDate());
     let bet_packet: any = {
       title: title,
       category: category,
       close_date: closeDate,
       options: options,
     };
+    console.log(bet_packet);
     const response = await fetch(`${url_path}api/requestbet`, {
       method: "POST",
       headers: {
@@ -149,11 +145,10 @@ export default function RequestBet() {
     if (response.ok) {
       fetchExistingReqs();
       toggleAlert(true, "Bettet ble requestet!", "success");
-      setOptions([{ option: "", latest_odds: null }]);
+      setOptions([]);
       setTitle("");
       setCategory("");
     } else {
-      console.log(response);
       toggleAlert(true, resp["errorMsg"], "error");
     }
   }
