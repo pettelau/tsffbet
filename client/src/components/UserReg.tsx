@@ -17,11 +17,11 @@ import KeyIcon from "@mui/icons-material/Key";
 import { selectPath } from "../redux/envSlice";
 
 function UserReg() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   let alertmsg = "";
 
+  const dispatch = useAppDispatch();
   const url_path = useAppSelector(selectPath);
 
   const [missingUsername, setMissingUsername] = useState<boolean>(false);
@@ -52,7 +52,7 @@ function UserReg() {
 
   const fetchUserAvailability = async (user: string) => {
     const response = await fetch(
-      `http://localhost:8000/api/userAvailability/${user}`
+      `${url_path}api/userAvailability/${user}`
     );
     const resp = await response.json();
 
@@ -122,12 +122,7 @@ function UserReg() {
   }, [userAvailability]);
 
   const createUser = async (newUser: Object) => {
-    // const response = await fetch("http://localhost:8000/api/createUser", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(newUser),
-    // });
-    const response = await fetch(`http://localhost:8000/api/createUser`, {
+    const response = await fetch(`${url_path}api/createUser`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUser),

@@ -10,7 +10,7 @@ type EnvDetails = {
 // Initial User state, all values are empty initially
 const initialState: EnvDetails = {
     // path: ""
-    path: "http://localhost:8000/"
+    path: "/"
   };
   
   // Redux User Slice
