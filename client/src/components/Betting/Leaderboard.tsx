@@ -57,13 +57,11 @@ export default function Leaderboard() {
     //   }
     // );
     // const resp = await response.json();
-    // console.log(resp);
 
     const response = await fetch(`${url_path}api/leaderboard`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(resp);
 
     if (response.ok) {
       let sorted = resp.sort((a: any, b: any) => b.balance - a.balance);

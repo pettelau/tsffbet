@@ -32,11 +32,10 @@ export default function Dictionary() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(response.status);
     if (response.status == 200) {
       setDictinary(resp);
     } else {
-      console.log(resp.detail);
+      toggleAlert(true, "Noe gikk galt", "error");
     }
   }
 
@@ -67,7 +66,6 @@ export default function Dictionary() {
       setFrequency(5);
       setDescription("");
     } else {
-      console.log(response);
       toggleAlert(true, "Noe gikk galt", "error");
     }
   }

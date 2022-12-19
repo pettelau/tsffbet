@@ -9,7 +9,6 @@ export default class LoginUtils {
 
   static hashPass(password: string): string {
     var hashedPass = String(CryptoJS.SHA256(password))
-    console.log(hashedPass)
     return hashedPass
   }
 

@@ -131,7 +131,6 @@ export default function RequestBet() {
       close_date: closeDate,
       options: options,
     };
-    console.log(bet_packet);
     const response = await fetch(`${url_path}api/requestbet`, {
       method: "POST",
       headers: {

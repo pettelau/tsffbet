@@ -25,7 +25,6 @@ export default function NewBet() {
   const [category, setCategory] = React.useState<string>("");
   const [closeDate, setCloseDate] = React.useState<Dayjs | null>(dayjs());
 
-  console.log(closeDate);
 
   const [options, setOptions] = React.useState<NewOptionType[]>([
     { option: "", latest_odds: null },
@@ -52,7 +51,6 @@ export default function NewBet() {
   function updateOption(value: string, index: number) {
     let optionsCopy = [...options];
     optionsCopy[index].option = value;
-    console.log(optionsCopy);
     setOptions(optionsCopy);
   }
 
@@ -70,8 +68,6 @@ export default function NewBet() {
     if (closeDate == null) {
       toggleAlert(true, "Must include close date", "error");
     } else {
-      console.log(closeDate);
-      console.log(typeof closeDate.toDate());
       let bet_packet: any = {
         title: title,
         category: category,

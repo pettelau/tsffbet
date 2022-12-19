@@ -32,12 +32,10 @@ export default function AdminHome() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(response.status);
     setResponseCode(response.status);
     if (response.status == 200) {
       setUsers(resp);
     } else {
-      console.log(resp.detail);
       setResponseText(resp.detail);
     }
   };
@@ -61,8 +59,6 @@ export default function AdminHome() {
   async function setWhitelist(index: number) {
     let oldValue = [...users];
 
-    console.log(oldValue[index].whitelist);
-    console.log(!oldValue[index].whitelist);
     oldValue[index].whitelist = !oldValue[index].whitelist;
     setUsers(oldValue);
 
@@ -70,7 +66,6 @@ export default function AdminHome() {
       user_id: oldValue[index].user_id,
       whitelisted: oldValue[index].whitelist,
     };
-    console.log(payload);
 
     const response = await fetch(`${url_path}api/admin/updatewl`, {
       method: "POST",
@@ -84,7 +79,6 @@ export default function AdminHome() {
     const resp = await response.json();
     if (response.ok) {
       toggleAlert(true, "Whitelist ble oppdatert!", "success");
-      console.log(resp);
     } else {
       toggleAlert(true, "Noe gikk galt", "error");
     }

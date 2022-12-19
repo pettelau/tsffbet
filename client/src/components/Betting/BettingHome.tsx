@@ -60,15 +60,13 @@ export default function BettingHome() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(resp);
     setResponseCode(response.status);
     if (response.status == 200) {
       setBets(resp);
-      console.log(resp);
       let cats: string[] = ["Alle kategorier"];
       resp.forEach((bet: Bet) => {
-        if (cats.indexOf(bet.category) === -1) {
-          cats.push(bet.category);
+        if (cats.indexOf(bet.category.toLowerCase()) === -1) {
+          cats.push(bet.category.toLowerCase());
         }
       });
       setCategories(cats);
@@ -89,7 +87,6 @@ export default function BettingHome() {
     }
   }
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    console.log(newValue);
     setChosenCategory(newValue);
   };
   if (responseCode !== 200) {
@@ -115,10 +112,9 @@ export default function BettingHome() {
         </Tabs>
         <div className="bet-flex-container">
           {bets.map((bet: Bet) => {
-
             if (
               chosenCategory == "Alle kategorier" ||
-              chosenCategory == bet.category
+              chosenCategory == bet.category.toLowerCase()
             ) {
               return (
                 <>

@@ -80,7 +80,6 @@ function Login() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(resp);
     dispatch(setUserDetails(resp[0]));
   }
 
@@ -100,10 +99,8 @@ function Login() {
         }
       );
       const resp = await response.json();
-      console.log(resp);
 
       if (resp["loggedIn"]) {
-        console.log("logged in!");
         localStorage.setItem("userLoggedIn", user.toLowerCase());
         localStorage.setItem("jwt", resp["jwt"]);
         dispatch(setUsername(user.toLowerCase()));

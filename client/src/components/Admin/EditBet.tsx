@@ -57,7 +57,6 @@ export default function EditBet() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(response.status);
     setResponseCode(response.status);
     if (response.status == 200) {
       setAllBets(resp);
@@ -93,7 +92,6 @@ export default function EditBet() {
     let oldValue = [...allBets];
     oldValue[betindex].bet_options[optionindex].option_status = event;
     setAllBets(oldValue);
-    console.log(event, betindex, optionindex);
   };
 
   async function settleBet(betindex: number) {
@@ -110,7 +108,6 @@ export default function EditBet() {
     const resp = await response.json();
     if (resp["settleBet"]) {
       toggleAlert(true, "Bettet ble settled!", "success");
-      console.log(resp);
     } else {
       toggleAlert(true, resp["errorMsg"], "error");
     }
@@ -118,8 +115,6 @@ export default function EditBet() {
 
   async function acceptBet(betindex: number) {
     let bet_id = { bet_id: allBets[betindex]["bet_id"] };
-
-    console.log(bet_id);
     const response = await fetch(`${url_path}api/admin/acceptbet`, {
       method: "POST",
       headers: {
@@ -132,7 +127,6 @@ export default function EditBet() {
     const resp = await response.json();
     if (response.ok) {
       toggleAlert(true, "Bettet ble akseptert!", "success");
-      console.log(resp);
     } else {
       toggleAlert(true, resp["errorMsg"], "error");
     }
@@ -141,7 +135,6 @@ export default function EditBet() {
   async function closeBet(betindex: number) {
     let bet_id = { bet_id: allBets[betindex]["bet_id"] };
 
-    console.log(bet_id);
     const response = await fetch(`${url_path}api/admin/closebet`, {
       method: "POST",
       headers: {
@@ -154,7 +147,6 @@ export default function EditBet() {
     const resp = await response.json();
     if (response.ok) {
       toggleAlert(true, "Bettet ble stengt!", "success");
-      console.log(resp);
     } else {
       toggleAlert(true, resp["errorMsg"], "error");
     }
@@ -200,7 +192,6 @@ export default function EditBet() {
                               value={option.option_status}
                               label="Age"
                               onChange={(e) => {
-                                console.log(e);
                                 handleOptionChange(
                                   e.target.value,
                                   betindex,

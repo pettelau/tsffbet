@@ -44,7 +44,6 @@ export default function AppAppBar() {
   const loggedInUser = useAppSelector(selectUsername);
   const balance = useAppSelector(selectBalance);
 
-  console.log(loggedInUser);
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

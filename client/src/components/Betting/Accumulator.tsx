@@ -55,15 +55,12 @@ export default function Accumulator() {
   });
   const url_path = useAppSelector(selectPath);
 
-  console.log(totalodds);
-
   if (bets.length == 0) {
     return <></>;
   }
 
   async function createAccum() {
     let bet_packet: any = { bets: bets, stake: stake, totalodds: totalodds };
-    console.log(JSON.stringify(bet_packet));
     const response = await fetch(`${url_path}api/placebet`, {
       method: "POST",
       headers: {

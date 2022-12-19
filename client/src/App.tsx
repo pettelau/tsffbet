@@ -60,7 +60,6 @@ export default function App() {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
-    console.log(resp);
     // dispatch(setUsername(user.toLowerCase()));
     store.dispatch(setUserDetails(resp[0]));
   }

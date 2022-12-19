@@ -55,10 +55,8 @@ function UserReg() {
       `http://localhost:8000/api/userAvailability/${user}`
     );
     const resp = await response.json();
-    console.log(resp);
 
     setUserAvailability({ checkedDB: true, userTaken: resp["userTaken"] });
-    console.log(resp["userTaken"]);
   };
 
   // Toggle error with message
@@ -107,7 +105,6 @@ function UserReg() {
         alertmsg = `Bruker '${user}' er tatt, vennligst velg et annet brukernavn`;
         toggleAlert(true, alertmsg, "error");
       } else {
-        console.log("here in useEffect");
         //hash pass and set to neo4j
         let hashedPass = LoginUtils.hashPass(pass);
         let newUser = {
@@ -118,7 +115,6 @@ function UserReg() {
         if (lastname !== "") {
           Object.assign(newUser, { lastname: lastname });
         }
-        console.log(newUser);
 
         createUser(newUser);
       }
@@ -144,7 +140,6 @@ function UserReg() {
       alertmsg = `Bruker ble ikke opprettet, noe gikk galt. Send melding til Lau. Error message: ${resp}`;
       toggleAlert(true, alertmsg, "error");
     }
-    console.log(resp);
   };
 
   return (

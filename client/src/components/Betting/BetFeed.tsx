@@ -48,7 +48,6 @@ export default function BetFeed() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setAccums(resp);
-      console.log(resp);
     } else {
       setResponseText(resp.detail);
     }
