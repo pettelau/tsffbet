@@ -602,7 +602,7 @@ async def add_user(user: dict) -> dict:
     hashed = bcrypt.hashpw(bytes(user["password"], encoding="utf-8"), bcrypt.gensalt())
     res = insertDB(
         Template(
-            "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 1000, '$firstname', '$lastname')"
+            "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 5000, '$firstname', '$lastname')"
         ).safe_substitute(
             {
                 "username": user["username"],
