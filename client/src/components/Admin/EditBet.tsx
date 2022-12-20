@@ -3,6 +3,7 @@ import {
   AlertColor,
   Button,
   Checkbox,
+  CircularProgress,
   InputLabel,
   MenuItem,
   Select,
@@ -76,6 +77,17 @@ export default function EditBet() {
     fetchBets();
   }, []);
 
+  if (responseCode == undefined) {
+    return (
+      <>
+      <br />
+      <br />
+      <br />
+        <CircularProgress />
+      </>
+    );
+  }
+  
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }

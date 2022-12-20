@@ -3,6 +3,7 @@ import {
   AlertTitle,
   Button,
   Card,
+  CircularProgress,
   Tab,
   Tabs,
   TextField,
@@ -97,6 +98,18 @@ export default function Leaderboard() {
       return "white";
     }
   }
+
+  if (responseCode == undefined) {
+    return (
+      <>
+      <br />
+      <br />
+      <br />
+        <CircularProgress />
+      </>
+    );
+  }
+  
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }

@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   Chip,
+  CircularProgress,
   Divider,
   InputLabel,
   MenuItem,
@@ -142,6 +143,17 @@ export default function Dictionary() {
     fetchDictionary();
   }, []);
 
+  if (responseCode == undefined) {
+    return (
+      <>
+      <br />
+      <br />
+      <br />
+        <CircularProgress />
+      </>
+    );
+  }
+  
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }

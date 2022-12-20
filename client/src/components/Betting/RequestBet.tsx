@@ -3,6 +3,7 @@ import {
   AlertColor,
   Button,
   Card,
+  CircularProgress,
   Divider,
   IconButton,
   TextField,
@@ -162,6 +163,17 @@ export default function RequestBet() {
     let optionsCopy = [...options];
     optionsCopy.splice(index, 1);
     setOptions(optionsCopy);
+  }
+
+  if (responseCode == undefined) {
+    return (
+      <>
+        <br />
+        <br />
+        <br />
+        <CircularProgress />
+      </>
+    );
   }
 
   if (responseCode !== 200) {

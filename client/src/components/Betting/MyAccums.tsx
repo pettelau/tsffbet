@@ -1,4 +1,4 @@
-import { Button, Card, Chip, Divider, Paper, Tab, Tabs } from "@mui/material";
+import { Button, Card, Chip, CircularProgress, Divider, Paper, Tab, Tabs } from "@mui/material";
 import React, { useEffect } from "react";
 import { selectPath } from "../../redux/envSlice";
 import { useAppSelector } from "../../redux/hooks";
@@ -84,6 +84,18 @@ export default function MyAccums() {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setChosenAccums(newValue);
   };
+
+  if (responseCode == undefined) {
+    return (
+      <>
+      <br />
+      <br />
+      <br />
+        <CircularProgress />
+      </>
+    );
+  }
+  
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }

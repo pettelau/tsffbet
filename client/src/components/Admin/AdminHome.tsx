@@ -6,6 +6,7 @@ import {
   AlertColor,
   Button,
   Card,
+  CircularProgress,
   Typography,
 } from "@mui/material";
 import { useAppSelector } from "../../redux/hooks";
@@ -105,6 +106,18 @@ export default function AdminHome() {
     fetchUsers();
   }, []);
 
+
+  if (responseCode == undefined) {
+    return (
+      <>
+      <br />
+      <br />
+      <br />
+        <CircularProgress />
+      </>
+    );
+  }
+  
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }

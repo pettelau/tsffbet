@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Chip,
+  CircularProgress,
   Divider,
   IconButton,
   Paper,
@@ -100,6 +101,17 @@ export default function BetFeed() {
   ];
 
   const navigate = useNavigate();
+
+  if (responseCode == undefined) {
+    return (
+      <>
+        <br />
+        <br />
+        <br />
+        <CircularProgress />
+      </>
+    );
+  }
 
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
