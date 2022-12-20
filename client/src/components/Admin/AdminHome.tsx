@@ -144,7 +144,10 @@ export default function AdminHome() {
               <>
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>{user.username}</Typography>
+                    <Typography>
+                      {user.username} {user.whitelist ? " ✅" : " ❌"}{" "}
+                      {user.admin ? " 🦸" : ""}
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <>
