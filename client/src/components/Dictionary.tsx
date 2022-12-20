@@ -26,6 +26,10 @@ export default function Dictionary() {
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<number>();
 
+  const [persons, setPersons] = React.useState<string[]>([]);
+  const [chosenPerson, setChosenPerson] =
+    React.useState<string>("Alle bidragsytere");
+
   const [word, setWord] = React.useState<string>("");
   const [frequency, setFrequency] = React.useState<number>(5);
   const [description, setDescription] = React.useState<string>("");
@@ -40,10 +44,24 @@ export default function Dictionary() {
 
     if (response.status == 200) {
       setDictinary(resp);
+      let persons: string[] = ["Alle bidragsytere"];
+      resp.forEach((word: DictionaryT) => {
+        if (persons.indexOf(word.submitter.toLowerCase()) === -1) {
+          persons.push(word.submitter.toLowerCase());
+        }
+      });
+      setPersons(persons);
     } else {
       setResponseText(resp.detail);
     }
   }
+
+  const handlePersonChange = (
+    event: React.SyntheticEvent,
+    newValue: string
+  ) => {
+    setChosenPerson(newValue);
+  };
 
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
     setFrequency(newValue as number);
@@ -152,27 +170,46 @@ export default function Dictionary() {
           <br />
         </Card>
       </div>
-
+      <Tabs
+        sx={{
+          boxShadow: "3px 3px 5px 2px rgba(0,0,0,.1)",
+          backgroundColor: "white",
+          margin: 2,
+        }}
+        value={chosenPerson}
+        onChange={handlePersonChange}
+        variant="scrollable"
+        scrollButtons="auto"
+      >
+        {persons.map((person: string) => {
+          return <Tab label={person} value={person} />;
+        })}
+      </Tabs>
       <div className="accums-flex-container">
         {dictionary.map((word: DictionaryT) => {
-          return (
-            <>
-              <div>
-                <Card
-                  sx={{
-                    backgroundColor: "white",
-                    padding: 1,
-                    width: 345,
-                  }}
-                >
-                  <h3>{word.word}</h3>
-                  Hyppighet: {word.frequency} <br />
-                  Innsendt av: {word.submitter} <br />
-                  {word.description} <br />
-                </Card>
-              </div>
-            </>
-          );
+          if (
+            chosenPerson == "Alle bidragsytere" ||
+            chosenPerson == word.submitter.toLowerCase()
+          ) {
+            return (
+              <>
+                <div>
+                  <Card
+                    sx={{
+                      backgroundColor: "white",
+                      padding: 1,
+                      width: 345,
+                    }}
+                  >
+                    <h3>{word.word}</h3>
+                    Hyppighet: {word.frequency} <br />
+                    Innsendt av: {word.submitter} <br />
+                    {word.description} <br />
+                  </Card>
+                </div>
+              </>
+            );
+          }
         })}
       </div>
     </>
