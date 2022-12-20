@@ -117,6 +117,7 @@ export type NewOptionType = {
 }
 
 export type DictionaryT = {
+  word_id: number;
   frequency: number;
   word: string;
   description: string;

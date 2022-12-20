@@ -4,7 +4,10 @@ import {
   Card,
   Chip,
   Divider,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Tab,
   Tabs,
   TextField,
@@ -18,6 +21,13 @@ import NoAccess from "./NoAccess";
 import Slider from "@mui/material/Slider";
 import AlertComp from "./Alert";
 
+const SORT_FILTERS = [
+  "Nyeste",
+  "Eldste",
+  "Hyppighet synkende",
+  "Hyppighet stigende",
+];
+
 export default function Dictionary() {
   const url_path = useAppSelector(selectPath);
 
@@ -29,6 +39,8 @@ export default function Dictionary() {
   const [persons, setPersons] = React.useState<string[]>([]);
   const [chosenPerson, setChosenPerson] =
     React.useState<string>("Alle bidragsytere");
+
+  const [chosenFilter, setChosenFilter] = React.useState<string>("Nyeste");
 
   const [word, setWord] = React.useState<string>("");
   const [frequency, setFrequency] = React.useState<number>(5);
@@ -61,6 +73,22 @@ export default function Dictionary() {
     newValue: string
   ) => {
     setChosenPerson(newValue);
+  };
+
+  const handleFilterChange = (event: string) => {
+    let oldValue = [...dictionary];
+
+    if (event == "Nyeste") {
+      oldValue.sort((a, b) => (a.word_id < b.word_id ? 1 : -1));
+    } else if (event == "Eldste") {
+      oldValue.sort((a, b) => (a.word_id > b.word_id ? 1 : -1));
+    } else if (event == "Hyppighet synkende") {
+      oldValue.sort((a, b) => (a.frequency < b.frequency ? 1 : -1));
+    } else {
+      oldValue.sort((a, b) => (a.frequency > b.frequency ? 1 : -1));
+    }
+    setChosenFilter(event);
+    setDictinary(oldValue);
   };
 
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
@@ -170,6 +198,19 @@ export default function Dictionary() {
           <br />
         </Card>
       </div>
+      <br />
+      <InputLabel id="demo-simple-select-label">Sorter etter</InputLabel>
+      <Select
+        labelId="demo-simple-select-label"
+        value={chosenFilter}
+        onChange={(e) => {
+          handleFilterChange(e.target.value);
+        }}
+      >
+        {SORT_FILTERS.map((filter: string) => {
+          return <MenuItem value={filter}>{filter}</MenuItem>;
+        })}
+      </Select>
       <Tabs
         sx={{
           boxShadow: "3px 3px 5px 2px rgba(0,0,0,.1)",
