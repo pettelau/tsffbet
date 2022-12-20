@@ -14,7 +14,7 @@ import { selectPath } from "../../redux/envSlice";
 import { selectAdmin } from "../../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 import NoAccess from "../NoAccess";
-import { AlertT, Bet, NewBetType, NewOptionType } from "../../types";
+import { AlertT, Bet, BetAdmin, NewBetType, NewOptionType } from "../../types";
 import { SendToMobileTwoTone } from "@mui/icons-material";
 import AlertComp from "../Alert";
 import Accordion from "@mui/material/Accordion";
@@ -44,7 +44,7 @@ export default function EditBet() {
     setAlertType({ type: type, msg: msg });
   }
 
-  const [allBets, setAllBets] = React.useState<Bet[]>([]);
+  const [allBets, setAllBets] = React.useState<BetAdmin[]>([]);
   const [categories, setCategories] = React.useState<string[]>([]);
   const [chosenCategory, setChosenCategory] =
     React.useState<string>("Alle kategorier");
@@ -91,6 +91,30 @@ export default function EditBet() {
   ) => {
     let oldValue = [...allBets];
     oldValue[betindex].bet_options[optionindex].option_status = event;
+    setAllBets(oldValue);
+  };
+
+  const handleOptionTextChange = (
+    event: any,
+    betindex: number,
+    optionindex: number
+  ) => {
+    let oldValue = [...allBets];
+    oldValue[betindex].bet_options[optionindex].option = event;
+    setAllBets(oldValue);
+  };
+
+  const handleOptionOddsChange = (
+    event: string,
+    betindex: number,
+    optionindex: number
+  ) => {
+    let oldValue = [...allBets];
+    if (event) {
+      oldValue[betindex].bet_options[optionindex].latest_odds = Number(event);
+    } else {
+      oldValue[betindex].bet_options[optionindex].latest_odds = null;
+    }
     setAllBets(oldValue);
   };
 
@@ -152,6 +176,64 @@ export default function EditBet() {
     }
   }
 
+  async function updateOrAddOption(
+    betindex: number,
+    optionindex: number,
+    option_id: number,
+    bet_id: number
+  ) {
+    let option = allBets[betindex].bet_options[optionindex];
+    if (option_id !== -1) {
+      const response = await fetch(`${url_path}api/admin/updateoption`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+        body: JSON.stringify(option),
+      });
+
+      const resp = await response.json();
+      if (response.ok) {
+        toggleAlert(true, "Option ble oppdatert!", "success");
+      } else {
+        toggleAlert(true, "Noe gikk galt", "error");
+      }
+    } else {
+      let newOption = {
+        option: option["option"],
+        latest_odds: option["latest_odds"],
+        bet: bet_id,
+      };
+      const response = await fetch(`${url_path}api/admin/addoption`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+        body: JSON.stringify(newOption),
+      });
+
+      const resp = await response.json();
+      if (response.ok) {
+        toggleAlert(true, "Option ble oppdatert!", "success");
+      } else {
+        toggleAlert(true, "Noe gikk galt", "error");
+      }
+    }
+  }
+
+  function addOption(betindex: number) {
+    let oldValue = [...allBets];
+    oldValue[betindex].bet_options.push({
+      option_id: -1,
+      option_status: 1,
+      option: "",
+      latest_odds: 1,
+    });
+    setAllBets(oldValue);
+  }
+
   return (
     <>
       {/* Alert component to show error/success messages */}
@@ -164,16 +246,14 @@ export default function EditBet() {
       <h2>Alle bets</h2>
       {isAdmin ? (
         <>
-          {allBets.map((bet: Bet, betindex) => {
+          {allBets.map((bet: BetAdmin, betindex) => {
             return (
               <>
                 <Accordion
                   sx={{ backgroundColor: BET_STATUS_COLOR[bet.bet_status - 1] }}
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>
-                      {bet.title} - {bet.bet_status}
-                    </Typography>
+                    <Typography>{bet.title}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     {bet.bet_options.map((option, optionindex) => {
@@ -186,9 +266,45 @@ export default function EditBet() {
                                 OPTION_STATUS_COLOR[option.option_status - 1],
                             }}
                           >
-                            {option.option} - {option.latest_odds} - Status:{" "}
-                            {option.option_status}
+                            <TextField
+                              label="Option text"
+                              value={option.option}
+                              onChange={(e) =>
+                                handleOptionTextChange(
+                                  e.target.value,
+                                  betindex,
+                                  optionindex
+                                )
+                              }
+                            />
+                            <TextField
+                              sx={{ width: 80 }}
+                              type={"number"}
+                              label="Option odds"
+                              value={option.latest_odds}
+                              onChange={(e) =>
+                                handleOptionOddsChange(
+                                  e.target.value,
+                                  betindex,
+                                  optionindex
+                                )
+                              }
+                            />
+                            <Button
+                              variant="outlined"
+                              onClick={() => {
+                                updateOrAddOption(
+                                  betindex,
+                                  optionindex,
+                                  option.option_id,
+                                  bet.bet_id
+                                );
+                              }}
+                            >
+                              {option.option_id == -1 ? "Legg til" : "Oppdater"}
+                            </Button>
                             <Select
+                              size="small"
                               value={option.option_status}
                               label="Age"
                               onChange={(e) => {
@@ -203,10 +319,19 @@ export default function EditBet() {
                               <MenuItem value={2}>Won</MenuItem>
                               <MenuItem value={3}>Lost</MenuItem>
                             </Select>
+                            <br />
                           </div>
                         </>
                       );
                     })}
+                    <Button
+                      onClick={() => {
+                        addOption(betindex);
+                      }}
+                    >
+                      Legg til option
+                    </Button>
+                    <br />
                     <Button
                       variant="contained"
                       onClick={() => {

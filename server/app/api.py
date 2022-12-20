@@ -384,6 +384,54 @@ async def accept_bet(
             raise HTTPException(status_code=403, detail="Something went wrong")
 
 
+@app.post("/api/admin/updateoption")
+async def accept_bet(
+    option: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    if is_admin(token["user"]):
+        try:
+            cursor = connection.cursor()
+            query = Template(
+                "update bet_options set option = '$option', latest_odds = $latest_odds where option_id = $option_id"
+            ).safe_substitute(
+                {
+                    "option": option["option"],
+                    "latest_odds": option["latest_odds"],
+                    "option_id": option["option_id"],
+                }
+            )
+            cursor.execute(query)
+            connection.commit()
+            return {"updateOption": True}
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.post("/api/admin/addoption")
+async def accept_bet(
+    option: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    if is_admin(token["user"]):
+        try:
+            cursor = connection.cursor()
+            query = Template(
+                "insert into bet_options(latest_odds, option, bet) values ($latest_odds, '$option', $bet)"
+            ).safe_substitute(
+                {
+                    "latest_odds": option["latest_odds"],
+                    "option": option["option"],
+                    "bet": option["bet"],
+                }
+            )
+            cursor.execute(query)
+            connection.commit()
+            return {"addOption": True}
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=403, detail="Something went wrong")
+
+
 @app.post("/api/admin/updatewl")
 async def accept_bet(
     payload: dict, token: str = Depends(authUtils.validate_access_token)

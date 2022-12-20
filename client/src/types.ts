@@ -8,9 +8,26 @@ export type Bet = {
     bet_options: BetOption[];
     is_accepted: undefined | Boolean;
 }
+export type BetAdmin = {
+    title: string;
+    bet_status: 1 | 2 | 3 | 4;
+    bet_id: number;
+    submitter: string;
+    category: string;
+    close_timestamp: Date;
+    bet_options: BetOptionAdmin[];
+    is_accepted: undefined | Boolean;
+}
 
 export type BetOption = {
     latest_odds: number;
+    option: string;
+    option_id: number;
+    option_status: 1 | 2 | 3 | 4
+
+}
+export type BetOptionAdmin = {
+    latest_odds: number | null;
     option: string;
     option_id: number;
     option_status: 1 | 2 | 3 | 4
