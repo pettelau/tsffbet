@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import accumSlice, {
   selectAccum,
   removeAccum,
   removeBet,
 } from "../../redux/accumSlice";
-import { AccumBetOption } from "../../types";
+import { AccumBetOption, AlertT } from "../../types";
 import {
+  AlertColor,
   Button,
   Chip,
   IconButton,
@@ -30,6 +31,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import ReceiptIcon from "@mui/icons-material/Receipt";
+import AlertComp from "../Alert";
 
 export default function Accumulator() {
   const dispatch = useAppDispatch();
@@ -43,11 +45,39 @@ export default function Accumulator() {
 
   const [betCompleted, setBetCompleted] = React.useState<boolean>(false);
 
-  // const [createAccum] = useMutation(CREATE_ACCUM, {
-  //   onCompleted: (res) => {
-  //     setBetCompleted(true);
-  //   },
-  // });
+  //error toggle
+  const [_alert, setAlert] = React.useState<boolean>(false);
+  const [_alertType, setAlertType] = React.useState<AlertT>({
+    type: "info",
+    msg: "",
+  });
+  // Toggle error with message
+  function toggleAlert(
+    isActive: boolean,
+    msg: string = "",
+    type: AlertColor = "info"
+  ) {
+    setAlert(isActive);
+    setAlertType({ type: type, msg: msg });
+  }
+
+  useEffect(() => {
+    var valueArr = bets.map(function (bet) {
+      return bet.bet;
+    });
+    var isDuplicate = valueArr.some(function (item, idx) {
+      return valueArr.indexOf(item) != idx;
+    });
+    if (isDuplicate) {
+      toggleAlert(
+        true,
+        "Du kan ikke ha flere valg fra samme bet i én kupong",
+        "error"
+      );
+    } else {
+      setAlert(false);
+    }
+  }, [bets]);
 
   let totalodds = 1;
   bets.map((bet: AccumBetOption) => {
@@ -60,6 +90,25 @@ export default function Accumulator() {
   }
 
   async function createAccum() {
+    var valueArr = bets.map(function (bet) {
+      return bet.bet;
+    });
+    var isDuplicate = valueArr.some(function (item, idx) {
+      return valueArr.indexOf(item) != idx;
+    });
+
+    if (isDuplicate) {
+      toggleAlert(
+        true,
+        "Du kan ikke ha flere valg fra samme bet i én kupong",
+        "error"
+      );
+      return;
+    }
+    if (stake == undefined || stake == "") {
+      toggleAlert(true, "Innsats kan ikke være tom", "error");
+      return;
+    }
     let bet_packet: any = { bets: bets, stake: stake, totalodds: totalodds };
     const response = await fetch(`${url_path}api/placebet`, {
       method: "POST",
@@ -123,6 +172,12 @@ export default function Accumulator() {
         <>
           <div className="Accum">
             <div style={{ padding: "20px" }}>
+              <AlertComp
+                setAlert={setAlert}
+                _alert={_alert}
+                _alertType={_alertType}
+                toggleAlert={toggleAlert}
+              ></AlertComp>
               <Button
                 size="small"
                 variant="contained"

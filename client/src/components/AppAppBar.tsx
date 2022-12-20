@@ -56,7 +56,7 @@ export default function AppAppBar() {
   return (
     <div>
       <AppBar position="fixed">
-        {SIZE.width > 1100 ? (
+        {SIZE.width > 1150 ? (
           <Toolbar
             sx={{
               backgroundColor: "#303c6c",
@@ -412,6 +412,9 @@ export default function AppAppBar() {
               <Typography sx={{ color: "white" }}>
                 {loggedInUser == "" ? (
                   <Chip
+                    onClick={() => {
+                      navigate("/login");
+                    }}
                     icon={
                       <PersonIcon sx={{ ":hover": { cursor: "pointer" } }} />
                     }

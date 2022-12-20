@@ -11,6 +11,7 @@ function AlertComp(props: AlertProps) {
           <Alert
             action={
               <Button
+                sx={{ ml: 0 }}
                 aria-label="close"
                 color="inherit"
                 size="small"
@@ -18,7 +19,7 @@ function AlertComp(props: AlertProps) {
                   props.toggleAlert(false);
                 }}
               >
-                <CloseIcon fontSize="inherit" />
+                <CloseIcon sx={{padding: 0}} fontSize="small" />
               </Button>
             }
             sx={{ mb: 2 }}

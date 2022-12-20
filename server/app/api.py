@@ -77,7 +77,7 @@ app.add_middleware(
 @app.get("/api/openbets")
 async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
     bets = fetchDBJson(
-        "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL"
+        "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL ORDER BY close_timestamp ASC"
     )
     bets_with_options = []
     for bet in bets:
