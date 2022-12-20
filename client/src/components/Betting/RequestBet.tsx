@@ -177,8 +177,8 @@ export default function RequestBet() {
         toggleAlert={toggleAlert}
       ></AlertComp>
       <div style={{ marginTop: 30, display: "flex", justifyContent: "center" }}>
-        <Card sx={{ minWidth: 400, maxWidth: 600 }}>
-          <h2>Request et bet</h2>
+        <Card sx={{ width: 400 }}>
+          <h2>Request-a-bet</h2>
           <TextField
             sx={{ width: 370 }}
             multiline
