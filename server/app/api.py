@@ -174,7 +174,7 @@ async def get_all_admin_bets(
 
 @app.get("/api/dictionary")
 async def get_dictionary(token: str = Depends(authUtils.validate_access_token)) -> dict:
-    res = fetchDBJson("select * from dictionary order by frequency DESC")
+    res = fetchDBJson("select * from dictionary order by word_id DESC")
     return res
 
 
