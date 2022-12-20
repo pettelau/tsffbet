@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  CircularProgress,
   Tab,
   Tabs,
   ToggleButton,
@@ -89,6 +90,16 @@ export default function BettingHome() {
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setChosenCategory(newValue);
   };
+  if (responseCode == undefined) {
+    return (
+      <>
+      <br />
+      <br />
+      <br />
+        <CircularProgress />
+      </>
+    );
+  }
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }
@@ -121,18 +132,27 @@ export default function BettingHome() {
                   <div>
                     <Card sx={{ padding: 2 }}>
                       <>
-                        {bet.title} <br />
-                        Bettet stenger {new Date(bet.close_timestamp).getDate()}
-                        . {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
-                        {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
-                        {("0" + new Date(bet.close_timestamp).getHours()).slice(
-                          -2
-                        )}
-                        :
-                        {(
-                          "0" + new Date(bet.close_timestamp).getMinutes()
-                        ).slice(-2)}
+                        <b>{bet.title}</b>
                         <br />
+                        <p
+                          style={{
+                            marginTop: 1,
+                            marginBottom: 1,
+                            color: "#828385",
+                          }}
+                        >
+                          Bettet stenger{" "}
+                          {new Date(bet.close_timestamp).getDate()}.{" "}
+                          {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
+                          {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
+                          {(
+                            "0" + new Date(bet.close_timestamp).getHours()
+                          ).slice(-2)}
+                          :
+                          {(
+                            "0" + new Date(bet.close_timestamp).getMinutes()
+                          ).slice(-2)}
+                        </p>
                         {bet.bet_options.map((option: BetOption) => {
                           let index = accumBets
                             .map((c: any) => c.option.option_id)
