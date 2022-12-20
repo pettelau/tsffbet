@@ -223,6 +223,30 @@ async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> d
     return accums_with_options
 
 
+@app.get("/api/useraccums/")
+async def get_accums(
+    user, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    accums = fetchDBJson(
+        Template(
+            "select accum_id, stake, total_odds, username, placed_timestamp from accums left join users on accums.user_id = users.user_id where users.username = '$user' order by placed_timestamp DESC"
+        ).safe_substitute({"user": user})
+    )
+    accums_with_options = []
+    for accum in accums:
+        accum = accum
+        accum_options = fetchDBJson(
+            Template(
+                "select bets.title, accum_options.user_odds, bet_options.option, bet_options.option_status from bet_options natural join accum_options left join bets on bet_options.bet = bets.bet_id inner join accums on accum_options.accum_id = accums.accum_id where accums.accum_id = $accum_id"
+            ).safe_substitute({"accum_id": accum["accum_id"]})
+        )
+
+        accum["accumBets"] = accum_options
+        accums_with_options.append(accum)
+    print(accums_with_options)
+    return accums_with_options
+
+
 @app.get("/api/allaccums")
 async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> dict:
     accums = fetchDBJson(

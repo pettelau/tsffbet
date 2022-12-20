@@ -1,4 +1,6 @@
 import {
+  Alert,
+  AlertTitle,
   Button,
   Card,
   Tab,
@@ -22,6 +24,7 @@ import NoAccess from "../NoAccess";
 import dayjs, { Dayjs } from "dayjs";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useNavigate } from "react-router-dom";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -75,6 +78,8 @@ export default function Leaderboard() {
     }
   }
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchLeaderboard();
   }, []);
@@ -99,6 +104,19 @@ export default function Leaderboard() {
   return (
     <>
       <h1>Leaderboard</h1>
+      <div
+        style={{
+          maxWidth: 500,
+          display: "grid",
+          margin: "auto",
+          textAlign: "center",
+        }}
+      >
+        <Alert severity="info">
+          Klikk på et brukernavn for å se alle kupongene til denne personen.
+        </Alert>
+      </div>
+      <br />
       {/* Fra dato:
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DateTimePicker
@@ -140,7 +158,16 @@ export default function Leaderboard() {
               return (
                 <>
                   <TableRow sx={{ backgroundColor: bgColorChecker(index) }}>
-                    <TableCell>{user.username}</TableCell>
+                    <TableCell
+                      sx={{
+                        ":hover": { cursor: "pointer" },
+                      }}
+                      onClick={() => {
+                        navigate(`/user/${user.username}`);
+                      }}
+                    >
+                      {user.username}
+                    </TableCell>
                     <TableCell sx={{ width: 70 }} align="center">
                       {user.balance}
                     </TableCell>
