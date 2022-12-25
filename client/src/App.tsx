@@ -27,6 +27,7 @@ import Leaderboard from "./components/Betting/Leaderboard";
 import Dictionary from "./components/Dictionary";
 import BetFeed from "./components/Betting/BetFeed";
 import UserProfile from "./components/UserProfile";
+import Competition from "./components/Competition";
 
 const THEME = createTheme({
   typography: {
@@ -54,8 +55,8 @@ const THEME = createTheme({
 });
 
 export default function App() {
-  // const url_path = "/";
-  const url_path = "http://localhost:8000/";
+  const url_path = "/";
+  // const url_path = "http://localhost:8000/";
 
   async function loginDetails() {
     const response = await fetch(`${url_path}api/login/details`, {
@@ -88,6 +89,7 @@ export default function App() {
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="dictionary" element={<Dictionary />} />
               <Route path="betfeed" element={<BetFeed />} />
+              <Route path="competition" element={<Competition />} />
               <Route path="user/:username" element={<UserProfile />} />
               <Route path="admin" element={<AdminHome />} />
               <Route path="admin/newbet" element={<NewBet />} />
