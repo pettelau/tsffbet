@@ -75,6 +75,18 @@ body, html {
 
   
 }
+.competition-flex-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.competition-flex-container > div {
+ margin-left: 10px;
+ margin-right: 10px;
+  
+}
 
 .bet-flex-container {
   display: flex;
@@ -110,4 +122,10 @@ h3 {
 
 .Table {
  max-width: 500px;
+}
+
+.CompList {
+  padding-left: 0;
+  text-align: center;
+  list-style-position: inside;
 }

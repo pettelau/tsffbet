@@ -1,4 +1,4 @@
-import { Button, Divider, TextField } from "@mui/material";
+import { Alert, Button, Divider, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { LoginUtils } from "../utils";
 // Icons
@@ -17,12 +17,35 @@ import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import SportsTennisIcon from "@mui/icons-material/SportsTennis";
 import QuizIcon from "@mui/icons-material/Quiz";
 import DynamicFeedIcon from "@mui/icons-material/DynamicFeed";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
+
   return (
     <>
       <div>
         <h1>Velkommen til nye LauBet!</h1>
+        <div
+          style={{
+            maxWidth: 500,
+            display: "grid",
+            margin: "auto",
+            textAlign: "center",
+          }}
+        >
+          <Alert
+            sx={{ ":hover": { cursor: "pointer" } }}
+            onClick={() => {
+              navigate("/competition");
+            }}
+            severity="info"
+          >
+            Klikk på denne meldingen for å gå til den nye betting-konkurransen
+            for å lese reglene og melde deg på!!
+          </Alert>
+        </div>
+        <br />
         <h3>En oversikt over nye og gamle funksjoner:</h3>
         <div className="flex-container">
           <div>

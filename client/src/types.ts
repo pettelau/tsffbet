@@ -124,6 +124,11 @@ export type DictionaryT = {
   submitter: string;
 }
 
+export type CompetitionT = {
+  username: string;
+  registered: number;
+}
+
 export type AdminUserDetails = {
   user_id: boolean;
   username: string;
@@ -142,4 +147,11 @@ export type LeaderboardData = {
   balance: number;
   won_accums: number;
   total_accums: number;
+}
+
+export type PublicUserData = {
+  balance: number;
+  firstname: string;
+  lastname: string;
+  last_login: undefined | Date;
 }

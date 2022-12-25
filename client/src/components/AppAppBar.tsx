@@ -27,6 +27,7 @@ import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import DynamicFeedIcon from "@mui/icons-material/DynamicFeed";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useAppSelector } from "../redux/hooks";
@@ -56,7 +57,7 @@ export default function AppAppBar() {
   return (
     <div>
       <AppBar position="fixed">
-        {SIZE.width > 1150 ? (
+        {SIZE.width > 1350 ? (
           <Toolbar
             sx={{
               backgroundColor: "#303c6c",
@@ -177,6 +178,21 @@ export default function AppAppBar() {
                 <DynamicFeedIcon />
                 <Typography sx={{ color: "white", marginLeft: 1 }}>
                   BetFeed
+                </Typography>
+              </IconButton>
+              <IconButton
+                id="feed-button"
+                size="large"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                onClick={() => {
+                  navigate("/competition");
+                }}
+              >
+                <DynamicFeedIcon />
+                <Typography sx={{ color: "white", marginLeft: 1 }}>
+                  Konkurranse!
                 </Typography>
               </IconButton>
             </Box>
@@ -345,6 +361,16 @@ export default function AppAppBar() {
                 >
                   <DynamicFeedIcon sx={{ mr: 1 }} />
                   BetFeed
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/competition");
+                  }}
+                >
+                  <EmojiEventsIcon sx={{ mr: 1 }} />
+                  Konkurranse
                 </MenuItem>
               </Menu>
               {/* <IconButton
