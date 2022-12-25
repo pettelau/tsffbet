@@ -178,8 +178,16 @@ async def get_dictionary(token: str = Depends(authUtils.validate_access_token)) 
     return res
 
 
+@app.get("/api/competition")
+async def get_dictionary(token: str = Depends(authUtils.validate_access_token)) -> dict:
+    res = fetchDBJson(
+        "select username, registered from users left join competition on users.user_id = competition.user_id"
+    )
+    return res
+
+
 @app.post("/api/submitword")
-async def get_dictionary(
+async def add_to_dictionary(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
 ) -> dict:
     try:
@@ -193,6 +201,27 @@ async def get_dictionary(
                 "submitter": token["user"],
                 "word": payload["word"],
             }
+        )
+        cursor.execute(query)
+        connection.commit()
+        return {"submitWord": True}
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.post("/api/updatecompetition")
+async def update_comp(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    print("her")
+    print(payload)
+
+    try:
+        cursor = connection.cursor()
+        query = Template(
+            "insert into competition (user_id, registered) values ($user_id, $registered) on conflict (user_id) do update set user_id = excluded.user_id, registered = excluded.registered"
+        ).safe_substitute(
+            {"user_id": token["user_id"], "registered": payload["registered"]}
         )
         cursor.execute(query)
         connection.commit()
@@ -245,6 +274,18 @@ async def get_accums(
         accums_with_options.append(accum)
     print(accums_with_options)
     return accums_with_options
+
+
+@app.get("/api/publicuserdata/")
+async def get_accums(
+    user, token: str = Depends(authUtils.validate_access_token)
+) -> dict:
+    data = fetchDBJson(
+        Template(
+            "select balance, firstname, lastname, last_login from users where username = '$user'"
+        ).safe_substitute({"user": user})
+    )
+    return data
 
 
 @app.get("/api/allaccums")
