@@ -186,7 +186,7 @@ export default function NewBet() {
           <br />
           <div>
             Tilbakebetalingsprosent:{" "}
-            {((totalodds / options.length - 1) * 100).toFixed(1)}%
+            {((((totalodds)/options.length)/options.length) * 100).toFixed(1)}%
           </div>
           <br />
           <Button
