@@ -3,7 +3,7 @@ import { LoginUtils } from "../utils";
 import { Link, useNavigate } from "react-router-dom";
 
 import TextField from "@mui/material/TextField";
-import { Avatar, Button, Card, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, Modal, Typography } from "@mui/material";
 
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import {
@@ -47,7 +47,27 @@ const MONTHS = [
   "desember",
 ];
 
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  borderRadius: "10px",
+  boxShadow: 24,
+  p: 4,
+};
+
 function Login() {
+  // Modal:
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [newPassword, setNewPassword] = React.useState<string>("");
+  const [confirmNewPassword, setConfirmNewPassword] =
+    React.useState<string>("");
+
   //error toggle
   const [_alert, setAlert] = useState<boolean>(false);
   const [_alertType, setAlertType] = useState<AlertT>({
@@ -108,6 +128,52 @@ function Login() {
         toggleAlert(true, "Feil brukernavn eller passord", "error");
       }
     } else toggleAlert(true, "Skriv inn både brukernavn og passord", "error");
+  }
+
+  async function updatePassword() {
+    if (LoginUtils.verifyPass(newPassword)) {
+      if (newPassword == confirmNewPassword) {
+        let hashedPass = LoginUtils.hashPass(newPassword);
+
+        let payload = {
+          new_password: hashedPass,
+        };
+
+        const response = await fetch(`${url_path}api/resetPassword`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const resp = await response.json();
+        if (response.ok) {
+          toggleAlert(true, "Passord ble oppdatert! Du kan nå logge inn på nytt med det nye passordet", "success");
+          setOpen(false);
+          setNewPassword("");
+          setConfirmNewPassword("");
+          onClickLogOut();
+        } else {
+          setNewPassword("");
+          setConfirmNewPassword("");
+          toggleAlert(true, "Noe gikk galt", "error");
+        }
+      } else {
+        setNewPassword("");
+        setConfirmNewPassword("");
+        toggleAlert(true, "Passordene er ikke identiske, prøv igjen", "error");
+        setOpen(false);
+      }
+    } else {
+      toggleAlert(
+        true,
+        "Det nye passordet må være minst 6 tegn langt, prøv igjen",
+        "error"
+      );
+      setOpen(false);
+    }
   }
 
   // Function for logging out user. Removes all data stored on client side
@@ -174,8 +240,48 @@ function Login() {
                 {("0" + new Date(created_on).getMinutes()).slice(-2)}
               </b>
               <br />
+              <Modal open={open} onClose={handleClose}>
+                <Box sx={style}>
+                  <div style={{ textAlign: "center" }}>
+                    <TextField
+                      type={"password"}
+                      label="Nytt passord"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                    <br />
+                    <br />
+                    <TextField
+                      type={"password"}
+                      label="Bekreft nytt passord"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    />
+                    <br />
+                    <br />
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        updatePassword();
+                      }}
+                    >
+                      Oppdater passord
+                    </Button>
+                  </div>
+                </Box>
+              </Modal>
             </>
           </div>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setOpen(true);
+            }}
+          >
+            Oppdater passord
+          </Button>
+          <br />
+          <br />
           <Button
             variant="contained"
             onClick={() => {

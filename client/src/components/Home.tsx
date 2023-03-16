@@ -2,13 +2,9 @@ import { Alert, Button, Divider, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { LoginUtils } from "../utils";
 // Icons
-import HomeIcon from "@mui/icons-material/Home";
-import PersonIcon from "@mui/icons-material/Person";
+
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import PaidIcon from "@mui/icons-material/Paid";
-import MenuIcon from "@mui/icons-material/Menu";
+
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import LockPersonIcon from "@mui/icons-material/LockPerson";
 import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";

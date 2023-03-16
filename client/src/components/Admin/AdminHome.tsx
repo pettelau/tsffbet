@@ -4,9 +4,13 @@ import {
   AccordionDetails,
   AccordionSummary,
   AlertColor,
+  Box,
   Button,
   Card,
   CircularProgress,
+  Input,
+  Modal,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useAppSelector } from "../../redux/hooks";
@@ -18,8 +22,28 @@ import { AdminUserDetails, AlertT } from "../../types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Switch from "@mui/material/Switch";
 import AlertComp from "../Alert";
+import { LoginUtils } from "../../utils";
+
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  borderRadius: "10px",
+  boxShadow: 24,
+  p: 4,
+};
 
 export default function AdminHome() {
+  // Modal:
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [newPassword, setNewPassword] = React.useState<string>("");
+  const [userIDToUpdate, setUserIDToUpdate] = React.useState<number>();
+
   const url_path = useAppSelector(selectPath);
 
   const isAdmin = useAppSelector(selectAdmin);
@@ -85,6 +109,32 @@ export default function AdminHome() {
     }
   }
 
+  async function updatePassword() {
+    let hashedPass = LoginUtils.hashPass(newPassword);
+
+    let payload = {
+      user_id: userIDToUpdate,
+      new_password: hashedPass,
+    };
+
+    const response = await fetch(`${url_path}api/admin/resetPassword`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const resp = await response.json();
+    if (response.ok) {
+      toggleAlert(true, "Passord ble oppdatert!", "success");
+      setOpen(false);
+    } else {
+      toggleAlert(true, "Noe gikk galt", "error");
+    }
+  }
+
   const MONTHS = [
     "jan",
     "feb",
@@ -106,18 +156,17 @@ export default function AdminHome() {
     fetchUsers();
   }, []);
 
-
   if (responseCode == undefined) {
     return (
       <>
-      <br />
-      <br />
-      <br />
+        <br />
+        <br />
+        <br />
         <CircularProgress />
       </>
     );
   }
-  
+
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }
@@ -133,102 +182,137 @@ export default function AdminHome() {
       <h2>Admin desktop</h2>
       {isAdmin ? (
         <>
-          Admin!!
-          <br />
-          <Button
-            onClick={() => {
-              navigate("/admin/newbet");
-            }}
-          >
-            Add nytt bet
-          </Button>
-          <br />
-          <Button
-            onClick={() => {
-              navigate("/admin/editbet");
-            }}
-          >
-            Endre bet
-          </Button>
-          <br />
-          <h2>Brukere:</h2>
-          {users.map((user: AdminUserDetails, index: number) => {
-            return (
-              <>
-                <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>
-                      {user.username} {user.whitelist ? " ✅" : " ❌"}{" "}
-                      {user.admin ? " 🦸" : ""}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <>
-                      Username: {user.username} <br />
-                      User_id: {user.user_id} <br />
-                      Balance: {user.balance} <br />
-                      Created on:{" "}
-                      {new Date(user.created_on).getDate() +
-                        " " +
-                        MONTHS[new Date(user.created_on).getMonth()] +
-                        " " +
-                        new Date(user.created_on).getFullYear() +
-                        " " +
-                        ("0" + new Date(user.created_on).getHours()).slice(-2) +
-                        ":" +
-                        ("0" + new Date(user.created_on).getMinutes()).slice(
-                          -2
-                        )}{" "}
-                      <br />
-                      Last login:{" "}
-                      {new Date(
-                        user.last_login ? user.last_login : ""
-                      ).getDate() +
-                        " " +
-                        MONTHS[
-                          new Date(
+          <div>
+            Admin!!
+            <br />
+            <Button
+              onClick={() => {
+                navigate("/admin/newbet");
+              }}
+            >
+              Add nytt bet
+            </Button>
+            <br />
+            <Button
+              onClick={() => {
+                navigate("/admin/editbet");
+              }}
+            >
+              Endre bet
+            </Button>
+            <br />
+            <h2>Brukere:</h2>
+            {users.map((user: AdminUserDetails, index: number) => {
+              return (
+                <>
+                  <div>
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography>
+                          {user.username} {user.whitelist ? " ✅" : " ❌"}{" "}
+                          {user.admin ? " 🦸" : ""}
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <>
+                          Username: {user.username} <br />
+                          User_id: {user.user_id} <br />
+                          Balance: {user.balance} <br />
+                          Created on:{" "}
+                          {new Date(user.created_on).getDate() +
+                            " " +
+                            MONTHS[new Date(user.created_on).getMonth()] +
+                            " " +
+                            new Date(user.created_on).getFullYear() +
+                            " " +
+                            ("0" + new Date(user.created_on).getHours()).slice(
+                              -2
+                            ) +
+                            ":" +
+                            (
+                              "0" + new Date(user.created_on).getMinutes()
+                            ).slice(-2)}{" "}
+                          <br />
+                          Last login:{" "}
+                          {new Date(
                             user.last_login ? user.last_login : ""
-                          ).getMonth()
-                        ] +
-                        " " +
-                        new Date(
-                          user.last_login ? user.last_login : ""
-                        ).getFullYear() +
-                        " " +
-                        (
-                          "0" +
-                          new Date(
-                            user.last_login ? user.last_login : ""
-                          ).getHours()
-                        ).slice(-2) +
-                        ":" +
-                        (
-                          "0" +
-                          new Date(
-                            user.last_login ? user.last_login : ""
-                          ).getMinutes()
-                        ).slice(-2)}
-                      <br />
-                      Number of Logins: {user.number_of_logins} <br />
-                      Firstname: {user.firstname} <br />
-                      Lastname: {user.lastname} <br />
-                      Admin: {user.admin ? "Ja" : "Nei"} <br />
-                      Whitelist:{" "}
-                      <Switch
-                        checked={user.whitelist}
-                        onChange={() => {
-                          setWhitelist(index);
-                        }}
-                      />
-                      {user.whitelist ? "Ja" : "Nei"} <br />
-                    </>
-                  </AccordionDetails>
-                </Accordion>
+                          ).getDate() +
+                            " " +
+                            MONTHS[
+                              new Date(
+                                user.last_login ? user.last_login : ""
+                              ).getMonth()
+                            ] +
+                            " " +
+                            new Date(
+                              user.last_login ? user.last_login : ""
+                            ).getFullYear() +
+                            " " +
+                            (
+                              "0" +
+                              new Date(
+                                user.last_login ? user.last_login : ""
+                              ).getHours()
+                            ).slice(-2) +
+                            ":" +
+                            (
+                              "0" +
+                              new Date(
+                                user.last_login ? user.last_login : ""
+                              ).getMinutes()
+                            ).slice(-2)}
+                          <br />
+                          Number of Logins: {user.number_of_logins} <br />
+                          Firstname: {user.firstname} <br />
+                          Lastname: {user.lastname} <br />
+                          Admin: {user.admin ? "Ja" : "Nei"} <br />
+                          Whitelist:{" "}
+                          <Switch
+                            checked={user.whitelist}
+                            onChange={() => {
+                              setWhitelist(index);
+                            }}
+                          />
+                          {user.whitelist ? "Ja" : "Nei"} <br />
+                          <Button
+                            onClick={() => {
+                              setUserIDToUpdate(user.user_id);
+                              handleOpen();
+                            }}
+                          >
+                            Reset password
+                          </Button>
+                        </>
+                      </AccordionDetails>
+                    </Accordion>
 
-                <br />
-              </>
-            );
-          })}
+                    <br />
+                  </div>
+                </>
+              );
+            })}
+            <Modal open={open} onClose={handleClose}>
+              <Box sx={style}>
+                <div style={{ textAlign: "center" }}>
+                  <TextField
+                    label="New password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <br />
+                  <br />
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      updatePassword();
+                    }}
+                  >
+                    Update password
+                  </Button>
+                </div>
+              </Box>
+            </Modal>
+          </div>
         </>
       ) : (
         <div>Du er dessverre ikke admin... Spør Lau om du kan bli?</div>

@@ -130,7 +130,7 @@ export type CompetitionT = {
 }
 
 export type AdminUserDetails = {
-  user_id: boolean;
+  user_id: number;
   username: string;
   admin: boolean;
   whitelist: boolean;

@@ -57,6 +57,7 @@ class AuthUtils:
         self,
         credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
     ):
+        print("i am here")
         token = credentials.credentials
         try:
             payload = jwt.decode(
@@ -85,7 +86,6 @@ class AuthUtils:
             payload = jwt.decode(
                 token, self.JWT_SECRET_KEY, algorithms=[self.JWT_ALGORITHM]
             )
-
 
         except JOSEError as e:
             raise HTTPException(status_code=401, detail=str(e))

@@ -75,7 +75,7 @@ app.add_middleware(
 
 
 @app.get("/api/openbets")
-async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_open_bets(token: str = Depends(authUtils.validate_access_token)):
     bets = fetchDBJson(
         "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL ORDER BY close_timestamp ASC"
     )
@@ -93,7 +93,7 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -
 
 
 @app.get("/api/requestedbets")
-async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_open_bets(token: str = Depends(authUtils.validate_access_token)):
     bets = fetchDBJson("select * from bets where is_accepted = false")
     bets_with_options = []
     for bet in bets:
@@ -112,30 +112,36 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -
 # @app.get("/api/leaderboard/")
 # async def get_open_bets(
 #     fromDate, toDate, token: str = Depends(authUtils.validate_access_token)
-# ) -> dict:
+# ) :
 #     print(fromDate, toDate)
 
 
 @app.get("/api/leaderboard")
-async def get_open_bets(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_leaderboard(
+    token: str = Depends(authUtils.validate_access_token),
+):
     leaderboard_data = []
-    users = fetchDBJson("select username, user_id, balance from users")
-    for user in users:
-        user_data = {"username": user["username"], "balance": user["balance"]}
-        won_accums = fetchDBJson(
-            Template(
-                "select count(*) from accums where user_id = $user_id and paid_out=true"
-            ).safe_substitute({"user_id": user["user_id"]})
-        )
-        total_accums = fetchDBJson(
-            Template(
-                "select count(*) from accums where user_id = $user_id"
-            ).safe_substitute({"user_id": user["user_id"]})
-        )
-        user_data["won_accums"] = won_accums[0]["count"]
-        user_data["total_accums"] = total_accums[0]["count"]
+    print("inside leaderboard")
+    try:
+        users = fetchDBJson("select username, user_id, balance from users")
+        for user in users:
+            user_data = {"username": user["username"], "balance": user["balance"]}
+            won_accums = fetchDBJson(
+                Template(
+                    "select count(*) from accums where user_id = $user_id and paid_out=true"
+                ).safe_substitute({"user_id": user["user_id"]})
+            )
+            total_accums = fetchDBJson(
+                Template(
+                    "select count(*) from accums where user_id = $user_id"
+                ).safe_substitute({"user_id": user["user_id"]})
+            )
+            user_data["won_accums"] = won_accums[0]["count"]
+            user_data["total_accums"] = total_accums[0]["count"]
 
-        leaderboard_data.append(user_data)
+            leaderboard_data.append(user_data)
+    except Exception as e:
+        print("feil her", e)
     return leaderboard_data
 
 
@@ -154,7 +160,7 @@ def is_admin(username):
 @app.get("/api/admin/allbets")
 async def get_all_admin_bets(
     token: str = Depends(authUtils.validate_access_token),
-) -> dict:
+):
     if is_admin(token["user"]):
         bets = fetchDBJson("select * from bets")
         bets_with_options = []
@@ -173,13 +179,13 @@ async def get_all_admin_bets(
 
 
 @app.get("/api/dictionary")
-async def get_dictionary(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_dictionary(token: str = Depends(authUtils.validate_access_token)):
     res = fetchDBJson("select * from dictionary order by word_id DESC")
     return res
 
 
 @app.get("/api/competition")
-async def get_dictionary(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_dictionary(token: str = Depends(authUtils.validate_access_token)):
     res = fetchDBJson(
         "select username, registered from users left join competition on users.user_id = competition.user_id"
     )
@@ -189,7 +195,7 @@ async def get_dictionary(token: str = Depends(authUtils.validate_access_token)) 
 @app.post("/api/submitword")
 async def add_to_dictionary(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+):
     try:
         cursor = connection.cursor()
         query = Template(
@@ -212,7 +218,7 @@ async def add_to_dictionary(
 @app.post("/api/updatecompetition")
 async def update_comp(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+):
     print("her")
     print(payload)
 
@@ -231,7 +237,7 @@ async def update_comp(
 
 
 @app.get("/api/accums")
-async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_accums(token: str = Depends(authUtils.validate_access_token)):
     accums = fetchDBJson(
         Template(
             "select accum_id, stake, total_odds, username, placed_timestamp from accums left join users on accums.user_id = users.user_id where accums.user_id = $user_id order by placed_timestamp DESC"
@@ -253,9 +259,7 @@ async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> d
 
 
 @app.get("/api/useraccums/")
-async def get_accums(
-    user, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+async def get_accums(user, token: str = Depends(authUtils.validate_access_token)):
     accums = fetchDBJson(
         Template(
             "select accum_id, stake, total_odds, username, placed_timestamp from accums left join users on accums.user_id = users.user_id where users.username = '$user' order by placed_timestamp DESC"
@@ -277,9 +281,7 @@ async def get_accums(
 
 
 @app.get("/api/publicuserdata/")
-async def get_accums(
-    user, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+async def get_accums(user, token: str = Depends(authUtils.validate_access_token)):
     data = fetchDBJson(
         Template(
             "select balance, firstname, lastname, last_login from users where username = '$user'"
@@ -289,7 +291,7 @@ async def get_accums(
 
 
 @app.get("/api/allaccums")
-async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> dict:
+async def get_accums(token: str = Depends(authUtils.validate_access_token)):
     accums = fetchDBJson(
         "select accum_id, stake, total_odds, username, placed_timestamp from accums left join users on accums.user_id = users.user_id order by placed_timestamp DESC"
     )
@@ -309,12 +311,12 @@ async def get_accums(token: str = Depends(authUtils.validate_access_token)) -> d
 
 
 # @app.get("/admin/allaccums")
-# async def read_root() -> dict:
+# async def read_root() :
 #     return {"message": "Admin"}
 
 
 @app.get("/api/userAvailability/{user}")
-async def user_availability(user: str) -> dict:
+async def user_availability(user: str):
     res = fetchDB(f"select exists(select 1 from users where username = '{user}')")
     if res[0][0]:
         return {"userTaken": True}
@@ -323,7 +325,7 @@ async def user_availability(user: str) -> dict:
 
 
 @app.get("/api/login/")
-async def add_user(user, password) -> dict:
+async def login(user, password):
     user_pass = fetchDB(
         Template(
             "select user_id, password from users where username = '$username'"
@@ -351,8 +353,7 @@ async def add_user(user, password) -> dict:
 @app.get("/api/login/details")
 async def add_user(
     token: str = Depends(authUtils.validate_access_token_nowhitelist),
-) -> dict:
-
+):
     res = fetchDBJson(
         Template(
             "select username, balance, firstname, lastname, admin, created_on from users where username = '$username'"
@@ -372,8 +373,7 @@ async def add_user(
 
 
 @app.get("/api/admin/users")
-async def get_users(token: str = Depends(authUtils.validate_access_token)) -> dict:
-
+async def get_users(token: str = Depends(authUtils.validate_access_token)):
     if is_admin(token["user"]):
         res = fetchDBJson(
             "select user_id, username, balance, created_on, last_login, firstname, lastname, admin, whitelist, number_of_logins from users"
@@ -385,9 +385,7 @@ async def get_users(token: str = Depends(authUtils.validate_access_token)) -> di
 
 # {category: "string", title: "string", options: [{latest_odds: number, option: "string"}]}
 @app.post("/api/admin/createbet")
-async def create_bet(
-    bet: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     # date_time_obj = datetime.datetime.strptime(
     #     bet["close_date"], "%Y-%m-%d %H:%M:%S.%f"
     # )
@@ -432,10 +430,7 @@ async def create_bet(
 
 
 @app.post("/api/admin/acceptbet")
-async def accept_bet(
-    bet: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
-
+async def accept_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     if is_admin(token["user"]):
         try:
             cursor = connection.cursor()
@@ -452,7 +447,7 @@ async def accept_bet(
 @app.post("/api/admin/updateoption")
 async def accept_bet(
     option: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+):
     if is_admin(token["user"]):
         try:
             cursor = connection.cursor()
@@ -476,7 +471,7 @@ async def accept_bet(
 @app.post("/api/admin/addoption")
 async def accept_bet(
     option: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+):
     if is_admin(token["user"]):
         try:
             cursor = connection.cursor()
@@ -500,7 +495,7 @@ async def accept_bet(
 @app.post("/api/admin/updatewl")
 async def accept_bet(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+):
     if is_admin(token["user"]):
         try:
             cursor = connection.cursor()
@@ -517,10 +512,7 @@ async def accept_bet(
 
 
 @app.post("/api/admin/closebet")
-async def accept_bet(
-    bet: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
-
+async def accept_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     if is_admin(token["user"]):
         try:
             cursor = connection.cursor()
@@ -534,10 +526,59 @@ async def accept_bet(
             raise HTTPException(status_code=403, detail="Something went wrong")
 
 
+@app.post("/api/admin/resetPassword")
+async def reset_password(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    if is_admin(token["user"]):
+        try:
+            print("payload", payload)
+            hashed = bcrypt.hashpw(
+                bytes(payload["new_password"], encoding="utf-8"), bcrypt.gensalt()
+            )
+
+            update_password = Template(
+                "update users set password = '$password' where user_id = $user_id"
+            ).safe_substitute(
+                {"password": hashed.decode("utf-8"), "user_id": payload["user_id"]}
+            )
+            print(update_password)
+            cursor = connection.cursor()
+            cursor.execute(update_password)
+            connection.commit()
+            return {"updatePassword": True}
+        except Exception as e:
+            return HTTPException(
+                status_code=500, detail="Something wrong. Could not reset password"
+            )
+
+
+@app.post("/api/resetPassword")
+async def reset_password(
+    payload: dict, token: str = Depends(authUtils.validate_access_token_nowhitelist)
+):
+    try:
+        hashed = bcrypt.hashpw(
+            bytes(payload["new_password"], encoding="utf-8"), bcrypt.gensalt()
+        )
+
+        update_password = Template(
+            "update users set password = '$password' where user_id = $user_id"
+        ).safe_substitute(
+            {"password": hashed.decode("utf-8"), "user_id": token["user_id"]}
+        )
+        cursor = connection.cursor()
+        cursor.execute(update_password)
+        connection.commit()
+        return {"updatePassword": True}
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not reset password"
+        )
+
+
 @app.post("/api/requestbet")
-async def create_bet(
-    bet: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     # date_time_obj = datetime.datetime.strptime(
     #     bet["close_date"], "%Y-%m-%d %H:%M:%S.%f"
     # )
@@ -581,9 +622,7 @@ async def create_bet(
 
 
 @app.post("/api/admin/settlebet")
-async def settle_bet(
-    bet: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+async def settle_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     if is_admin(token["user"]):
         # settle bet
         cursor = connection.cursor()
@@ -658,9 +697,7 @@ async def settle_bet(
 
 
 @app.post("/api/placebet")
-async def place_bet(
-    bet: dict, token: str = Depends(authUtils.validate_access_token)
-) -> dict:
+async def place_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     res = fetchDBJson(
         Template(
             "select balance from users where username = '$username'"
@@ -709,8 +746,7 @@ async def place_bet(
 
 
 @app.post("/api/createUser")
-async def add_user(user: dict) -> dict:
-
+async def add_user(user: dict):
     # hashed = authUtils.create_hashed_password(user["password"])
     hashed = bcrypt.hashpw(bytes(user["password"], encoding="utf-8"), bcrypt.gensalt())
     res = insertDB(
@@ -726,3 +762,29 @@ async def add_user(user: dict) -> dict:
         )
     )
     return {"userCreated": True}
+
+
+@app.post("/api/updatePassword")
+async def update_password(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    # hashed = authUtils.create_hashed_password(user["password"])
+    try:
+        hashed = bcrypt.hashpw(
+            bytes(payload["password"], encoding="utf-8"), bcrypt.gensalt()
+        )
+
+        update_password = Template(
+            "update users set password = $password where user_id = $user_id"
+        ).safe_substitute(
+            {"password": hashed.decode("utf-8"), "user_id": int(token["user_id"])}
+        )
+        cursor = connection.cursor()
+        cursor.execute(update_password)
+        connection.commit()
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not update password"
+        )
+    else:
+        return {"userCreated": True}
