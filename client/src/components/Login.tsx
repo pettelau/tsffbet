@@ -150,7 +150,11 @@ function Login() {
 
         const resp = await response.json();
         if (response.ok) {
-          toggleAlert(true, "Passord ble oppdatert! Du kan nå logge inn på nytt med det nye passordet", "success");
+          toggleAlert(
+            true,
+            "Passord ble oppdatert! Du kan nå logge inn på nytt med det nye passordet",
+            "success"
+          );
           setOpen(false);
           setNewPassword("");
           setConfirmNewPassword("");
@@ -349,18 +353,26 @@ function Login() {
                 >
                   <b> Logg inn </b>
                 </Button>
+                <br />
+                Glemt passord? <br />
+                Lau kan gi deg et midlertidig passord som du kan oppdatere
+                etterpå.
               </div>
               <div>
+                <br />
                 <Button
+                  variant="contained"
                   id="register-button"
                   component={Link}
                   to="/UserReg"
                   sx={{
-                    color: "#1d2528",
+                    color: "#ffffff",
+                    backgroundColor: "#1d2528",
                     mt: 2,
+                    mb: 2,
                     ":hover": {
                       color: "#ffffff",
-                      backgroundColor: "#1d2528",
+                      backgroundColor: "#636e72",
                     },
                   }}
                 >
