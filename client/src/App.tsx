@@ -28,6 +28,8 @@ import Dictionary from "./components/Dictionary";
 import BetFeed from "./components/Betting/BetFeed";
 import UserProfile from "./components/UserProfile";
 import Competition from "./components/Competition";
+import BondeBridge from "./components/BondeBridge/BondeBridge";
+import BondeBridgeHome from "./components/BondeBridge/BondeBridgeHome";
 
 const THEME = createTheme({
   typography: {
@@ -69,6 +71,7 @@ export default function App() {
 
   useEffect(() => {
     if (localStorage.getItem("jwt") !== "") {
+      console.log("Her");
       loginDetails();
     }
   }, []);
@@ -90,6 +93,8 @@ export default function App() {
               <Route path="dictionary" element={<Dictionary />} />
               <Route path="betfeed" element={<BetFeed />} />
               <Route path="competition" element={<Competition />} />
+              <Route path="bondebridge/:game_id" element={<BondeBridge />} />
+              <Route path="bondebridge" element={<BondeBridgeHome />} />
               <Route path="user/:username" element={<UserProfile />} />
               <Route path="admin" element={<AdminHome />} />
               <Route path="admin/newbet" element={<NewBet />} />

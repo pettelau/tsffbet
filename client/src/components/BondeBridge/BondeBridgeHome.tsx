@@ -1,0 +1,582 @@
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Chip,
+  Divider,
+  Fab,
+  FormControl,
+  Grid,
+  Input,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Select,
+  SelectChangeEvent,
+  Snackbar,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  BondeUser,
+  Player,
+  PlayerScore,
+  Prizes,
+  Round,
+  Game,
+  GamePlayer,
+  PlayerPreGame,
+} from "../../types";
+import { useAppSelector } from "../../redux/hooks";
+import { selectPath } from "../../redux/envSlice";
+
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import Alert from "@mui/material/Alert";
+import { IconButton } from "@mui/material";
+import { InfoOutlined, Person } from "@mui/icons-material";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import CloseIcon from "@mui/icons-material/Close";
+
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
+
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Pie } from "react-chartjs-2";
+import { useNavigate, useParams } from "react-router-dom";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+
+export default function BondeBridgeHome() {
+  const navigate = useNavigate();
+
+  const url_path = useAppSelector(selectPath);
+
+  const [newPlayerModalOpen, setNewPlayerModalOpen] =
+    React.useState<boolean>(false);
+  const handleNewPlayerClose = () => setNewPlayerModalOpen(false);
+
+  const [newGameModalOpen, setNewGameModalOpen] =
+    React.useState<boolean>(false);
+  const handleNewGameClose = () => setNewGameModalOpen(false);
+
+  const [moneyMultiplier, setMoneyMultiplier] = useState<number>(2);
+  const [extraCostLoser, setExtraCostLoser] = useState<number>(100);
+  const [extraCostSecondLast, setExtraCostSecondLast] = useState<number>(50);
+
+  const [users, setUsers] = useState<BondeUser[]>([]);
+
+  const [players, setPlayers] = useState<PlayerPreGame[]>([]);
+
+  const [games, setGames] = useState<Game[]>([]);
+
+  const [dealerIndex, setDealerIndex] = useState<number>(0);
+
+  const [alertOpen, setAlertOpen] = useState<boolean>(false);
+
+  // const NUMBER_OF_ROUNDS = 3;
+  const NUMBER_OF_ROUNDS = Math.floor(52 / players.length);
+
+  const [nickname, setNickname] = useState<string>("");
+  const [error, setError] = useState<null | string>(null);
+
+  async function initGame() {
+    try {
+      // Step 1: Create a new game and get the game ID
+      const gameResponse = await fetch(`${url_path}api/bonde/game`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          players: players.map((p) => p.player_id),
+          extra_cost_loser: extraCostLoser,
+          extra_cost_second_last: extraCostSecondLast,
+          money_multiplier: moneyMultiplier,
+        }),
+      });
+      const { game_id, created_on, game_player_ids } =
+        await gameResponse.json();
+
+      const updatedPlayers = players.map((player, index) => ({
+        ...player,
+        game_player_id: game_player_ids[index],
+      }));
+
+      setPlayers(updatedPlayers);
+
+      // Steps 2 and 3: Generate rounds and send them to the backend
+      let tempRounds = generateRounds(); // Function to generate empty rounds
+      console.log(JSON.stringify({ game_id, rounds: tempRounds }));
+      const roundsResponse = await fetch(`${url_path}api/bonde/rounds`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          game_id: game_id,
+          rounds: tempRounds,
+          num_players: players.length,
+        }),
+      });
+
+      const { created } = await roundsResponse.json();
+      if (created) {
+        handleSnackClick();
+        fetchGames();
+        setValue(0);
+        setPlayers([]);
+      }
+    } catch (error) {
+      console.error("Error initializing game:", error);
+    }
+  }
+
+  function generateRounds() {
+    let _dealerIndex = dealerIndex;
+    let tempRounds: Round[] = [];
+    let tempPlayerScores: PlayerScore[] = [];
+    for (let i = 0; i < players.length; i++) {
+      tempPlayerScores.push({
+        player_scores_id: undefined,
+        num_tricks: null,
+        stand: null,
+      });
+    }
+    // Down rounds
+    for (let j = NUMBER_OF_ROUNDS; j > 1; j--) {
+      tempRounds.push({
+        round_id: null,
+        dealer_index: _dealerIndex % players.length,
+        num_cards: j,
+        locked: false,
+        player_scores: tempPlayerScores,
+      });
+      _dealerIndex += 1;
+    }
+
+    // Up rounds
+    for (let k = 2; k < NUMBER_OF_ROUNDS + 1; k++) {
+      tempRounds.push({
+        round_id: null,
+        dealer_index: _dealerIndex % players.length,
+        num_cards: k,
+        locked: false,
+        player_scores: tempPlayerScores,
+      });
+      _dealerIndex += 1;
+    }
+    return tempRounds;
+  }
+
+  const handleAddPlayer = async () => {
+    try {
+      const response = await fetch(`${url_path}api/bonde/adduser`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nickname }),
+      });
+      const data = await response.json();
+
+      if (data.addUser === false) {
+        setError(data.errorMsg);
+      } else {
+        setError(null);
+        setNickname("");
+        setNewPlayerModalOpen(false);
+        fetchUsers();
+        // Refetch users below
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+      console.error(err);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${url_path}api/bonde/users`);
+      const data = await response.json();
+      setUsers(data.users);
+      console.log(data.users);
+    } catch (err) {
+      setError("Kunne ikke hente brukere");
+      console.error(err);
+    }
+  };
+
+  const fetchGames = async () => {
+    try {
+      const response = await fetch(`${url_path}api/bonde/games`);
+      const data = await response.json();
+      setGames(data.games);
+      console.log(data.games);
+    } catch (err) {
+      setError("Noe gikk galt. Kunne ikke hente eksisterende spill");
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchGames();
+  }, []);
+
+  const handlePlayerSelect = (event: any, newValues: BondeUser[] | null) => {
+    // Convert the BondeUser to Player type with score initialized to 0
+    if (newValues) {
+      const newPlayers = newValues.map((user) => ({
+        player_id: user.player_id,
+        game_player_id: undefined,
+        nickname: user.nickname,
+        score: 0,
+      }));
+      setPlayers(newPlayers);
+    } else {
+      setPlayers([]); // clear the selected players if newValues is null
+    }
+  };
+
+  // TAB MENU
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  // SUCCESS SNACKBAR
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
+  const [snackOpen, setSnackOpen] = React.useState(false);
+
+  const handleSnackClick = () => {
+    setSnackOpen(true);
+  };
+
+  const handleSnackClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setSnackOpen(false);
+  };
+
+  return (
+    <>
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackClose}
+      >
+        <Alert
+          onClose={handleSnackClose}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Spillet ble opprettet!
+        </Alert>
+      </Snackbar>
+      <div id="rules">
+        <br />
+        <h1>LauBet Bondebridge</h1>
+        <Divider />
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            centered
+            value={value}
+            onChange={handleChange}
+            aria-label="basic tabs example"
+          >
+            <Tab label="Eksisterende spill" {...a11yProps(0)} />
+            <Tab label="Lag nytt spill" {...a11yProps(1)} />
+          </Tabs>
+        </Box>
+        <CustomTabPanel value={value} index={0}>
+          {games.map((game) => {
+            return (
+              <Card
+                style={{
+                  margin: "20px",
+                  backgroundColor:
+                    game.status == "in-progress" ? "#B2FFF9" : "#D4E6EC",
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h5">Game ID: {game.game_id}</Typography>
+                  <Typography variant="body1">Status: {game.status}</Typography>
+                  <Typography variant="body1">
+                    Multiplikator: <b>{game.money_multiplier}</b>
+                  </Typography>
+                  <Typography variant="body1">
+                    Ekstra kostnad (Taper): <b>{game.extra_cost_loser}</b>
+                  </Typography>
+                  <Typography variant="body1">
+                    Ekstra kostnad (Nest sist):{" "}
+                    <b>{game.extra_cost_second_last}</b>
+                  </Typography>
+                  <Typography variant="body1">
+                    Opprettet:{" "}
+                    <b>{new Date(game.created_on).toLocaleString()}</b>
+                  </Typography>
+                  <br />
+                  <Grid
+                    container
+                    justifyContent="center"
+                    spacing={1}
+                    style={{ display: "flex", flexWrap: "wrap" }}
+                  >
+                    {game.players.map((player: GamePlayer, index) => (
+                      <Grid item key={index}>
+                        <Chip label={`${player.nickname}, ${player.score}`} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <br />
+                  <Grid>
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        navigate(`/bondebridge/${game.game_id}`);
+                      }}
+                    >
+                      Gå til runde
+                    </Button>
+                  </Grid>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={1}>
+          <div id="rules">
+            <Button
+              onClick={() => {
+                setNewPlayerModalOpen(true);
+              }}
+              variant="outlined"
+              startIcon={<PersonAddIcon />}
+            >
+              Legg til ny bruker i databasen
+            </Button>
+            <br />
+            <br />
+            <div
+              style={{
+                maxWidth: "90%",
+                width: "100%",
+                margin: "auto",
+              }}
+            >
+              <Autocomplete
+                multiple
+                filterSelectedOptions
+                options={users}
+                getOptionLabel={(option) => option.nickname}
+                onChange={handlePlayerSelect}
+                value={players} // Map selected players to BondeUser type for Autocomplete
+                isOptionEqualToValue={(option, value) =>
+                  option.player_id === value.player_id
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Legg til spillere for denne runden"
+                    variant="outlined"
+                  />
+                )}
+              />
+            </div>
+            <br />
+            <div
+              style={{
+                maxWidth: "60%",
+                width: "100%",
+                margin: "auto",
+              }}
+            >
+              {" "}
+              <Alert variant="outlined" severity="info">
+                Husk å legge til spillerne i den rekkefølgen dere sitter
+              </Alert>
+            </div>
+            {players.length > 2 ? (
+              <>
+                <br />
+                <TextField
+                  size="small"
+                  label="Differanse ganges med"
+                  type="number"
+                  value={moneyMultiplier}
+                  onChange={(e) => {
+                    setMoneyMultiplier(Number(e.target.value));
+                  }}
+                />
+                <br />
+                <br />
+                <TextField
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">kr</InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  label={`Sum ${players.length}. plass til 1. plass`}
+                  type="number"
+                  value={extraCostLoser}
+                  onChange={(e) => {
+                    setExtraCostLoser(Number(e.target.value));
+                  }}
+                />
+              </>
+            ) : (
+              ""
+            )}
+            {players.length > 3 ? (
+              <>
+                <br />
+                <br />
+                <TextField
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">kr</InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  label={`Sum ${players.length - 1}. plass til 2. plass`}
+                  type="number"
+                  value={extraCostSecondLast}
+                  onChange={(e) => {
+                    setExtraCostSecondLast(Number(e.target.value));
+                  }}
+                />
+                <br />
+              </>
+            ) : (
+              ""
+            )}
+            {players.length > 2 ? (
+              <>
+                <br />
+                <br />
+                <FormControl sx={{ minWidth: 210 }}>
+                  <InputLabel id="dealer-select-label">
+                    Dealer første runde
+                  </InputLabel>
+                  <Select
+                    size="small"
+                    labelId="dealer-select-label"
+                    id="dealer-select"
+                    value={players[dealerIndex].nickname}
+                    label="Dealer første runde"
+                    defaultValue="hello"
+                    onChange={(event: SelectChangeEvent) => {
+                      setDealerIndex(
+                        players.findIndex(
+                          (player) => player.nickname === event.target.value
+                        )
+                      );
+                    }}
+                  >
+                    {players.map((player: PlayerPreGame, index: number) => {
+                      return (
+                        <MenuItem value={player.nickname}>
+                          {player.nickname}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+                <br />
+              </>
+            ) : (
+              ""
+            )}
+            <br />
+            <Button
+              disabled={players.length < 3}
+              variant="contained"
+              onClick={() => {
+                initGame();
+              }}
+            >
+              Opprett spill!
+            </Button>
+            <br />
+          </div>
+        </CustomTabPanel>
+
+        <Modal open={newPlayerModalOpen} onClose={handleNewPlayerClose}>
+          <>
+            <div id="rules">
+              {error && <Alert severity="error">{error}</Alert>}
+              <br />
+              <h2>Legg til ny bruker i databasen</h2>
+              <TextField
+                size="small"
+                label="BB-brukernavn"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+              />
+              <br />
+              <br />
+              <Button variant="contained" onClick={handleAddPlayer}>
+                Legg til bruker
+              </Button>
+            </div>
+          </>
+        </Modal>
+      </div>
+    </>
+  );
+}
