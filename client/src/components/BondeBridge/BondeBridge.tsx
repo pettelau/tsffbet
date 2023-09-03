@@ -355,7 +355,7 @@ export default function BondeBridge() {
 
     let loopTo = halfway
       ? Math.min(currentRoundIndex, sortedRounds.length / 2)
-      : currentRoundIndex+1;
+      : currentRoundIndex + 1;
     for (let j = 0; j < loopTo; j++) {
       if (sortedRounds[j].player_scores[i].stand) {
         playerScore +=
@@ -648,8 +648,8 @@ export default function BondeBridge() {
             {showGif && (
               <div className="modalOverlay">
                 <img
-                  src={`/bm2.gif`}
-                  // src={`/bm${Math.floor(Math.random() * 17) + 1}.gif`}
+                  // src={`/bm2.gif`}
+                  src={`/bm${Math.floor(Math.random() * 13) + 1}.gif`}
                   alt="Description of GIF"
                 />
               </div>
@@ -864,6 +864,54 @@ export default function BondeBridge() {
                                         justifyContent: "center",
                                       }}
                                     >
+                                      {round.player_scores.some(
+                                        (playerScore) =>
+                                          playerScore.stand === null
+                                      ) ? (
+                                        ""
+                                      ) : round.player_scores.reduce(
+                                          (total, playerScore) =>
+                                            total +
+                                            (playerScore.num_tricks || 0),
+                                          0
+                                        ) > round.num_cards ? (
+                                        <div
+                                          style={{
+                                            backgroundColor:
+                                              "rgba(255, 178, 64, 0.7)",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "right",
+                                          }}
+                                        >
+                                          {round.player_scores.reduce(
+                                            (total, playerScore) =>
+                                              total +
+                                              (playerScore.num_tricks || 0),
+                                            0
+                                          ) - round.num_cards}{" "}
+                                          ⬆
+                                        </div>
+                                      ) : (
+                                        <div
+                                          style={{
+                                            backgroundColor:
+                                              "rgba(173, 216, 230, 0.7)",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "right",
+                                          }}
+                                        >
+                                          {round.num_cards -
+                                            round.player_scores.reduce(
+                                              (total, playerScore) =>
+                                                total +
+                                                (playerScore.num_tricks || 0),
+                                              0
+                                            )}{" "}
+                                          ⬇
+                                        </div>
+                                      )}
                                       <IconButton
                                         onClick={() => {
                                           setResultOpen(true);
