@@ -884,6 +884,7 @@ async def get_users():
     #     return HTTPException(
     #         status_code=500, detail="Something wrong. Could not fetch games"
     #     )
+    print({"games": games})
     return {"games": games}
 
 
@@ -919,13 +920,15 @@ async def get_game(game_id: int):
 
 @app.get("/api/bonde/users")
 async def get_users():
-    try:
-        query = "SELECT player_id, nickname FROM bonde_users;"
-        users = fetchDBJsonNew(query)
-    except Exception as e:
-        return HTTPException(
-            status_code=500, detail="Something wrong. Could not fetch users"
-        )
+    # try:
+    query = "SELECT player_id, nickname FROM bonde_users;"
+    users = fetchDBJsonNew(query)
+    print({"users": users})
+
+    # except Exception as e:
+    #     return HTTPException(
+    #         status_code=500, detail="Something wrong. Could not fetch users"
+    #     )
     return {"users": users}
 
 
