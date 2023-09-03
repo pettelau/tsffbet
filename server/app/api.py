@@ -921,7 +921,7 @@ async def get_game(game_id: int):
 async def get_users():
     try:
         query = "SELECT player_id, nickname FROM bonde_users;"
-        users = fetchDBJson(query)
+        users = fetchDBJsonNew(query)
     except Exception as e:
         return HTTPException(
             status_code=500, detail="Something wrong. Could not fetch users"
