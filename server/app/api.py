@@ -865,20 +865,20 @@ async def get_users():
     games = fetchDBJsonNew(query)
 
     # Loop through each game and get the players for that game
-    # if games:
-    for game in games:
-        players_query = """
-            SELECT game_players.player_id, game_player_id, nickname, score
-            FROM games 
-            NATURAL JOIN game_players 
-            LEFT JOIN bonde_users ON game_players.player_id = bonde_users.player_id 
-            WHERE game_id = %s;
-        """
-        players_result = fetchDBJsonNew(players_query, (game["game_id"],))
-        game["players"] = [
-            {"nickname": player["nickname"], "score": player["score"]}
-            for player in players_result
-        ]
+    if games:
+        for game in games:
+            players_query = """
+                SELECT game_players.player_id, game_player_id, nickname, score
+                FROM games 
+                NATURAL JOIN game_players 
+                LEFT JOIN bonde_users ON game_players.player_id = bonde_users.player_id 
+                WHERE game_id = %s;
+            """
+            players_result = fetchDBJsonNew(players_query, (game["game_id"],))
+            game["players"] = [
+                {"nickname": player["nickname"], "score": player["score"]}
+                for player in players_result
+            ]
 
     # except Exception as e:
     #     return HTTPException(
