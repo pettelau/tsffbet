@@ -139,7 +139,6 @@ async def get_leaderboard(
     token: str = Depends(authUtils.validate_access_token),
 ):
     leaderboard_data = []
-    print("inside leaderboard")
     try:
         users = fetchDBJson("select username, user_id, balance from users")
         for user in users:
@@ -237,8 +236,6 @@ async def add_to_dictionary(
 async def update_comp(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
 ):
-    print("her")
-    print(payload)
 
     try:
         cursor = connection.cursor()
@@ -272,7 +269,6 @@ async def get_accums(token: str = Depends(authUtils.validate_access_token)):
 
         accum["accumBets"] = accum_options
         accums_with_options.append(accum)
-    print(accums_with_options)
     return accums_with_options
 
 
@@ -294,7 +290,6 @@ async def get_accums(user, token: str = Depends(authUtils.validate_access_token)
 
         accum["accumBets"] = accum_options
         accums_with_options.append(accum)
-    print(accums_with_options)
     return accums_with_options
 
 
@@ -324,7 +319,6 @@ async def get_accums(token: str = Depends(authUtils.validate_access_token)):
 
         accum["accumBets"] = accum_options
         accums_with_options.append(accum)
-    print(accums_with_options)
     return accums_with_options
 
 
@@ -550,7 +544,6 @@ async def reset_password(
 ):
     if is_admin(token["user"]):
         try:
-            print("payload", payload)
             hashed = bcrypt.hashpw(
                 bytes(payload["new_password"], encoding="utf-8"), bcrypt.gensalt()
             )
@@ -560,7 +553,6 @@ async def reset_password(
             ).safe_substitute(
                 {"password": hashed.decode("utf-8"), "user_id": payload["user_id"]}
             )
-            print(update_password)
             cursor = connection.cursor()
             cursor.execute(update_password)
             connection.commit()
@@ -605,7 +597,6 @@ async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_t
         # close_date = parser.parse(bet["close_date"]).replace(
         #     tzinfo=ZoneInfo("Europe/Berlin")
         # )
-        # print(bet["close_date"].astimezone(pytz.timezone("Europe/Oslo")))
         # create bet
         cursor = connection.cursor()
         query1 = Template(
@@ -884,7 +875,6 @@ async def get_users():
     #     return HTTPException(
     #         status_code=500, detail="Something wrong. Could not fetch games"
     #     )
-    print({"games": games})
     return {"games": games}
 
 
@@ -923,7 +913,6 @@ async def get_users():
     # try:
     query = "SELECT player_id, nickname FROM bonde_users;"
     users = fetchDBJsonNew(query)
-    print({"users": users})
 
     # except Exception as e:
     #     return HTTPException(
@@ -1014,7 +1003,6 @@ async def update_round(data: dict):
         #     ),
         # )
         # Update player_scores
-        print(data)
         for round in data["rounds"]:
             for player_score in round["player_scores"]:
                 cursor.execute(
@@ -1038,7 +1026,6 @@ async def update_round(data: dict):
 async def update_player_scores(data: dict):
     # Connect to the database
     try:
-        print(data)
         cursor = connection.cursor()
 
         # Update player_scores
