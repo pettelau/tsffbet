@@ -4,13 +4,11 @@ import {
   Button,
   Card,
   CardContent,
-  Checkbox,
   Chip,
   Divider,
   Fab,
   FormControl,
   Grid,
-  Input,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -18,7 +16,6 @@ import {
   Select,
   SelectChangeEvent,
   Snackbar,
-  Stack,
   Tab,
   Tabs,
   TextField,
@@ -27,9 +24,7 @@ import {
 import React, { useEffect, useState } from "react";
 import {
   BondeUser,
-  Player,
   PlayerScore,
-  Prizes,
   Round,
   Game,
   GamePlayer,
@@ -38,23 +33,12 @@ import {
 import { useAppSelector } from "../../redux/hooks";
 import { selectPath } from "../../redux/envSlice";
 
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Alert from "@mui/material/Alert";
-import { IconButton } from "@mui/material";
-import { InfoOutlined, Person } from "@mui/icons-material";
+
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import CloseIcon from "@mui/icons-material/Close";
 
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Pie } from "react-chartjs-2";
 import { useNavigate, useParams } from "react-router-dom";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -117,7 +101,6 @@ export default function BondeBridgeHome() {
 
   const [dealerIndex, setDealerIndex] = useState<number>(0);
 
-  const [alertOpen, setAlertOpen] = useState<boolean>(false);
 
   // const NUMBER_OF_ROUNDS = 3;
   const NUMBER_OF_ROUNDS = Math.floor(52 / players.length);
@@ -150,7 +133,6 @@ export default function BondeBridgeHome() {
 
       // Steps 2 and 3: Generate rounds and send them to the backend
       let tempRounds = generateRounds(); // Function to generate empty rounds
-      console.log(JSON.stringify({ game_id, rounds: tempRounds }));
       const roundsResponse = await fetch(`${url_path}api/bonde/rounds`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,7 +223,6 @@ export default function BondeBridgeHome() {
       const response = await fetch(`${url_path}api/bonde/users`);
       const data = await response.json();
       setUsers(data.users);
-      console.log(data.users);
     } catch (err) {
       setError("Kunne ikke hente brukere");
       console.error(err);
@@ -253,7 +234,6 @@ export default function BondeBridgeHome() {
       const response = await fetch(`${url_path}api/bonde/games`);
       const data = await response.json();
       setGames(data.games);
-      console.log(data.games);
     } catch (err) {
       setError("Noe gikk galt. Kunne ikke hente eksisterende spill");
       console.error(err);
