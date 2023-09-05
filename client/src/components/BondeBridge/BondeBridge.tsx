@@ -41,6 +41,7 @@ import { InfoOutlined, Person } from "@mui/icons-material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const style = {
   position: "absolute" as "absolute",
@@ -55,6 +56,7 @@ const style = {
 };
 
 export default function BondeBridge() {
+  const navigate = useNavigate();
   const params = useParams();
   const GAME_ID = params.game_id;
 
@@ -661,7 +663,7 @@ export default function BondeBridge() {
                   <TableRow>
                     <>
                       <TableCell>
-                        <b>#Kort</b>
+                        <b>#</b>
                       </TableCell>
                       {players
                         .sort((a, b) => a.game_player_id - b.game_player_id)
@@ -724,37 +726,12 @@ export default function BondeBridge() {
                                   <TableCell
                                     align="center"
                                     sx={{
-                                      width: 500,
-                                      // backgroundColor:
-                                      //   score.stand === false ? "#ff9d96" : "",
+                                      width: 300,
                                       backgroundColor: backgroundColor,
                                     }}
                                   >
                                     {currentRoundIndex === roundIndex &&
                                     currentGame?.status !== "finished" ? (
-                                      // <Select
-                                      //   sx={{ width: 61 }}
-                                      //   size="small"
-                                      //   disabled={
-                                      //     round.locked ||
-                                      //     (reBitState &&
-                                      //       round.dealer_index !== playerIndex)
-                                      //   }
-                                      //   value={
-                                      //     rounds[roundIndex].player_scores[
-                                      //       playerIndex
-                                      //     ].num_tricks
-                                      //   }
-                                      //   onChange={(event) =>
-                                      //     handleTrickChange(
-                                      //       event?.target.value,
-                                      //       roundIndex,
-                                      //       playerIndex
-                                      //     )
-                                      //   }
-                                      // >
-                                      //   {returnMenuItems(round.num_cards)}
-                                      // </Select>
                                       <div>
                                         <button
                                           id="button-bonde"
@@ -796,46 +773,7 @@ export default function BondeBridge() {
                                           +
                                         </button>
                                       </div>
-                                    ) : // <div>
-                                    //   <button
-                                    //     disabled={
-                                    //       round.locked ||
-                                    //       (reBitState &&
-                                    //         round.dealer_index !==
-                                    //           playerIndex) ||
-                                    //       numTricks <= 0
-                                    //     }
-                                    //     onClick={() =>
-                                    //       handleTrickChange(
-                                    //         numTricks - 1,
-                                    //         roundIndex,
-                                    //         playerIndex
-                                    //       )
-                                    //     }
-                                    //   >
-                                    //     -
-                                    //   </button>
-                                    //   <span>{numTricks}</span>
-                                    //   <button
-                                    //     disabled={
-                                    //       round.locked ||
-                                    //       (reBitState &&
-                                    //         round.dealer_index !==
-                                    //           playerIndex) ||
-                                    //       numTricks >= round.num_cards
-                                    //     }
-                                    //     onClick={() =>
-                                    //       handleTrickChange(
-                                    //         numTricks + 1,
-                                    //         roundIndex,
-                                    //         playerIndex
-                                    //       )
-                                    //     }
-                                    //   >
-                                    //     +
-                                    //   </button>
-                                    // </div>
-                                    score.num_tricks !== null ? (
+                                    ) : score.num_tricks !== null ? (
                                       10 + Math.pow(score.num_tricks, 2)
                                     ) : (
                                       ""
@@ -850,7 +788,7 @@ export default function BondeBridge() {
                             <>
                               <TableCell
                                 sx={{
-                                  width: 50,
+                                  width: 100,
                                   margin: "auto",
                                 }}
                               >
@@ -864,17 +802,25 @@ export default function BondeBridge() {
                                         justifyContent: "center",
                                       }}
                                     >
-                                      {round.player_scores.some(
-                                        (playerScore) =>
-                                          playerScore.stand === null
-                                      ) ? (
-                                        ""
-                                      ) : round.player_scores.reduce(
-                                          (total, playerScore) =>
-                                            total +
-                                            (playerScore.num_tricks || 0),
-                                          0
-                                        ) > round.num_cards ? (
+                                      <IconButton 
+                                        onClick={() => {
+                                          setResultOpen(true);
+                                        }}
+                                      >
+                                        ✅
+                                      </IconButton>
+                                      <IconButton
+                                        onClick={() => {
+                                          handleLockRound(round);
+                                        }}
+                                      >
+                                        ↩️
+                                      </IconButton>
+                                      {round.player_scores.reduce(
+                                        (total, playerScore) =>
+                                          total + (playerScore.num_tricks || 0),
+                                        0
+                                      ) > round.num_cards ? (
                                         <div
                                           style={{
                                             backgroundColor:
@@ -912,21 +858,6 @@ export default function BondeBridge() {
                                           ⬇
                                         </div>
                                       )}
-                                      <IconButton
-                                        onClick={() => {
-                                          setResultOpen(true);
-                                        }}
-                                      >
-                                        ✅
-                                      </IconButton>
-                                      <br />
-                                      <IconButton
-                                        onClick={() => {
-                                          handleLockRound(round);
-                                        }}
-                                      >
-                                        ↩️
-                                      </IconButton>
                                     </div>
                                   </>
                                 ) : (
@@ -1059,14 +990,26 @@ export default function BondeBridge() {
               </Table>
             </TableContainer>
             {currentGame?.status === "finished" ? (
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setFinalModalOpen(true);
-                }}
-              >
-                Se resultat
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setFinalModalOpen(true);
+                  }}
+                >
+                  Se resultat
+                </Button>
+                <br />
+                <br />
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    navigate("/bondebridge");
+                  }}
+                >
+                  Tilbake til meny
+                </Button>
+              </>
             ) : (
               ""
             )}
