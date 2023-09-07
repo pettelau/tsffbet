@@ -232,11 +232,62 @@ async def add_to_dictionary(
         raise HTTPException(status_code=403, detail="Something went wrong")
 
 
+@app.put("/api/dictionary/updateword")
+async def update_dictionary(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    print(payload)
+    try:
+        if token["user"].lower() == payload["submitter"].lower() or is_admin(
+            token["user"]
+        ):
+            if isinstance(payload["frequency"], int):
+                cursor = connection.cursor()
+                query = Template(
+                    "update dictionary set word='$word', frequency=$frequency, description='$description' where word_id=$word_id;"
+                ).safe_substitute(
+                    {
+                        "word": payload["word"],
+                        "frequency": payload["frequency"],
+                        "description": payload["description"],
+                        "word_id": payload["word_id"],
+                    }
+                )
+                cursor.execute(query)
+                connection.commit()
+                return {"updatedWord": True}
+            else:
+                raise HTTPException(
+                    status_code=422, detail="Frequency must be an integer"
+                )
+        else:
+            raise HTTPException(
+                status_code=403, detail="You cannot update another person's word"
+            )
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.delete("/api/dictionary/deleteword/{word_id}")
+async def delete_in_dictionary(
+    word_id: str, token: str = Depends(authUtils.validate_access_token)
+):
+    try:
+        cursor = connection.cursor()
+        query = Template(
+            "delete from dictionary where word_id=$word_id"
+        ).safe_substitute({"word_id": word_id})
+        cursor.execute(query)
+        connection.commit()
+        return {"deleteWord": True}
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Could not delete word")
+
+
 @app.post("/api/updatecompetition")
 async def update_comp(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
 ):
-
     try:
         cursor = connection.cursor()
         query = Template(
