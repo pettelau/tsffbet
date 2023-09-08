@@ -7,15 +7,15 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.5",
-    "@mui/styles": "^5.14.5",
+    "@mui/styles": "^5.14.7",
     "@mui/x-date-pickers": "^6.11.1",
     "@reduxjs/toolkit": "^1.9.5",
-    "@testing-library/jest-dom": "^6.0.0",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.4.3",
-    "@types/jest": "^29.5.3",
-    "@types/node": "^20.5.0",
-    "@types/react": "^18.2.20",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.48",
+    "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
@@ -31,8 +31,10 @@
     "react-router-dom": "^6.15.0",
     "react-scripts": "5.0.1",
     "reactflow": "^11.8.3",
+    "recharts": "^2.8.0",
     "redux": "^4.2.1",
-    "web-vitals": "^3.4.0"
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -61,7 +63,7 @@
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",
     "ts-loader": "^9.4.4",
-    "typescript": "^5.1.6",
+    "typescript": "^4.9.5",
     "webpack-cli": "^5.1.4"
   }
 }
