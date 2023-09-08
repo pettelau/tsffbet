@@ -29,19 +29,21 @@ import {
   Game,
   GamePlayer,
   PlayerPreGame,
+  Stats,
+  SimplePieChartProps,
+  PositiveAndNegativeBarChartProps,
 } from "../../types";
 import { useAppSelector } from "../../redux/hooks";
 import { selectPath } from "../../redux/envSlice";
-
-
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { useNavigate, useParams } from "react-router-dom";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
+import GaugeWithNeedle, {
+  PositiveAndNegativeBarChart,
+  SimplePieChart,
+} from "./StatsCharts";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -93,6 +95,8 @@ export default function BondeBridgeHome() {
   const [extraCostLoser, setExtraCostLoser] = useState<number>(100);
   const [extraCostSecondLast, setExtraCostSecondLast] = useState<number>(50);
 
+  const [stats, setStats] = useState<Stats>();
+
   const [users, setUsers] = useState<BondeUser[]>([]);
 
   const [players, setPlayers] = useState<PlayerPreGame[]>([]);
@@ -100,7 +104,6 @@ export default function BondeBridgeHome() {
   const [games, setGames] = useState<Game[]>([]);
 
   const [dealerIndex, setDealerIndex] = useState<number>(0);
-
 
   // const NUMBER_OF_ROUNDS = 3;
   const NUMBER_OF_ROUNDS = Math.floor(52 / players.length);
@@ -240,9 +243,22 @@ export default function BondeBridgeHome() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${url_path}api/bonde/stats`);
+      const data = await response.json();
+      console.log(data);
+      setStats(data as Stats);
+    } catch (err) {
+      setError("Noe gikk galt. Kunne ikke hente eksisterende spill");
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchGames();
+    fetchStats();
   }, []);
 
   const handlePlayerSelect = (event: any, newValues: BondeUser[] | null) => {
@@ -320,6 +336,7 @@ export default function BondeBridgeHome() {
           >
             <Tab label="Eksisterende spill" {...a11yProps(0)} />
             <Tab label="Lag nytt spill" {...a11yProps(1)} />
+            <Tab label="Statistikk" {...a11yProps(2)} />
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0}>
@@ -403,6 +420,7 @@ export default function BondeBridgeHome() {
                 filterSelectedOptions
                 options={users}
                 getOptionLabel={(option) => option.nickname}
+                //@ts-ignore
                 onChange={handlePlayerSelect}
                 value={players} // Map selected players to BondeUser type for Autocomplete
                 isOptionEqualToValue={(option, value) =>
@@ -533,6 +551,30 @@ export default function BondeBridgeHome() {
               Opprett spill!
             </Button>
             <br />
+          </div>
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={2}>
+          <div id="stats">
+            {stats ? (
+              <>
+                <h2>UNDERMELDT VS OVERMELDT</h2>
+                <SimplePieChart
+                  data={[
+                    { name: "Undermeldt", value: stats.perc_underbid },
+                    { name: "Overmeldt", value: 100 - stats.perc_underbid },
+                  ]}
+                />
+                <h2>GJ.SNITT OVER/UNDERMELDT PER ANTALL KORT</h2>
+                <PositiveAndNegativeBarChart data={stats.avg_diffs} />
+                <h2 >GJENNOMSNITTLIG <br />UNDERMELDT/OVERMELDT:</h2>
+<div style={{marginTop: -100, paddingLeft: 94}}>
+                <GaugeWithNeedle value={stats.total_avg_diff} />
+                </div>
+                <h2>{stats.total_avg_diff}</h2>
+              </>
+            ) : (
+              "Laster stats ..."
+            )}
           </div>
         </CustomTabPanel>
 

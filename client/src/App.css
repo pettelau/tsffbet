@@ -226,3 +226,34 @@ button {
 .menu, .menu * {
   font-family: 'Quicksand', sans-serif;
 }
+
+#stats {
+  margin: 20px auto;
+  text-align: center;
+  background-color: white;
+  padding-bottom: 20px;
+  border-radius: 10px;
+  max-width: 700px;
+  width: 100%; 
+  display: flex;
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.custom-tooltip {
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+}
+
+.custom-tooltip .label {
+  margin-bottom: 8px;
+}
+
+.custom-tooltip .value {
+  color: #077431;
+}
+

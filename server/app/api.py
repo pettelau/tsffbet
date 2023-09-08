@@ -929,6 +929,68 @@ async def get_users():
     return {"games": games}
 
 
+@app.get("/api/bonde/stats")
+async def get_stats():
+    # Fetching needed data from db
+    try:
+        query_rounds = """
+        SELECT round_id, SUM(num_tricks), MAX(num_cards) as num_cards
+        FROM player_scores
+        NATURAL JOIN rounds
+        WHERE stand IS NOT NULL
+        GROUP BY round_id ORDER BY num_cards DESC;
+       """
+        result1 = fetchDBJsonNew(query_rounds)
+
+        num_underbid = 0
+        num_overbid = 0
+        total_diff = 0
+
+        diffs = {}
+        counts = {}
+        chart_data = []
+        for row in result1:
+            round_id = row["round_id"]
+            sum_val = row["sum"]
+            num_cards = row["num_cards"]
+            if sum_val < num_cards:
+                num_underbid += 1
+            else:
+                num_overbid += 1
+            total_diff += sum_val - num_cards
+
+            difference = sum_val - num_cards
+
+            # Update diffs and counts dictionaries
+            if num_cards in diffs:
+                diffs[num_cards] += difference
+                counts[num_cards] += 1
+            else:
+                diffs[num_cards] = difference
+                counts[num_cards] = 1
+
+        total_avg_diff = round((total_diff / len(result1)), 1)
+        for num_cards in diffs:
+            avg_diff = round(diffs[num_cards] / counts[num_cards], 2)
+            chart_data.append({"name": str(num_cards), "value": avg_diff})
+
+        print(chart_data)
+
+        perc_underbid = round(num_underbid / len(result1) * 100, 1)
+        print(diffs)
+        return {
+            "perc_underbid": perc_underbid,
+            "total_avg_diff": total_avg_diff,
+            "avg_diffs": chart_data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
+
+    # concat the data and calculate and structure interesting stats
+
+    # send back to frontend
+
+
 @app.get("/api/bonde/game/{game_id}")
 async def get_game(game_id: int):
     try:

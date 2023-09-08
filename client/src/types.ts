@@ -209,3 +209,32 @@ export type BondeUser = {
   player_id: number;
   nickname: string;
 };
+
+export type Stats = {
+  avg_diffs: AvgDiffs[];
+  perc_underbid: number;
+  total_avg_diff: number;
+};
+
+export type AvgDiffs = {
+  name: string;
+  value: number;
+};
+
+export type PieData = {
+  name: string;
+  value: number;
+};
+
+export type SimplePieChartProps = {
+  data: PieData[];
+};
+
+export type BarChartDataItem = {
+  name: string;
+  value: number;
+};
+
+export type PositiveAndNegativeBarChartProps = {
+  data: BarChartDataItem[];
+};
