@@ -61,11 +61,6 @@ export type UserAvailability = {
   userTaken: boolean;
 };
 
-export type Team = {
-  team_id: number;
-  team_name: string;
-};
-
 export type AccumBets = {
   title: string;
   user_odds: number;
@@ -101,7 +96,6 @@ export type UserDetails = {
   balance: number;
   firstname: string;
   lastname: string;
-  associated_team: string | null;
   admin: boolean;
   created_on: Date;
 };
@@ -147,8 +141,6 @@ export type AdminUserDetails = {
 
 export type LeaderboardData = {
   username: string;
-  associated_team: string | null;
-  associated_team_id: number | null;
   balance: number;
   won_accums: number;
   total_accums: number;
@@ -159,7 +151,6 @@ export type PublicUserData = {
   firstname: string;
   lastname: string;
   last_login: undefined | Date;
-  associated_team: string | null;
 };
 
 export type Game = {

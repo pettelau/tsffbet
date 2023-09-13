@@ -2,15 +2,15 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { UserDetails } from "../types";
 import { RootState } from "./store";
 
+
 // Initial User state, all values are empty initially
 const initialState: UserDetails = {
   username: "",
   balance: 0,
   firstname: "",
   lastname: "",
-  associated_team: null,
   admin: false,
-  created_on: new Date(),
+  created_on: new Date,
 };
 
 // Redux User Slice
@@ -30,14 +30,13 @@ export const userSlice = createSlice({
       state.balance = 0;
     },
     setUserDetails: (state, action: PayloadAction<UserDetails>) => {
-      state.firstname = action.payload.firstname;
-      state.username = action.payload.username;
-      state.lastname = action.payload.lastname;
-      state.associated_team = action.payload.associated_team;
-      state.balance = action.payload.balance;
-      state.admin = action.payload.admin;
-      state.created_on = action.payload.created_on;
-    },
+      state.firstname = action.payload.firstname
+      state.username = action.payload.username
+      state.lastname = action.payload.lastname
+      state.balance = action.payload.balance
+      state.admin = action.payload.admin
+      state.created_on = action.payload.created_on
+    }
   },
 });
 
@@ -49,20 +48,10 @@ const selectUsername = (state: RootState) => state.user.username;
 const selectBalance = (state: RootState) => state.user.balance;
 const selectFirstname = (state: RootState) => state.user.firstname;
 const selectLastname = (state: RootState) => state.user.lastname;
-const selectAssociatedTeam = (state: RootState) => state.user.associated_team;
 const selectAdmin = (state: RootState) => state.user.admin;
 const selectCreatedOn = (state: RootState) => state.user.created_on;
 const selectUserState = (state: RootState) => state.user;
 
-export {
-  selectUsername,
-  selectBalance,
-  selectFirstname,
-  selectLastname,
-  selectAssociatedTeam,
-  selectAdmin,
-  selectCreatedOn,
-  selectUserState,
-};
+export { selectUsername, selectBalance, selectFirstname, selectLastname, selectAdmin, selectCreatedOn, selectUserState };
 
 export default userSlice.reducer;

@@ -15,7 +15,6 @@ import {
   selectUsername,
   selectCreatedOn,
   setUserDetails,
-  selectAssociatedTeam,
 } from "../redux/userSlice";
 import { setUsername } from "../redux/userSlice";
 import { AlertColor } from "@mui/material/Alert";
@@ -82,7 +81,6 @@ function Login() {
   const loggedInUser = useAppSelector(selectUsername);
   const firstname = useAppSelector(selectFirstname);
   const lastname = useAppSelector(selectLastname);
-  const associated_team = useAppSelector(selectAssociatedTeam);
   const balance = useAppSelector(selectBalance);
   const created_on = useAppSelector(selectCreatedOn);
 
@@ -233,9 +231,6 @@ function Login() {
               Fornavn: <b>{firstname} </b>
               <br />
               Etternavn: <b>{lastname} </b>
-              <br />
-              Tilknyttet lag:{" "}
-              <b>{associated_team ? associated_team : "ingen"} </b>
               <br />
               Saldo: <b>{balance} </b>
               <br />

@@ -1,5 +1,4 @@
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
 from fastapi import HTTPException
 from time import sleep
 from fastapi import FastAPI, Depends
@@ -10,6 +9,8 @@ from string import Template
 import bcrypt
 from .auth_utils import authUtils
 from psycopg2.extras import RealDictCursor
+import datetime
+import pytz
 from dateutil import parser
 from zoneinfo import ZoneInfo
 
@@ -58,16 +59,23 @@ def insertDB(query):
     connection.commit()
 
 
-def insertDBNew(query, values=None):
-    cursor = connection.cursor()
+# conn = psycopg2.connect(
+# host=Credentials.host,
+# database=Credentials.db,
+# user=Credentials.user,
+# password=Credentials.password,
+# )
+# # create a cursor
+# cur = conn.cursor()
 
-    # Check if there are values to parameterize, otherwise just execute the query
-    if values:
-        cursor.execute(query, values)
-    else:
-        cursor.execute(query)
 
-    connection.commit()
+# # execute a statement
+# print("PostgreSQL database version:")
+# cur.execute("SELECT * from accounts;")
+
+# # display the PostgreSQL database server version
+# db_version = cur.fetchone()
+# print(db_version)
 
 
 app = FastAPI()
@@ -103,7 +111,7 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)):
 
 
 @app.get("/api/requestedbets")
-async def get_requested_bets(token: str = Depends(authUtils.validate_access_token)):
+async def get_open_bets(token: str = Depends(authUtils.validate_access_token)):
     bets = fetchDBJson("select * from bets where is_accepted = false")
     bets_with_options = []
     for bet in bets:
@@ -118,28 +126,33 @@ async def get_requested_bets(token: str = Depends(authUtils.validate_access_toke
     return bets_with_options
 
 
+# leaderboard date range, currently not implemented
+# @app.get("/api/leaderboard/")
+# async def get_open_bets(
+#     fromDate, toDate, token: str = Depends(authUtils.validate_access_token)
+# ) :
+#     print(fromDate, toDate)
+
+
 @app.get("/api/leaderboard")
 async def get_leaderboard(
     token: str = Depends(authUtils.validate_access_token),
 ):
     leaderboard_data = []
     try:
-        users = fetchDBJsonNew(
-            "select username, user_id, balance, teams.team_name as associated_team, teams.team_id as associated_team_id from users left join teams on users.team_id = teams.team_id"
-        )
+        users = fetchDBJson("select username, user_id, balance from users")
         for user in users:
-            user_data = {
-                "username": user["username"],
-                "associated_team": user["associated_team"],
-                "associated_team_id": user["associated_team_id"],
-                "balance": user["balance"],
-            }
-            won_accums_query = (
-                "select count(*) from accums where user_id = %s and paid_out=true"
+            user_data = {"username": user["username"], "balance": user["balance"]}
+            won_accums = fetchDBJson(
+                Template(
+                    "select count(*) from accums where user_id = $user_id and paid_out=true"
+                ).safe_substitute({"user_id": user["user_id"]})
             )
-            won_accums = fetchDBJsonNew(won_accums_query, (user["user_id"],))
-            total_accums_query = "select count(*) from accums where user_id = %s"
-            total_accums = fetchDBJsonNew(total_accums_query, (user["user_id"],))
+            total_accums = fetchDBJson(
+                Template(
+                    "select count(*) from accums where user_id = $user_id"
+                ).safe_substitute({"user_id": user["user_id"]})
+            )
             user_data["won_accums"] = won_accums[0]["count"]
             user_data["total_accums"] = total_accums[0]["count"]
 
@@ -180,6 +193,113 @@ async def get_all_admin_bets(
         return bets_with_options
     else:
         raise HTTPException(status_code=403, detail="You are not admin")
+
+
+@app.get("/api/dictionary")
+async def get_dictionary(token: str = Depends(authUtils.validate_access_token)):
+    res = fetchDBJson("select * from dictionary order by word_id DESC")
+    return res
+
+
+@app.get("/api/competition")
+async def get_dictionary(token: str = Depends(authUtils.validate_access_token)):
+    res = fetchDBJson(
+        "select username, registered from users left join competition on users.user_id = competition.user_id"
+    )
+    return res
+
+
+@app.post("/api/submitword")
+async def add_to_dictionary(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    try:
+        cursor = connection.cursor()
+        query = Template(
+            "insert into dictionary(frequency, description, submitter, word) values ($frequency, '$description', '$submitter', '$word')"
+        ).safe_substitute(
+            {
+                "frequency": payload["frequency"],
+                "description": payload["description"],
+                "submitter": token["user"],
+                "word": payload["word"],
+            }
+        )
+        cursor.execute(query)
+        connection.commit()
+        return {"submitWord": True}
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.put("/api/dictionary/updateword")
+async def update_dictionary(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    print(payload)
+    try:
+        if token["user"].lower() == payload["submitter"].lower() or is_admin(
+            token["user"]
+        ):
+            if isinstance(payload["frequency"], int):
+                cursor = connection.cursor()
+                query = Template(
+                    "update dictionary set word='$word', frequency=$frequency, description='$description' where word_id=$word_id;"
+                ).safe_substitute(
+                    {
+                        "word": payload["word"],
+                        "frequency": payload["frequency"],
+                        "description": payload["description"],
+                        "word_id": payload["word_id"],
+                    }
+                )
+                cursor.execute(query)
+                connection.commit()
+                return {"updatedWord": True}
+            else:
+                raise HTTPException(
+                    status_code=422, detail="Frequency must be an integer"
+                )
+        else:
+            raise HTTPException(
+                status_code=403, detail="You cannot update another person's word"
+            )
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Something went wrong")
+
+
+@app.delete("/api/dictionary/deleteword/{word_id}")
+async def delete_in_dictionary(
+    word_id: str, token: str = Depends(authUtils.validate_access_token)
+):
+    try:
+        cursor = connection.cursor()
+        query = Template(
+            "delete from dictionary where word_id=$word_id"
+        ).safe_substitute({"word_id": word_id})
+        cursor.execute(query)
+        connection.commit()
+        return {"deleteWord": True}
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Could not delete word")
+
+
+@app.post("/api/updatecompetition")
+async def update_comp(
+    payload: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    try:
+        cursor = connection.cursor()
+        query = Template(
+            "insert into competition (user_id, registered) values ($user_id, $registered) on conflict (user_id) do update set user_id = excluded.user_id, registered = excluded.registered"
+        ).safe_substitute(
+            {"user_id": token["user_id"], "registered": payload["registered"]}
+        )
+        cursor.execute(query)
+        connection.commit()
+        return {"submitWord": True}
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Something went wrong")
 
 
 @app.get("/api/accums")
@@ -225,10 +345,13 @@ async def get_accums(user, token: str = Depends(authUtils.validate_access_token)
 
 
 @app.get("/api/publicuserdata/")
-async def user_data_public(user, token: str = Depends(authUtils.validate_access_token)):
-    query = "select balance, firstname, lastname, last_login, teams.team_name as associated_team from users left join teams on users.team_id = teams.team_id where username = %s"
-    data = fetchDBJsonNew(query, (user,))
-    return {"userdata": data}
+async def get_accums(user, token: str = Depends(authUtils.validate_access_token)):
+    data = fetchDBJson(
+        Template(
+            "select balance, firstname, lastname, last_login from users where username = '$user'"
+        ).safe_substitute({"user": user})
+    )
+    return data
 
 
 @app.get("/api/allaccums")
@@ -250,6 +373,11 @@ async def get_accums(token: str = Depends(authUtils.validate_access_token)):
     return accums_with_options
 
 
+# @app.get("/admin/allaccums")
+# async def read_root() :
+#     return {"message": "Admin"}
+
+
 @app.get("/api/userAvailability/{user}")
 async def user_availability(user: str):
     res = fetchDB(f"select exists(select 1 from users where username = '{user}')")
@@ -257,13 +385,6 @@ async def user_availability(user: str):
         return {"userTaken": True}
     else:
         return {"userTaken": False}
-
-
-@app.get("/api/teams")
-async def all_teams():
-    res = fetchDBJsonNew(f"select * from teams;")
-
-    return {"teams": res}
 
 
 @app.get("/api/login/")
@@ -293,20 +414,23 @@ async def login(user, password):
 
 
 @app.get("/api/login/details")
-async def login_details(
+async def add_user(
     token: str = Depends(authUtils.validate_access_token_nowhitelist),
 ):
-    query = "select username, balance, firstname, lastname, teams.team_name as associated_team, admin, created_on from users left join teams on users.team_id = teams.team_id where username = %s"
-    res = fetchDBJsonNew(query, (token["user"],))
-    query2 = "update users set last_login = NOW() where user_id = %s"
-
-    cursor = connection.cursor()
-    cursor.execute(query2, (token["user_id"],))
-
-    inc_numb_logins = (
-        "update users set number_of_logins = number_of_logins + 1 where user_id = %s"
+    res = fetchDBJson(
+        Template(
+            "select username, balance, firstname, lastname, admin, created_on from users where username = '$username'"
+        ).safe_substitute({"username": token["user"]})
     )
-    cursor.execute(inc_numb_logins, (token["user_id"],))
+    update_last_login = Template(
+        "update users set last_login = NOW() where user_id = $user_id"
+    ).safe_substitute({"user_id": token["user_id"]})
+    cursor = connection.cursor()
+    cursor.execute(update_last_login)
+    inc_numb_logins = Template(
+        "update users set number_of_logins = number_of_logins + 1 where user_id = $user_id"
+    ).safe_substitute({"user_id": token["user_id"]})
+    cursor.execute(inc_numb_logins)
     connection.commit()
     return res
 
@@ -322,6 +446,7 @@ async def get_users(token: str = Depends(authUtils.validate_access_token)):
         raise HTTPException(status_code=403, detail="You are not admin")
 
 
+# {category: "string", title: "string", options: [{latest_odds: number, option: "string"}]}
 @app.post("/api/admin/createbet")
 async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     # date_time_obj = datetime.datetime.strptime(
@@ -383,7 +508,7 @@ async def accept_bet(bet: dict, token: str = Depends(authUtils.validate_access_t
 
 
 @app.post("/api/admin/updateoption")
-async def update_option(
+async def accept_bet(
     option: dict, token: str = Depends(authUtils.validate_access_token)
 ):
     if is_admin(token["user"]):
@@ -407,7 +532,7 @@ async def update_option(
 
 
 @app.post("/api/admin/addoption")
-async def add_option(
+async def accept_bet(
     option: dict, token: str = Depends(authUtils.validate_access_token)
 ):
     if is_admin(token["user"]):
@@ -431,7 +556,7 @@ async def add_option(
 
 
 @app.post("/api/admin/updatewl")
-async def update_wl(
+async def accept_bet(
     payload: dict, token: str = Depends(authUtils.validate_access_token)
 ):
     if is_admin(token["user"]):
@@ -450,7 +575,7 @@ async def update_wl(
 
 
 @app.post("/api/admin/closebet")
-async def close_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
+async def accept_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     if is_admin(token["user"]):
         try:
             cursor = connection.cursor()
@@ -514,7 +639,7 @@ async def reset_password(
 
 
 @app.post("/api/requestbet")
-async def request_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
+async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
     # date_time_obj = datetime.datetime.strptime(
     #     bet["close_date"], "%Y-%m-%d %H:%M:%S.%f"
     # )
@@ -680,40 +805,22 @@ async def place_bet(bet: dict, token: str = Depends(authUtils.validate_access_to
     return {"placeBet": True}
 
 
-class UserCreate(BaseModel):
-    username: str
-    password: str
-    firstname: str
-    lastname: str
-    team_id: Optional[int] = None
-
-
 @app.post("/api/createUser")
-async def add_user(user: UserCreate):
-    hashed = bcrypt.hashpw(bytes(user.password, encoding="utf-8"), bcrypt.gensalt())
-
-    if user.team_id is not None:
-        # Define the SQL query and its values separately
-        query = (
-            "INSERT INTO users(username, password, balance, firstname, lastname, team_id) "
-            "VALUES (%s, %s, 5000, %s, %s, %s)"
+async def add_user(user: dict):
+    # hashed = authUtils.create_hashed_password(user["password"])
+    hashed = bcrypt.hashpw(bytes(user["password"], encoding="utf-8"), bcrypt.gensalt())
+    res = insertDB(
+        Template(
+            "insert into users(username, password, balance, firstname, lastname) values ('$username', '$password', 5000, '$firstname', '$lastname')"
+        ).safe_substitute(
+            {
+                "username": user["username"],
+                "password": hashed.decode("utf-8"),
+                "firstname": user["firstname"],
+                "lastname": user["lastname"],
+            }
         )
-        values = (
-            user.username,
-            hashed.decode("utf-8"),
-            user.firstname,
-            user.lastname,
-            user.team_id,
-        )
-    else:
-        query = (
-            "INSERT INTO users(username, password, balance, firstname, lastname) "
-            "VALUES (%s, %s, 5000, %s, %s)"
-        )
-        values = (user.username, hashed.decode("utf-8"), user.firstname, user.lastname)
-
-    insertDBNew(query, values)
-
+    )
     return {"userCreated": True}
 
 
@@ -741,3 +848,334 @@ async def update_password(
         )
     else:
         return {"userCreated": True}
+
+
+## BONDEBRIDGE
+
+from pydantic import BaseModel
+
+
+class UserCreate(BaseModel):
+    nickname: str
+
+
+class GameCreate(BaseModel):
+    money_multiplier: int
+    extra_cost_loser: int
+    extra_cost_second_last: int
+    players: List[int]  # List of player IDs
+
+
+class RoundCreate(BaseModel):
+    game_id: int
+    num_cards: int
+    dealer_index: int
+
+
+class PlayerScoreCreate(BaseModel):
+    round_id: int
+    num_tricks: int
+    stand: bool
+
+
+@app.post("/api/bonde/adduser")
+async def add_player(player: dict):
+    cursor = connection.cursor()
+    try:
+        query = "INSERT INTO bonde_users(nickname) VALUES (%s);"
+        cursor.execute(query, (player["nickname"],))
+        connection.commit()
+    except IntegrityError as e:
+        connection.rollback()  # Important to roll back the failed transaction
+        if e.pgcode == "23505":
+            return {
+                "addUser": False,
+                "errorMsg": "Brukernavn finnes allerede i databasen",
+            }
+        else:
+            return {
+                "addUser": False,
+                "errorMsg": "An error occurred",
+            }
+    return {"addUser": True}
+
+
+@app.get("/api/bonde/games")
+async def get_users():
+    # try:
+    query = "SELECT * FROM games ORDER BY game_id DESC;"
+    games = fetchDBJsonNew(query)
+
+    # Loop through each game and get the players for that game
+    if games:
+        for game in games:
+            players_query = """
+                SELECT game_players.player_id, game_player_id, nickname, score
+                FROM games 
+                NATURAL JOIN game_players 
+                LEFT JOIN bonde_users ON game_players.player_id = bonde_users.player_id 
+                WHERE game_id = %s;
+            """
+            players_result = fetchDBJsonNew(players_query, (game["game_id"],))
+            game["players"] = [
+                {"nickname": player["nickname"], "score": player["score"]}
+                for player in players_result
+            ]
+
+    # except Exception as e:
+    #     return HTTPException(
+    #         status_code=500, detail="Something wrong. Could not fetch games"
+    #     )
+    return {"games": games}
+
+
+@app.get("/api/bonde/stats")
+async def get_stats():
+    # Fetching needed data from db
+    try:
+        query_rounds = """
+        SELECT round_id, SUM(num_tricks), MAX(num_cards) as num_cards
+        FROM player_scores
+        NATURAL JOIN rounds
+        WHERE stand IS NOT NULL
+        GROUP BY round_id ORDER BY num_cards DESC;
+       """
+        result1 = fetchDBJsonNew(query_rounds)
+
+        num_underbid = 0
+        num_overbid = 0
+        total_diff = 0
+
+        diffs = {}
+        counts = {}
+        chart_data = []
+        for row in result1:
+            round_id = row["round_id"]
+            sum_val = row["sum"]
+            num_cards = row["num_cards"]
+            if sum_val < num_cards:
+                num_underbid += 1
+            else:
+                num_overbid += 1
+            total_diff += sum_val - num_cards
+
+            difference = sum_val - num_cards
+
+            # Update diffs and counts dictionaries
+            if num_cards in diffs:
+                diffs[num_cards] += difference
+                counts[num_cards] += 1
+            else:
+                diffs[num_cards] = difference
+                counts[num_cards] = 1
+
+        total_avg_diff = round((total_diff / len(result1)), 1)
+        for num_cards in diffs:
+            avg_diff = round(diffs[num_cards] / counts[num_cards], 2)
+            chart_data.append({"name": str(num_cards), "value": avg_diff})
+
+        print(chart_data)
+
+        perc_underbid = round(num_underbid / len(result1) * 100, 1)
+        print(diffs)
+        return {
+            "perc_underbid": perc_underbid,
+            "total_avg_diff": total_avg_diff,
+            "avg_diffs": chart_data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
+
+    # concat the data and calculate and structure interesting stats
+
+    # send back to frontend
+
+
+@app.get("/api/bonde/game/{game_id}")
+async def get_game(game_id: int):
+    try:
+        query = "SELECT * FROM games WHERE game_id = %s;"
+        game = fetchDBJsonNew(query, (game_id,))
+
+        # Fetch corresponding rounds
+        rounds_query = "SELECT round_id, num_cards, dealer_index, locked FROM rounds WHERE game_id = %s;"
+        rounds = fetchDBJsonNew(rounds_query, (game_id,))
+
+        for round in rounds:
+            round_scores_qurey = "SELECT player_scores_id, num_tricks, stand FROM player_scores WHERE round_id = %s ORDER BY player_scores_id ASC;"
+            round_scores = fetchDBJsonNew(round_scores_qurey, (round["round_id"],))
+            round["player_scores"] = round_scores
+
+        players_query = """
+                SELECT nickname, game_player_id, game_players.player_id 
+                FROM games 
+                NATURAL JOIN game_players 
+                LEFT JOIN bonde_users ON game_players.player_id = bonde_users.player_id 
+                WHERE game_id = %s ORDER BY game_player_id ASC;
+            """
+        players = fetchDBJsonNew(players_query, (game_id,))
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not fetch games"
+        )
+    return {"game": game, "rounds": rounds, "players": players}
+
+
+@app.get("/api/bonde/users")
+async def get_users():
+    # try:
+    query = "SELECT player_id, nickname FROM bonde_users;"
+    users = fetchDBJsonNew(query)
+
+    # except Exception as e:
+    #     return HTTPException(
+    #         status_code=500, detail="Something wrong. Could not fetch users"
+    #     )
+    return {"users": users}
+
+
+@app.post("/api/bonde/game")
+async def create_game(game: GameCreate):
+    try:
+        cursor = connection.cursor()
+        query1 = "INSERT INTO games(money_multiplier, extra_cost_loser, extra_cost_second_last) VALUES (%s, %s, %s) RETURNING game_id;"
+        cursor.execute(
+            query1,
+            (game.money_multiplier, game.extra_cost_loser, game.extra_cost_second_last),
+        )
+        game_id = cursor.fetchone()[0]
+
+        game_player_ids = []
+        # Add players to game_players table
+        for player_id in game.players:
+            query = "INSERT INTO game_players(game_id, player_id) VALUES (%s, %s) RETURNING game_player_id;"
+            cursor.execute(query, (game_id, player_id))
+            game_player_ids.append(cursor.fetchone()[0])
+
+        connection.commit()
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not create game"
+        )
+
+    return {
+        "game_id": game_id,
+        "game_player_ids": game_player_ids,
+    }
+
+
+@app.post("/api/bonde/rounds")
+async def create_rounds(rounds: dict):
+    try:
+        cursor = connection.cursor()
+        round_ids = []
+        player_scores_ids = []
+        game_id = rounds["game_id"]
+
+        # Add all rounds
+        for round in rounds["rounds"]:
+            query = "INSERT INTO rounds(game_id, num_cards, dealer_index) VALUES (%s, %s, %s) RETURNING round_id;"
+            cursor.execute(query, (game_id, round["num_cards"], round["dealer_index"]))
+            round_id = cursor.fetchone()[0]
+            round_ids.append(round_id)
+
+            # Add all player scores for each round
+            scores_id_round = []
+
+            for _ in range(rounds["num_players"]):
+                query = "INSERT INTO player_scores(round_id) VALUES (%s) RETURNING player_scores_id;"
+                cursor.execute(query, (round_id,))
+                player_scores_id = cursor.fetchone()[0]
+                scores_id_round.append(player_scores_id)
+
+            player_scores_ids.append(scores_id_round)
+
+        connection.commit()
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not update round"
+        )
+
+    return {"created": True}
+
+
+@app.put("/api/bonde/rounds")
+async def update_round(data: dict):
+    # Connect to the database
+    try:
+        cursor = connection.cursor()
+
+        # # Update the rounds table
+        # cursor.execute(
+        #     "UPDATE rounds SET num_cards = %s, dealer_index = %s, locked = %s WHERE round_id = %s",
+        #     (
+        #         roundData["num_cards"],
+        #         roundData["dealer_index"],
+        #         roundData["locked"],
+        #         round_id,
+        #     ),
+        # )
+        # Update player_scores
+        for round in data["rounds"]:
+            for player_score in round["player_scores"]:
+                cursor.execute(
+                    "UPDATE player_scores SET num_tricks = %s, stand = %s WHERE player_scores_id = %s",
+                    (
+                        player_score["num_tricks"],
+                        player_score["stand"],
+                        player_score["player_scores_id"],
+                    ),
+                )
+        connection.commit()
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not update round"
+        )
+
+    return {"message": "Round updated successfully"}
+
+
+@app.put("/api/bonde/playerdata")
+async def update_player_scores(data: dict):
+    # Connect to the database
+    try:
+        cursor = connection.cursor()
+
+        # Update player_scores
+        for player in data["playerData"]:
+            try:
+                cursor.execute(
+                    "UPDATE game_players SET score = %s WHERE game_player_id = %s",
+                    (
+                        player["score"],
+                        player["game_player_id"],
+                    ),
+                )
+            except KeyError:
+                print("KeyError")
+        connection.commit()
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not update player scores"
+        )
+
+    return {"message": "Player scores updated successfully"}
+
+
+@app.put("/api/game/complete/{game_id}")
+async def update_round(game_id: int):
+    # Connect to the database
+    try:
+        cursor = connection.cursor()
+        cursor.execute(
+            "UPDATE games SET status = 'finished' WHERE game_id = %s",
+            (game_id,),
+        )
+
+        connection.commit()
+    except Exception as e:
+        return HTTPException(
+            status_code=500, detail="Something wrong. Could not complete game"
+        )
+
+    return {"message": "Game completed successfully"}

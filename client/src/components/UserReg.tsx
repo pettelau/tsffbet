@@ -1,32 +1,20 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect } from "react";
 import { LoginUtils } from "../utils";
 import { Link, Navigate } from "react-router-dom";
 import axios from "axios";
 
 import TextField from "@mui/material/TextField";
-import {
-  AlertTitle,
-  Button,
-  FormControl,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from "@mui/material";
+import { AlertTitle, Button, InputAdornment } from "@mui/material";
 import Alert, { AlertColor } from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { setUsername } from "../redux/userSlice";
 import AlertComp from "./Alert";
-import { AlertT, Team, UserAvailability } from "../types";
+import { AlertT, UserAvailability } from "../types";
 import { AccountCircle, ConstructionOutlined } from "@mui/icons-material";
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import KeyIcon from "@mui/icons-material/Key";
 import { selectPath } from "../redux/envSlice";
-
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 
 function UserReg() {
   const navigate = useNavigate();
@@ -56,11 +44,6 @@ function UserReg() {
     msg: "",
   });
 
-  const [acceptedConditions, setAcceptedConditions] = useState<boolean>(false);
-  const [associatedTeam, setAssociatedTeam] = useState<undefined | number>();
-
-  const [teams, setTeams] = useState<Team[]>([]);
-
   // //fetched user from neo4j
   const [userAvailability, setUserAvailability] = useState<UserAvailability>({
     checkedDB: false,
@@ -68,17 +51,12 @@ function UserReg() {
   });
 
   const fetchUserAvailability = async (user: string) => {
-    const response = await fetch(`${url_path}api/userAvailability/${user}`);
+    const response = await fetch(
+      `${url_path}api/userAvailability/${user}`
+    );
     const resp = await response.json();
 
     setUserAvailability({ checkedDB: true, userTaken: resp["userTaken"] });
-  };
-
-  const fetchTeams = async () => {
-    const response = await fetch(`${url_path}api/teams`);
-    const resp = await response.json();
-    console.log(resp);
-    setTeams(resp.teams as Team[]);
   };
 
   // Toggle error with message
@@ -90,18 +68,6 @@ function UserReg() {
     setAlert(isActive);
     setAlertType({ type: type, msg: msg });
   }
-
-  const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setAcceptedConditions(event.target.checked);
-  };
-
-  const handleTeamChange = (event: SelectChangeEvent<number | "none">) => {
-    const value =
-      event.target.value === "none"
-        ? undefined
-        : (event.target.value as number);
-    setAssociatedTeam(value);
-  };
 
   // Create user first function
   function initCreateUser() {
@@ -145,7 +111,6 @@ function UserReg() {
           username: user,
           firstname: firstname,
           password: hashedPass,
-          team_id: associatedTeam,
         };
         if (lastname !== "") {
           Object.assign(newUser, { lastname: lastname });
@@ -172,10 +137,6 @@ function UserReg() {
     }
   };
 
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
   return (
     <>
       <AlertComp
@@ -201,7 +162,7 @@ function UserReg() {
             <b>Allerede bruker? Klikk her</b>
           </Button>
         </div>
-        <h1>Opprett bruker i TSFFBet </h1>
+        <h1>Opprett bruker i LauBet </h1>
         <div className="register-fields">
           <TextField
             InputProps={{
@@ -255,25 +216,6 @@ function UserReg() {
             onChange={(e) => setLastname(e.target.value)}
           />{" "}
           <br /> <br />
-          <FormControl sx={{ width: 223.5 }} variant="outlined">
-            <InputLabel id="team-select-label">Velg tilknyttet lag</InputLabel>
-            <Select
-              labelId="team-select-label"
-              id="team-select"
-              value={associatedTeam ?? "none"}
-              onChange={handleTeamChange}
-              label="Velg tilknyttet lag"
-            >
-              <MenuItem value="none">Ikke tilknyttet noe lag</MenuItem>
-              {/* Option to unselect a team */}
-              {teams.map((team) => (
-                <MenuItem key={team.team_id} value={team.team_id}>
-                  {team.team_name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <br /> <br />
           <TextField
             InputProps={{
               startAdornment: (
@@ -315,29 +257,14 @@ function UserReg() {
           >
             <Alert severity="info">
               <AlertTitle>Lagring av passord</AlertTitle>
-              Passordet blir hashet til en ugjenkjennelig streng både på klient-
-              og serverside. Dermed er det umulig for meg eller noen andre å se
-              passordet ditt, men ettersom dette bare er et hobbyprosjekt ønsker
-              jeg at du bruker et ufarlig passord.
+              Passordet blir "kvernet" (hashet) til en ugjenkjennelig streng.
+              Dermed er det umulig for meg å se passordet ditt, men vil
+              allikevel anbefale å bruke et passord det ikke er så "farlig" med.
             </Alert>
           </div>
         </div>
-        <br />
-        <FormControlLabel
-          sx={{ maxWidth: 500 }}
-          control={
-            <Checkbox
-              checked={acceptedConditions}
-              onChange={handleCheckboxChange}
-              name="myCheckbox"
-              color="primary"
-            />
-          }
-          label="Jeg godtar at TSFFBet lagrer brukerinformasjonen ovenfor og jeg godtar at TSFFBet ikke står ansvarlig for noe av denne dataen dersom den skulle kommet på avveie."
-        />
         <div>
           <Button
-            disabled={!acceptedConditions}
             id="register-user-button"
             variant="contained"
             onClick={() => initCreateUser()}

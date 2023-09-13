@@ -1,9 +1,10 @@
+/laubet_venv
 __pycache__
 /server/app/credentials.py
 nginx.conf
 **/.DS_Store
 node_modules
-/server/tsff_venv
+/server/lb_venv
 laubet.sql
 .DS_Store
 bondebridge.sql

@@ -27,8 +27,12 @@ import NewBet from "./components/Admin/NewBet";
 import EditBet from "./components/Admin/EditBet";
 import RequestBet from "./components/Betting/RequestBet";
 import Leaderboard from "./components/Betting/Leaderboard";
+import Dictionary from "./components/Dictionary";
 import BetFeed from "./components/Betting/BetFeed";
 import UserProfile from "./components/UserProfile";
+import Competition from "./components/Competition";
+import BondeBridge from "./components/BondeBridge/BondeBridge";
+import BondeBridgeHome from "./components/BondeBridge/BondeBridgeHome";
 
 const THEME = createTheme({
   typography: {
@@ -42,28 +46,16 @@ const THEME = createTheme({
     MuiButton: {
       styleOverrides: {
         contained: {
-          backgroundColor: "#13252b",
+          backgroundColor: "#303c6c",
           color: "white",
         },
         outlined: {
-          borderColor: "#13252b",
+          borderColor: "#303c6c",
           border: "2px solid",
-          color: "#13252b",
+          color: "#303c6c",
         },
       },
     },
-    // MuiAlert: {
-    //   styleOverrides: {
-    //     // Target the "info" severity
-    //     standardInfo: {
-    //       backgroundColor: "#00b2aa",
-    //       color: "white",
-    //       "& .MuiAlert-icon": {
-    //         color: "#13252b",
-    //       }, // Replace 'yourDesiredColor' with the color you want
-    //     },
-    //   },
-    // },
   },
 });
 
@@ -100,7 +92,11 @@ export default function App() {
               <Route path="userReg" element={<UserReg />} />
               <Route path="requestbet" element={<RequestBet />} />
               <Route path="leaderboard" element={<Leaderboard />} />
+              <Route path="dictionary" element={<Dictionary />} />
               <Route path="betfeed" element={<BetFeed />} />
+              <Route path="competition" element={<Competition />} />
+              <Route path="bondebridge/:game_id" element={<BondeBridge />} />
+              <Route path="bondebridge" element={<BondeBridgeHome />} />
               <Route path="user/:username" element={<UserProfile />} />
               <Route path="admin" element={<AdminHome />} />
               <Route path="admin/newbet" element={<NewBet />} />
