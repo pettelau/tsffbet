@@ -47,8 +47,7 @@ export default function UserProfile() {
   const params = useParams();
   const username = params.username;
   const [accums, setAccums] = React.useState<Accums[]>([]);
-  const [publicUserData, setPublicUserData] =
-    React.useState<PublicUserData[]>();
+  const [publicUserData, setPublicUserData] = React.useState<PublicUserData>();
 
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseCodeUser, setResponseCodeUser] = React.useState<number>();
@@ -80,9 +79,10 @@ export default function UserProfile() {
       }
     );
     const resp = await response.json();
+    console.log(resp);
     setResponseCodeUser(response.status);
     if (response.ok) {
-      setPublicUserData(resp);
+      setPublicUserData(resp["userdata"][0]);
     } else {
       setResponseText(resp.detail);
     }
@@ -141,36 +141,41 @@ export default function UserProfile() {
     return (
       <>
         <h2>{username} sine kuponger</h2>
-        Fornavn: {publicUserData[0].firstname} <br />
-        Fornavn: {publicUserData[0].lastname} <br />
-        Balanse: {publicUserData[0].balance} kr
+        Fornavn: {publicUserData.firstname} <br />
+        Etternavn: {publicUserData.lastname} <br />
+        Tilknyttet lag:{" "}
+        {publicUserData.associated_team
+          ? publicUserData.associated_team
+          : "Ingen"}{" "}
+        <br />
+        Balanse: {publicUserData.balance} kr
         <br />
         Sist innlogget:{" "}
         {new Date(
-          publicUserData[0].last_login ? publicUserData[0].last_login : ""
+          publicUserData.last_login ? publicUserData.last_login : ""
         ).getDate() +
           " " +
           MONTHS[
             new Date(
-              publicUserData[0].last_login ? publicUserData[0].last_login : ""
+              publicUserData.last_login ? publicUserData.last_login : ""
             ).getMonth()
           ] +
           " " +
           new Date(
-            publicUserData[0].last_login ? publicUserData[0].last_login : ""
+            publicUserData.last_login ? publicUserData.last_login : ""
           ).getFullYear() +
           " " +
           (
             "0" +
             new Date(
-              publicUserData[0].last_login ? publicUserData[0].last_login : ""
+              publicUserData.last_login ? publicUserData.last_login : ""
             ).getHours()
           ).slice(-2) +
           ":" +
           (
             "0" +
             new Date(
-              publicUserData[0].last_login ? publicUserData[0].last_login : ""
+              publicUserData.last_login ? publicUserData.last_login : ""
             ).getMinutes()
           ).slice(-2)}{" "}
         <br />
@@ -272,21 +277,21 @@ export default function UserProfile() {
                       })}
                       <Chip
                         sx={{
-                          backgroundColor: "#303c6c",
+                          backgroundColor: "#13252b",
                           color: "white",
                           marginRight: 1,
                         }}
                         label={"Innsats: " + accum.stake + "kr"}
                       ></Chip>
                       <Chip
-                        sx={{ backgroundColor: "#303c6c", color: "white" }}
+                        sx={{ backgroundColor: "#13252b", color: "white" }}
                         label={"Totalodds: " + accum.total_odds.toFixed(2)}
                       ></Chip>
                       <br />
                       <Chip
                         sx={{
                           marginTop: 1,
-                          backgroundColor: "#303c6c",
+                          backgroundColor: "#13252b",
                           color: "white",
                         }}
                         label={

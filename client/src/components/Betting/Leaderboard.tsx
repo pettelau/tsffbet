@@ -1,56 +1,44 @@
 import {
   Alert,
-  AlertTitle,
-  Button,
-  Card,
   CircularProgress,
-  Tab,
-  Tabs,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
+  Divider,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
 } from "@mui/material";
 import React, { useEffect } from "react";
-import { Bet, BetOption, LeaderboardData } from "../../types";
+import { LeaderboardData, Team } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { addBet, removeBet, selectAccum } from "../../redux/accumSlice";
-import {
-  selectBalance,
-  selectFirstname,
-  selectLastname,
-} from "../../redux/userSlice";
+
 import { selectPath } from "../../redux/envSlice";
-import useWindowDimensions from "../../utils/deviceSizeInfo";
 import NoAccess from "../NoAccess";
 import dayjs, { Dayjs } from "dayjs";
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+
 import { useNavigate } from "react-router-dom";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 
 export default function Leaderboard() {
-  const dispatch = useAppDispatch();
-
   const url_path = useAppSelector(selectPath);
 
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<number>();
 
-  const [fromDate, setFromDate] = React.useState<Dayjs | null>(
-    dayjs().subtract(2, "month")
-  );
-  const [toDate, setToDate] = React.useState<Dayjs | null>(dayjs());
-
   const [leaderboardData, setLeaderboardData] = React.useState<
     LeaderboardData[]
   >([]);
+
+  const [filterTeam, setFilterTeam] = React.useState<undefined | number>();
+
+  const [teams, setTeams] = React.useState<Team[]>([
+    { team_id: -1, team_name: "Brukere uten lag" },
+  ]);
 
   async function fetchLeaderboard() {
     // const response = await fetch(
@@ -70,7 +58,7 @@ export default function Leaderboard() {
     });
     const resp = await response.json();
     setResponseCode(response.status);
-
+    console.log(resp);
     if (response.ok) {
       let sorted = resp.sort((a: any, b: any) => b.balance - a.balance);
       setLeaderboardData(sorted);
@@ -79,11 +67,39 @@ export default function Leaderboard() {
     }
   }
 
+  const fetchTeams = async () => {
+    const response = await fetch(`${url_path}api/teams`);
+    const resp = await response.json();
+    console.log(resp);
+    setTeams((prevTeams) => {
+      const newTeams = resp.teams as Team[];
+      const combinedTeams = [...prevTeams, ...newTeams];
+
+      const uniqueTeams = combinedTeams.filter(
+        (team, index, self) =>
+          index === self.findIndex((t) => t.team_id === team.team_id)
+      );
+
+      return uniqueTeams;
+    });
+  };
+
   const navigate = useNavigate();
 
   useEffect(() => {
+    fetchTeams();
     fetchLeaderboard();
   }, []);
+
+  const handleTeamChange = (event: SelectChangeEvent<number | "none">) => {
+    const value =
+      event.target.value === "none"
+        ? undefined
+        : (event.target.value as number);
+    setFilterTeam(value);
+
+    console.log(value);
+  };
 
   function bgColorChecker(index: number) {
     if (index == 0) {
@@ -102,14 +118,14 @@ export default function Leaderboard() {
   if (responseCode == undefined) {
     return (
       <>
-      <br />
-      <br />
-      <br />
+        <br />
+        <br />
+        <br />
         <CircularProgress />
       </>
     );
   }
-  
+
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }
@@ -119,7 +135,8 @@ export default function Leaderboard() {
       <h1>Leaderboard</h1>
       <div
         style={{
-          maxWidth: 500,
+          width: "90%",
+          maxWidth: 800,
           display: "grid",
           margin: "auto",
           textAlign: "center",
@@ -148,12 +165,39 @@ export default function Leaderboard() {
           ampm={false}
         />
       </LocalizationProvider> */}
+      <div>
+        <FormControl sx={{ width: 223.5 }} variant="outlined">
+          <InputLabel id="team-select-label">
+            Filtrer spillere på lag
+          </InputLabel>
+          <Select
+            labelId="team-select-label"
+            id="team-select"
+            value={filterTeam ?? "none"}
+            onChange={handleTeamChange}
+            label="Filtrer spillere på lag"
+          >
+            <MenuItem value="none">Alle lag</MenuItem>
+            <Divider />
+            {/* Option to unselect a team */}
+            {teams.map((team) => (
+              <MenuItem key={team.team_id} value={team.team_id}>
+                {team.team_name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+      <br />
       <div style={{ display: "flex", justifyContent: "center" }}>
         <Table className="Table" aria-label="simple table">
           <TableHead>
             <TableRow sx={{ backgroundColor: "white" }}>
               <TableCell>
                 <b>Bruker</b>
+              </TableCell>
+              <TableCell>
+                <b>Lag</b>
               </TableCell>
               <TableCell align="center">
                 <b>Balanse</b>
@@ -168,38 +212,48 @@ export default function Leaderboard() {
           </TableHead>
           <TableBody>
             {leaderboardData.map((user, index) => {
-              return (
-                <>
-                  <TableRow sx={{ backgroundColor: bgColorChecker(index) }}>
-                    <TableCell
-                      sx={{
-                        ":hover": { cursor: "pointer" },
-                      }}
-                      onClick={() => {
-                        navigate(`/user/${user.username}`);
-                      }}
-                    >
-                      {user.username}
-                    </TableCell>
-                    <TableCell sx={{ width: 70 }} align="center">
-                      {user.balance}
-                    </TableCell>
-                    <TableCell sx={{ width: 40 }} align="center">
-                      {user.total_accums}
-                    </TableCell>
-                    <TableCell sx={{ width: 100 }} align="center">
-                      {user.won_accums}
-                      {user.total_accums !== 0
-                        ? " (" +
-                          ((user.won_accums / user.total_accums) * 100).toFixed(
-                            1
-                          ) +
-                          "%)"
-                        : ""}
-                    </TableCell>
-                  </TableRow>
-                </>
-              );
+              if (
+                !filterTeam ||
+                user.associated_team_id === filterTeam ||
+                (user.associated_team_id === null && filterTeam === -1)
+              ) {
+                return (
+                  <>
+                    <TableRow sx={{ backgroundColor: bgColorChecker(index) }}>
+                      <TableCell
+                        sx={{
+                          ":hover": { cursor: "pointer" },
+                        }}
+                        onClick={() => {
+                          navigate(`/user/${user.username}`);
+                        }}
+                      >
+                        {user.username}
+                      </TableCell>
+                      <TableCell sx={{ width: 70 }} align="center">
+                        {user.associated_team ? user.associated_team : "Ingen"}
+                      </TableCell>
+                      <TableCell sx={{ width: 70 }} align="center">
+                        {user.balance}
+                      </TableCell>
+                      <TableCell sx={{ width: 40 }} align="center">
+                        {user.total_accums}
+                      </TableCell>
+                      <TableCell sx={{ width: 100 }} align="center">
+                        {user.won_accums}
+                        {user.total_accums !== 0
+                          ? " (" +
+                            (
+                              (user.won_accums / user.total_accums) *
+                              100
+                            ).toFixed(1) +
+                            "%)"
+                          : ""}
+                      </TableCell>
+                    </TableRow>
+                  </>
+                );
+              }
             })}
           </TableBody>
         </Table>

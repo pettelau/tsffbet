@@ -198,21 +198,21 @@ export default function BetFeed() {
                   })}
                   <Chip
                     sx={{
-                      backgroundColor: "#303c6c",
+                      backgroundColor: "#13252b",
                       color: "white",
                       marginRight: 1,
                     }}
                     label={"Innsats: " + accum.stake + "kr"}
                   ></Chip>
                   <Chip
-                    sx={{ backgroundColor: "#303c6c", color: "white" }}
+                    sx={{ backgroundColor: "#13252b", color: "white" }}
                     label={"Totalodds: " + accum.total_odds.toFixed(2)}
                   ></Chip>
                   <br />
                   <Chip
                     sx={{
                       marginTop: 1,
-                      backgroundColor: "#303c6c",
+                      backgroundColor: "#13252b",
                       color: "white",
                     }}
                     label={
