@@ -289,7 +289,7 @@ export default function RequestBet() {
                     <Card sx={{ padding: 2 }}>
                       <>
                         {bet.title} <br />
-                        😈 Innsendt av: <b>{bet.submitter}</b> 😈 <br />
+                        Innsendt av: <b>{bet.submitter}</b><br />
                         {bet.bet_options.map((option: BetOption) => {
                           return (
                             <>

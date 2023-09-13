@@ -266,7 +266,7 @@ export default function Accumulator() {
         <div className="AccumCollapsed">
           <Fab
             color="primary"
-            sx={{ backgroundColor: "#303c6c" }}
+            sx={{ backgroundColor: "#13252b" }}
             variant="extended"
             onClick={() => {
               setIsCollapsed(false);

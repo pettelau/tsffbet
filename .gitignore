@@ -4,7 +4,7 @@ __pycache__
 nginx.conf
 **/.DS_Store
 node_modules
-/server/lb_venv
+/server/tsff_venv
 laubet.sql
 .DS_Store
 bondebridge.sql

@@ -60,8 +60,8 @@ export default function AppAppBar() {
         {SIZE.width > 1350 ? (
           <Toolbar
             sx={{
-              backgroundColor: "#303c6c",
-              color: "#f4976c",
+              backgroundColor: "#13252b",
+              color: "#d9f3f1",
               justifyContent: "space-between",
             }}
           >
@@ -73,23 +73,9 @@ export default function AppAppBar() {
                   navigate("/");
                 }}
                 style={{ maxHeight: 30, marginRight: 25, marginTop: 8 }}
-                src={"/laubet_simple.png"}
+                src={"/tsff_simple.png"}
               />
-              {/* <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                sx={{ mr: 2 }}
-                onClick={() => {
-                  navigate("/");
-                }}
-              >
-                <HomeIcon />
-                <Typography sx={{ color: "white", marginLeft: 1 }}>
-                  Hjem
-                </Typography>
-              </IconButton> */}
+            
               <IconButton
                 id="betting-button"
                 size="large"
@@ -150,21 +136,7 @@ export default function AppAppBar() {
                   Leaderboard
                 </Typography>
               </IconButton>
-              <IconButton
-                id="dict-button"
-                size="large"
-                edge="start"
-                color="inherit"
-                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
-                onClick={() => {
-                  navigate("/dictionary");
-                }}
-              >
-                <MenuBookIcon />
-                <Typography sx={{ color: "white", marginLeft: 1 }}>
-                  Ordboka
-                </Typography>
-              </IconButton>
+             
               <IconButton
                 id="feed-button"
                 size="large"
@@ -180,32 +152,9 @@ export default function AppAppBar() {
                   BetFeed
                 </Typography>
               </IconButton>
-              <IconButton
-                id="feed-button"
-                size="large"
-                edge="start"
-                color="inherit"
-                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
-                onClick={() => {
-                  navigate("/bondebridge");
-                }}
-              >
-                <InterestsIcon />
-                <Typography sx={{ color: "white", marginLeft: 1 }}>
-                  Bondebridge
-                </Typography>
-              </IconButton>
+            
             </Box>
-            {/* <Box sx={{ flex: 1 }}>
-              
-              <img
-                onClick={() => {
-                  navigate("/");
-                }}
-                style={{ maxHeight: 45 }}
-                src={"/laubet_simple.png"}
-              />
-            </Box> */}
+            
             <Box
               sx={{
                 flex: 1,
@@ -228,7 +177,7 @@ export default function AppAppBar() {
                   {loggedInUser == "" ? (
                     <Chip
                       icon={<PersonIcon />}
-                      sx={{ backgroundColor: "#303c6c", color: "#f4976c" }}
+                      sx={{ backgroundColor: "#d9f3f1", color: "#13252b" }}
                       label={"Logg inn"}
                     ></Chip>
                   ) : (
@@ -260,7 +209,7 @@ export default function AppAppBar() {
         ) : (
           <Toolbar
             sx={{
-              backgroundColor: "#303c6c",
+              backgroundColor: "#13252b",
               color: "#f4976c",
               justifyContent: "space-between",
             }}
@@ -343,16 +292,7 @@ export default function AppAppBar() {
                 </MenuItem>
                 <Divider />
 
-                <MenuItem
-                  onClick={() => {
-                    setAnchorEl(null);
-                    navigate("/dictionary");
-                  }}
-                >
-                  <MenuBookIcon sx={{ mr: 1 }} />
-                  Ordboka
-                </MenuItem>
-                <Divider />
+               
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
@@ -362,62 +302,9 @@ export default function AppAppBar() {
                   <DynamicFeedIcon sx={{ mr: 1 }} />
                   BetFeed
                 </MenuItem>
-                <Divider />
-                <MenuItem
-                  onClick={() => {
-                    setAnchorEl(null);
-                    navigate("/bondebridge");
-                  }}
-                >
-                  <InterestsIcon sx={{ mr: 1 }} />
-                  Bondebridge
-                </MenuItem>
+             
               </Menu>
-              {/* <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                sx={{ mr: 2 }}
-                onClick={() => {
-                  navigate("/");
-                }}
-              >
-                <HomeIcon />
-                <Typography sx={{ color: "white", marginLeft: 1 }}>
-                  Hjem
-                </Typography>
-              </IconButton>
-              <IconButton
-                id="betting-button"
-                size="large"
-                edge="start"
-                color="inherit"
-                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
-                onClick={() => {
-                  navigate("/bettinghome");
-                }}
-              >
-                <LocalAtmIcon />
-                <Typography sx={{ color: "white", marginLeft: 1 }}>
-                  Odds
-                </Typography>
-              </IconButton>
-              <IconButton
-                id="my-accums-button"
-                size="large"
-                edge="start"
-                color="inherit"
-                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
-                onClick={() => {
-                  navigate("/myaccums");
-                }}
-              >
-                <ReceiptIcon />
-                <Typography sx={{ color: "white", marginLeft: 1 }}>
-                  Mine spill
-                </Typography>
-              </IconButton> */}
+              
             </Box>
             <Box sx={{ flex: 1 }}>
               <img
@@ -425,7 +312,7 @@ export default function AppAppBar() {
                   navigate("/");
                 }}
                 style={{ maxHeight: 30, marginTop: 5 }}
-                src={"/laubet_simple.png"}
+                src={"/tsff_simple.png"}
               />
             </Box>
             <Box

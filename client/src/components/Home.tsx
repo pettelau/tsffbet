@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <>
       <div>
-        <h1>Velkommen til nye LauBet!</h1>
+        <h1>Velkommen til TSFFBet!</h1>
         <div
           style={{
             maxWidth: 500,
@@ -30,78 +30,47 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          <Alert
-            sx={{ ":hover": { cursor: "pointer" } }}
-            onClick={() => {
-              navigate("/competition");
-            }}
-            severity="info"
-          >
-            Klikk på denne meldingen for å gå til den nye betting-konkurransen
-            for å lese reglene og melde deg på!!
-          </Alert>
+          Studentfotballen tar stadig nye steg, og jeg følte det nå var på tide
+          med en helt egen bettingside for TSFF! <br />
+          <br />
+          Her kan du opprette en egen bruker og lage klinke bonger som du kan
+          sette dine fiktive penger på!
         </div>
         <br />
-        <h3>En oversikt over nye og gamle funksjoner:</h3>
         <div className="flex-container">
           <div>
             <LocalAtmIcon sx={{ fontSize: 80 }} /> <br />
             <h3>Odds</h3>
-            Oddssiden er selve kjernefunksjonen til LauBet, og den finnes
-            selvfølgelig fortsatt!
+            Oddssiden inneholder alt av tilgjengelige odds på markedet.
           </div>
           <div>
             <LockPersonIcon sx={{ fontSize: 80 }} /> <br />
             <h3>Innlogging</h3>
-            LauBet har et nytt brukersystem hvor dere oppretter egne brukere, og
-            blir whitelistet av meg. All informasjon på LauBet er utilgjengelig
-            for alle andre.
+            Du må opprette bruker og bli godkjent av meg før du kan se noe på
+            siden. Du kan også legge til hvilket lag du er tilknyttet. Passordet
+            blir selvsagt hashet både på klient- og serversiden, men anbefaler
+            uansett å bruke et helt ufarlig passord.
           </div>
-          <div>
-            <MenuBookIcon sx={{ fontSize: 80 }} /> <br />
-            <h3>Ordboka</h3>
-            Ordboka er er et viktig verktøy for å ta vare på våre særegne ord og
-            uttrykk.
-          </div>
+
           <div>
             <DynamicFeedIcon sx={{ fontSize: 80 }} /> <br />
             <h3>BetFeed</h3>
-            Sjekk hvilke bonger de andre spillerne har levert inn!
+            Sjekk hvilke bonger de andre brukere har levert inn!
           </div>
           <div>
             <ScheduleSendIcon sx={{ fontSize: 80 }} /> <br />
             <h3>Request-a-bet</h3>
-            Dersom du ønsker å foreslå et bet som bør inn på LauBet er dette
-            fortsatt mulig.
+            Dersom du ønsker å foreslå et bet som bør inn på TSFFBet kan du
+            gjøre dette. Det kan være kamper som mangler eller andre spill som
+            f.eks. målscorerspill, cornerspill, over-/underspill. Jeg godtar det
+            meste!
           </div>
           <div>
             <LeaderboardIcon sx={{ fontSize: 80 }} /> <br />
             <h3>Leaderboard</h3>
-            Sjekk hvem som har har mest cash på LauBet, og hvem som har flest
+            Sjekk hvem som har har mest cash på TSFFBet, og hvem som har flest
             grønne bonger i portefølgen sin.
           </div>
-          <div>
-            <ForumIcon sx={{ fontSize: 80 }} /> <br />
-            <h3>Kommentarer (kommer)</h3>
-            Er en odds helt feilsatt? Har noen satt et helt håpløst bet som
-            viser at de har null tro på deg i eksempelvis Padeltennis eller på
-            byen? Legg igjen en kommentar og si din mening!
-          </div>
-
-          <div>
-            <SportsTennisIcon sx={{ fontSize: 80 }} /> <br />
-            <h3>Interne bets (kommer)</h3>
-            Sett opp interne veddemål med én eller flere andre brukere og
-            plasser LauCoins på at du selv kommer til å vinne. F.eks. et slag
-            padeltennis eller FIFA.
-          </div>
-          {/* <div>
-            <QuizIcon sx={{ fontSize: 80 }} /> <br />
-            <h3>TopicDuel (kommer kanskje)</h3>
-            Min gode venn Jacob Theisen jobber for tiden med et quiz-spill hvor
-            man spiller live mot én eller flere venner i en gitt kategori. Dette
-            er noe vi håper vi kan få implementert inn i LauBet etter hvert...
-          </div> */}
         </div>
       </div>
       <br />
