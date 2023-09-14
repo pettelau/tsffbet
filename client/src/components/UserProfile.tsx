@@ -79,7 +79,6 @@ export default function UserProfile() {
       }
     );
     const resp = await response.json();
-    console.log(resp);
     setResponseCodeUser(response.status);
     if (response.ok) {
       setPublicUserData(resp["userdata"][0]);
@@ -140,13 +139,14 @@ export default function UserProfile() {
   if (publicUserData) {
     return (
       <>
-        <h2>{username} sine kuponger</h2>
-        Fornavn: {publicUserData.firstname} <br />
-        Etternavn: {publicUserData.lastname} <br />
-        Tilknyttet lag:{" "}
+        <h2>PROFILSIDE: {username}</h2>
+        <b>
+          {publicUserData.firstname} {publicUserData.lastname}
+        </b>
+        <br />
         {publicUserData.associated_team
           ? publicUserData.associated_team
-          : "Ingen"}{" "}
+          : "Ikke tilknyttet noe lag"}{" "}
         <br />
         Balanse: {publicUserData.balance} kr
         <br />

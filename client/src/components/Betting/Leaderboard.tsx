@@ -58,7 +58,6 @@ export default function Leaderboard() {
     });
     const resp = await response.json();
     setResponseCode(response.status);
-    console.log(resp);
     if (response.ok) {
       let sorted = resp.sort((a: any, b: any) => b.balance - a.balance);
       setLeaderboardData(sorted);
@@ -70,7 +69,6 @@ export default function Leaderboard() {
   const fetchTeams = async () => {
     const response = await fetch(`${url_path}api/teams`);
     const resp = await response.json();
-    console.log(resp);
     setTeams((prevTeams) => {
       const newTeams = resp.teams as Team[];
       const combinedTeams = [...prevTeams, ...newTeams];
@@ -98,7 +96,6 @@ export default function Leaderboard() {
         : (event.target.value as number);
     setFilterTeam(value);
 
-    console.log(value);
   };
 
   function bgColorChecker(index: number) {

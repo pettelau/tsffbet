@@ -77,7 +77,6 @@ function UserReg() {
   const fetchTeams = async () => {
     const response = await fetch(`${url_path}api/teams`);
     const resp = await response.json();
-    console.log(resp);
     setTeams(resp.teams as Team[]);
   };
 
