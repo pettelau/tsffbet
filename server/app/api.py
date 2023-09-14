@@ -16,6 +16,13 @@ from zoneinfo import ZoneInfo
 from psycopg2.errors import UniqueViolation
 from psycopg2 import IntegrityError
 
+from databases import Database
+from .credentials import Credentials
+
+DATABASE_URL = f"postgresql://{Credentials.user}:{Credentials.password}@{Credentials.host}/{Credentials.db}"
+
+database = Database(DATABASE_URL)
+
 
 try:
     connection = pool.getconn()
@@ -71,6 +78,17 @@ def insertDBNew(query, values=None):
 
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
+
 
 origins = ["*"]
 
@@ -691,30 +709,35 @@ class UserCreate(BaseModel):
 @app.post("/api/createUser")
 async def add_user(user: UserCreate):
     hashed = bcrypt.hashpw(bytes(user.password, encoding="utf-8"), bcrypt.gensalt())
+    try:
+        if user.team_id is not None:
+            query = (
+                "INSERT INTO users(username, password, balance, firstname, lastname, team_id) "
+                "VALUES (:username, :password, 5000, :firstname, :lastname, :team_id)"
+            )
+            values = {
+                "username": user.username,
+                "password": hashed.decode("utf-8"),
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "team_id": user.team_id,
+            }
+        else:
+            query = (
+                "INSERT INTO users(username, password, balance, firstname, lastname) "
+                "VALUES (:username, :password, 5000, :firstname, :lastname)"
+            )
+            values = {
+                "username": user.username,
+                "password": hashed.decode("utf-8"),
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+            }
 
-    if user.team_id is not None:
-        # Define the SQL query and its values separately
-        query = (
-            "INSERT INTO users(username, password, balance, firstname, lastname, team_id) "
-            "VALUES (%s, %s, 5000, %s, %s, %s)"
-        )
-        values = (
-            user.username,
-            hashed.decode("utf-8"),
-            user.firstname,
-            user.lastname,
-            user.team_id,
-        )
-    else:
-        query = (
-            "INSERT INTO users(username, password, balance, firstname, lastname) "
-            "VALUES (%s, %s, 5000, %s, %s)"
-        )
-        values = (user.username, hashed.decode("utf-8"), user.firstname, user.lastname)
-
-    insertDBNew(query, values)
-
-    return {"userCreated": True}
+        await database.execute(query, values)
+        return {"userCreated": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Internal server error")
 
 
 @app.post("/api/updatePassword")
