@@ -120,9 +120,20 @@ h3 {
   margin-bottom: 5px;
 }
 
-.Table {
- max-width: 500px;
+.table-div {  
+  padding-bottom: 100px;
+  display: "flex";
+  justify-content: "center";
+  max-width: 650px;
+  margin: 0 auto;
 }
+
+@media screen and (max-width: 650px) {
+  .table-div {
+    max-width: 98%;
+  }
+}
+
 
 .CompList {
   padding-left: 0;

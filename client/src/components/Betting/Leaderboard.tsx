@@ -138,11 +138,12 @@ export default function Leaderboard() {
           width: "90%",
           maxWidth: 800,
           display: "grid",
+          placeItems: "center",
           margin: "auto",
           textAlign: "center",
         }}
       >
-        <Alert severity="info">
+        <Alert sx={{ maxWidth: 500 }} severity="info">
           Klikk på et brukernavn for å se alle kupongene til denne personen.
         </Alert>
       </div>
@@ -189,22 +190,20 @@ export default function Leaderboard() {
         </FormControl>
       </div>
       <br />
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Table className="Table" aria-label="simple table">
+      <div className="table-div">
+        <Table aria-label="simple table">
           <TableHead>
             <TableRow sx={{ backgroundColor: "white" }}>
-              <TableCell>
+              <TableCell align="center">
                 <b>Bruker</b>
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 <b>Lag</b>
               </TableCell>
               <TableCell align="center">
                 <b>Balanse</b>
               </TableCell>
-              <TableCell align="center">
-                <b>Antall kuponger</b>
-              </TableCell>
+
               <TableCell align="center">
                 <b>Vunnede kuponger</b>
               </TableCell>
@@ -230,23 +229,21 @@ export default function Leaderboard() {
                       >
                         {user.username}
                       </TableCell>
-                      <TableCell sx={{ width: 70 }} align="center">
+                      <TableCell align="center">
                         {user.associated_team ? user.associated_team : "Ingen"}
                       </TableCell>
                       <TableCell sx={{ width: 70 }} align="center">
                         {user.balance}
                       </TableCell>
-                      <TableCell sx={{ width: 40 }} align="center">
-                        {user.total_accums}
-                      </TableCell>
+
                       <TableCell sx={{ width: 100 }} align="center">
-                        {user.won_accums}
+                        {user.won_accums + "/" + user.total_accums}
                         {user.total_accums !== 0
                           ? " (" +
                             (
                               (user.won_accums / user.total_accums) *
                               100
-                            ).toFixed(1) +
+                            ).toFixed(0) +
                             "%)"
                           : ""}
                       </TableCell>

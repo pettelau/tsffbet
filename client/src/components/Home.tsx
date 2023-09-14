@@ -24,6 +24,8 @@ export default function Home() {
         <h1>Velkommen til TSFFBet!</h1>
         <div
           style={{
+            marginLeft: 10,
+            marginRight: 10,
             maxWidth: 500,
             display: "grid",
             margin: "auto",

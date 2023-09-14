@@ -290,15 +290,22 @@ function Login() {
             Oppdater passord
           </Button>
           <br />
-          <br />
-          <Button
-            variant="contained"
-            onClick={() => {
-              navigate("/admin");
-            }}
-          >
-            Gå til adminside
-          </Button>
+          {isAdmin ? (
+            <>
+              <br />
+              <Button
+                variant="contained"
+                onClick={() => {
+                  navigate("/admin");
+                }}
+              >
+                Gå til adminside
+              </Button>
+            </>
+          ) : (
+            ""
+          )}
+
           <div>
             <Button
               variant="contained"
