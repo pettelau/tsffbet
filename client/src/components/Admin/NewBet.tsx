@@ -83,7 +83,7 @@ export default function NewBet() {
       });
 
       const resp = await response.json();
-      if (resp["createBet"]) {
+      if (resp["settleBet"]) {
         toggleAlert(true, "Bettet ble opprettet!", "success");
         setOptions([{ option: "", latest_odds: null }]);
         setTitle("");
