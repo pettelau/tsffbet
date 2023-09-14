@@ -598,7 +598,7 @@ async def settle_bet(bet: dict, token: str = Depends(authUtils.validate_access_t
             )
             cursor.execute(query2)
         query_accum_ids = Template(
-            "select distinct accum_id from accums natural join accum_options natural join bet_options where bet = $bet_id"
+            "select distinct accum_id from accums natural join accum_options natural join bet_options where bet = $bet_id and paid_out = false"
         ).safe_substitute(
             {
                 "bet_id": bet["bet_id"],
