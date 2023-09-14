@@ -140,7 +140,15 @@ export default function BetFeed() {
                       color: "#828385",
                     }}
                   >
-                    <b>{accum.username}</b> |{" "}
+                    <b
+                    style={{cursor: "pointer"}}
+                      onClick={() => {
+                        navigate(`/user/${accum.username}`);
+                      }}
+                    >
+                      {accum.username}
+                    </b>{" "}
+                    |{" "}
                     {new Date(accum.placed_timestamp).getDate() +
                       " " +
                       MONTHS[new Date(accum.placed_timestamp).getMonth()] +
