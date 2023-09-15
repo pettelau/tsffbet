@@ -50,15 +50,68 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)):
 
 @app.get("/api/requestedbets")
 async def get_requested_bets():
-    bets = await database.fetch_all("select * from bets where is_accepted = false")
-    bets_with_options = []
-    for bet in bets:
-        options_query = "select option_id, latest_odds, option_status, option from bet_options where bet = :bet"
-        options = await database.fetch_all(options_query, {"bet": bet["bet_id"]})
-        bet_with_option = dict(bet)
-        bet_with_option["bet_options"] = options
-        bets_with_options.append(bet_with_option)
-    return bets_with_options
+    try:
+        bets = await database.fetch_all("select * from bets where is_accepted = false")
+        bets_with_options = []
+        for bet in bets:
+            options_query = "select option_id, latest_odds, option_status, option from bet_options where bet = :bet"
+            options = await database.fetch_all(options_query, {"bet": bet["bet_id"]})
+            bet_with_option = dict(bet)
+            bet_with_option["bet_options"] = options
+            bets_with_options.append(bet_with_option)
+        return bets_with_options
+    except Exception:
+        raise HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.get("/api/stats")
+async def get_stats(
+    offset: int = 0,
+    limit: int = 20,
+    token: str = Depends(authUtils.validate_access_token),
+):
+    try:
+        num_users = await database.fetch_one("SELECT COUNT(*) FROM users")
+        num_accums = await database.fetch_one("SELECT COUNT(*) FROM accums")
+        balance_sum_total = await database.fetch_one("SELECT SUM(balance) FROM users")
+        accum_sum_total = await database.fetch_one("SELECT SUM(stake) FROM accums")
+        total_stakes = await database.fetch_all(
+            """SELECT 
+                accum_options.option_id, 
+                SUM(stake) AS total_stake, 
+                option, 
+                title,
+                COUNT(DISTINCT(accums.accum_id)) as number_accums
+            FROM 
+                accum_options 
+            LEFT JOIN 
+                bet_options ON accum_options.option_id = bet_options.option_id 
+            LEFT JOIN 
+                accums ON accum_options.accum_id = accums.accum_id 
+            LEFT JOIN 
+                bets ON bet_options.bet = bets.bet_id
+            GROUP BY 
+                accum_options.option_id, 
+                option, 
+                title
+            ORDER BY total_stake DESC
+            LIMIT :limit OFFSET :offset
+            """,
+            {"limit": limit, "offset": offset},
+        )
+        print(dict(num_users))
+        stats = {
+            "num_users": num_users["count"],
+            "num_accums": num_accums["count"],
+            "avg_stake": round((accum_sum_total["sum"] / num_accums["count"]), 1),
+            "avg_user_balance": round(
+                (balance_sum_total["sum"] / num_users["count"]), 1
+            ),
+            "total_stakes": total_stakes,
+        }
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Something went wrong")
 
 
 @app.get("/api/leaderboard")
