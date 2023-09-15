@@ -24,10 +24,8 @@ import PaidIcon from "@mui/icons-material/Paid";
 import MenuIcon from "@mui/icons-material/Menu";
 import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
 import DynamicFeedIcon from "@mui/icons-material/DynamicFeed";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import InterestsIcon from '@mui/icons-material/Interests';
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useAppSelector } from "../redux/hooks";
@@ -75,7 +73,7 @@ export default function AppAppBar() {
                 style={{ maxHeight: 30, marginRight: 25, marginTop: 8 }}
                 src={"/tsff_simple.png"}
               />
-            
+
               <IconButton
                 id="betting-button"
                 size="large"
@@ -136,7 +134,7 @@ export default function AppAppBar() {
                   Leaderboard
                 </Typography>
               </IconButton>
-             
+
               <IconButton
                 id="feed-button"
                 size="large"
@@ -152,9 +150,23 @@ export default function AppAppBar() {
                   BetFeed
                 </Typography>
               </IconButton>
-            
+              <IconButton
+                id="feed-button"
+                size="large"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                onClick={() => {
+                  navigate("/stats");
+                }}
+              >
+                <QueryStatsIcon />
+                <Typography sx={{ color: "white", marginLeft: 1 }}>
+                  Stats
+                </Typography>
+              </IconButton>
             </Box>
-            
+
             <Box
               sx={{
                 flex: 1,
@@ -292,7 +304,6 @@ export default function AppAppBar() {
                 </MenuItem>
                 <Divider />
 
-               
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
@@ -302,9 +313,18 @@ export default function AppAppBar() {
                   <DynamicFeedIcon sx={{ mr: 1 }} />
                   BetFeed
                 </MenuItem>
-             
+                <Divider />
+
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/stats");
+                  }}
+                >
+                  <QueryStatsIcon sx={{ mr: 1 }} />
+                  Stats
+                </MenuItem>
               </Menu>
-              
             </Box>
             <Box sx={{ flex: 1 }}>
               <img

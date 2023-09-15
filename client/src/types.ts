@@ -220,9 +220,19 @@ export type BondeUser = {
 };
 
 export type Stats = {
-  avg_diffs: AvgDiffs[];
-  perc_underbid: number;
-  total_avg_diff: number;
+  num_users: number;
+  num_accums: number;
+  avg_stake: number;
+  avg_user_balance: number;
+  total_stakes: OptionStake[];
+};
+
+export type OptionStake = {
+  option_id: number;
+  total_stake: number;
+  option: string;
+  title: string;
+  number_accums: number;
 };
 
 export type AvgDiffs = {
