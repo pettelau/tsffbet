@@ -13,6 +13,7 @@ import { selectPath } from "../../redux/envSlice";
 import { useAppSelector } from "../../redux/hooks";
 import { AccumBets, Accums } from "../../types";
 import NoAccess from "../NoAccess";
+import { selectUsername } from "../../redux/userSlice";
 
 function getAccumStatus(accum: Accums) {
   let hasWon: boolean = false;
@@ -42,13 +43,14 @@ function getAccumStatus(accum: Accums) {
 }
 
 export default function MyAccums() {
+  const username = useAppSelector(selectUsername);
   const [accums, setAccums] = React.useState<Accums[]>([]);
 
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<number>();
 
   const fetchBets = async () => {
-    const response = await fetch(`${url_path}api/accums`, {
+    const response = await fetch(`${url_path}api/useraccums?user=${username}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();

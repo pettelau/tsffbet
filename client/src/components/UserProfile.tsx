@@ -81,7 +81,7 @@ export default function UserProfile() {
     const resp = await response.json();
     setResponseCodeUser(response.status);
     if (response.ok) {
-      setPublicUserData(resp["userdata"][0]);
+      setPublicUserData(resp);
     } else {
       setResponseText(resp.detail);
     }

@@ -25,6 +25,11 @@ export default function BetFeed() {
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<number>();
 
+  const [offset, setOffset] = React.useState<number>(0);
+  const [limit, setLimit] = React.useState<number>(15);
+
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
   //error toggle
   const [_alert, setAlert] = React.useState<boolean>(false);
   const [_alertType, setAlertType] = React.useState<AlertT>({
@@ -42,13 +47,18 @@ export default function BetFeed() {
   }
 
   const fetchBets = async () => {
-    const response = await fetch(`${url_path}api/allaccums`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
-    });
+    setIsLoading(true);
+    const response = await fetch(
+      `${url_path}api/allaccums?skip=${offset}&limit=${limit}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      }
+    );
     const resp = await response.json();
     setResponseCode(response.status);
     if (response.status == 200) {
-      setAccums(resp);
+      setIsLoading(false);
+      setAccums((prevAccums) => [...prevAccums, ...resp]);
     } else {
       setResponseText(resp.detail);
     }
@@ -56,7 +66,7 @@ export default function BetFeed() {
 
   useEffect(() => {
     fetchBets();
-  }, []);
+  }, [offset]);
 
   function getAccumStatus(accum: Accums) {
     let hasWon: boolean = false;
@@ -141,7 +151,7 @@ export default function BetFeed() {
                     }}
                   >
                     <b
-                    style={{cursor: "pointer"}}
+                      style={{ cursor: "pointer" }}
                       onClick={() => {
                         navigate(`/user/${accum.username}`);
                       }}
@@ -235,6 +245,28 @@ export default function BetFeed() {
           );
         })}
       </div>
+      {isLoading ? (
+        <>
+          <br />
+          <br />
+          <br />
+          <CircularProgress />
+        </>
+      ) : (
+        <>
+          <br />
+          <Button
+            onClick={() => {
+              setOffset((prev) => prev + limit);
+            }}
+            variant="contained"
+          >
+            Last inn flere
+          </Button>
+          <br />
+          <br />
+        </>
+      )}
     </>
   );
 }
