@@ -51,16 +51,26 @@ export default function EditBet() {
     React.useState<string>("Alle kategorier");
 
   const [responseCode, setResponseCode] = React.useState<number>();
-  const [responseText, setResponseText] = React.useState<number>();
+  const [responseText, setResponseText] = React.useState<string>();
+
+  const [offset, setOffset] = React.useState<number>(0);
+  const [limit, setLimit] = React.useState<number>(15);
+
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   const fetchBets = async () => {
-    const response = await fetch(`${url_path}api/admin/allbets`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
-    });
+    setIsLoading(true);
+    const response = await fetch(
+      `${url_path}api/admin/allbets?skip=${offset}&limit=${limit}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      }
+    );
     const resp = await response.json();
     setResponseCode(response.status);
     if (response.status == 200) {
-      setAllBets(resp);
+      setIsLoading(false);
+      setAllBets((prevBets) => [...prevBets, ...resp]);
       let cats: string[] = ["Alle kategorier"];
       resp.forEach((bet: Bet) => {
         if (cats.indexOf(bet.category) === -1) {
@@ -73,21 +83,25 @@ export default function EditBet() {
     }
   };
 
+  // useEffect(() => {
+  //  fetchBets();
+  // }, []);
+
   useEffect(() => {
     fetchBets();
-  }, []);
+  }, [offset]);
 
   if (responseCode == undefined) {
     return (
       <>
-      <br />
-      <br />
-      <br />
+        <br />
+        <br />
+        <br />
         <CircularProgress />
       </>
     );
   }
-  
+
   if (responseCode !== 200) {
     return <NoAccess responseCode={responseCode} responseText={responseText} />;
   }
@@ -380,6 +394,28 @@ export default function EditBet() {
               </>
             );
           })}
+          {isLoading ? (
+            <>
+              <br />
+              <br />
+              <br />
+              <CircularProgress />
+            </>
+          ) : (
+            <>
+              <br />
+              <Button
+                onClick={() => {
+                  setOffset((prev) => prev + limit);
+                }}
+                variant="contained"
+              >
+                Last inn flere
+              </Button>
+              <br />
+              <br />
+            </>
+          )}
         </>
       ) : (
         ""

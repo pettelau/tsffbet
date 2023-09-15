@@ -166,7 +166,7 @@ function UserReg() {
     if (resp.userCreated) {
       navigate("/login");
     } else {
-      alertmsg = `Bruker ble ikke opprettet, noe gikk galt. Send melding til Lau. Error message: ${resp}`;
+      alertmsg = `Bruker ble ikke opprettet, noe gikk galt. Error message: ${resp.detail}`;
       toggleAlert(true, alertmsg, "error");
     }
   };

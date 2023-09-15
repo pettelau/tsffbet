@@ -1,4 +1,4 @@
-import { Alert, Button, Divider, TextField } from "@mui/material";
+import { Alert, AlertTitle, Button, Divider, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { LoginUtils } from "../utils";
 // Icons
@@ -32,6 +32,23 @@ export default function Home() {
             textAlign: "center",
           }}
         >
+          <Alert severity="warning">
+            <AlertTitle>Viktig info</AlertTitle>Pågangen og interessen på siden
+            har vært over all forventing - over 100 brukere på et par timer!
+            Utrolig gøy! Men sjansene for at bugs kan forekomme er stor nå i
+            starten. Jeg fikser feilene så fort som mulig, men ber om forståelse
+            og håper folk kommer tilbake senere selv om siden kanskje er nede
+            noe nå i begynnelsen🙏
+          </Alert>
+          <br />
+          <Alert severity="warning">
+            <AlertTitle>Annen viktig info</AlertTitle>Foreløpig har jeg ikke noe
+            godt system for innmelding av resultater fra bets, f.eks. målscorer-
+            og kortspill som ikke ligger ute på tsff.no. Inntil videre kan dere
+            sende SMS til 90636538 med resultater. Her stoler jeg på at det dere
+            melder inn er korrekt.
+          </Alert>
+          <br />
           Studentfotballen tar stadig nye steg, og jeg følte det nå var på tide
           med en helt egen bettingside for TSFF! <br />
           <br />

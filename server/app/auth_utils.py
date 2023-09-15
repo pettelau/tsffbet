@@ -1,5 +1,4 @@
 from random import random
-import os
 from passlib.context import CryptContext
 from jose import jwt
 from jose.exceptions import JOSEError
@@ -7,27 +6,12 @@ from fastapi import HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import bcrypt
 from .credentials import Credentials
-import psycopg2
-from .postgresPool import pool
-from string import Template
-from psycopg2.extras import RealDictCursor
+
+from .db_instance import database
 
 
 SECRET = Credentials.secret
 ALGORITHM = Credentials.algorithm
-
-try:
-    connection = pool.getconn()
-
-except (Exception, psycopg2.DatabaseError) as error:
-    print("Error while connecting to PostgreSQL", error)
-
-
-def fetchDBJson(query):
-    cursor = connection.cursor(cursor_factory=RealDictCursor)
-    cursor.execute(query)
-    result = cursor.fetchall()
-    return result
 
 
 class AuthUtils:
@@ -63,12 +47,10 @@ class AuthUtils:
                 token, self.JWT_SECRET_KEY, algorithms=[self.JWT_ALGORITHM]
             )
 
-            res = fetchDBJson(
-                Template(
-                    "select whitelist from users where username = '$username'"
-                ).safe_substitute({"username": payload["user"]})
-            )
-            if res[0]["whitelist"]:
+            query_wl = "select whitelist from users where username = :username"
+
+            res = await database.fetch_one(query_wl, {"username": payload["user"]})
+            if res["whitelist"]:
                 return payload
             else:
                 raise HTTPException(status_code=403, detail="You are not whitelisted")
