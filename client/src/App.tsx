@@ -78,7 +78,7 @@ export default function App() {
     });
     const resp = await response.json();
     // dispatch(setUsername(user.toLowerCase()));
-    store.dispatch(setUserDetails(resp[0]));
+    store.dispatch(setUserDetails(resp));
   }
 
   useEffect(() => {
