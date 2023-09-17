@@ -70,8 +70,8 @@ const THEME = createTheme({
 });
 
 export default function App() {
-  // const url_path = "/";
-  const url_path = "http://localhost:8001/";
+  const url_path = "/";
+  // const url_path = "http://localhost:8001/";
 
   async function loginDetails() {
     const response = await fetch(`${url_path}api/login/details`, {
@@ -84,8 +84,6 @@ export default function App() {
 
   useEffect(() => {
     if (localStorage.getItem("jwt") !== null) {
-      console.log(localStorage.getItem("jwt"));
-      console.log("Here");
       loginDetails();
     }
   }, []);

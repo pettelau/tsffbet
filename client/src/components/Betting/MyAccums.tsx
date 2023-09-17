@@ -90,7 +90,7 @@ export default function MyAccums() {
 
   useEffect(() => {
     fetchBets();
-  }, []);
+  }, [username]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setChosenAccums(newValue);

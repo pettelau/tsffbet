@@ -95,7 +95,6 @@ export default function Leaderboard() {
         ? undefined
         : (event.target.value as number);
     setFilterTeam(value);
-
   };
 
   function bgColorChecker(index: number) {
@@ -197,7 +196,7 @@ export default function Leaderboard() {
               <TableCell align="center">
                 <b>Lag</b>
               </TableCell>
-              <TableCell align="center">
+              <TableCell sx={{ width: 100 }} align="center">
                 <b>Balanse</b>
               </TableCell>
 
@@ -229,8 +228,8 @@ export default function Leaderboard() {
                       <TableCell align="center">
                         {user.associated_team ? user.associated_team : "Ingen"}
                       </TableCell>
-                      <TableCell sx={{ width: 70 }} align="center">
-                        {user.balance}
+                      <TableCell sx={{ width: 100 }} align="center">
+                        {user.balance.toFixed(0).toLocaleString()} kr
                       </TableCell>
 
                       <TableCell sx={{ width: 100 }} align="center">
