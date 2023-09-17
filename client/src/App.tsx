@@ -82,7 +82,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (localStorage.getItem("jwt") !== "") {
+    if (localStorage.getItem("jwt") !== null) {
       loginDetails();
     }
   }, []);
