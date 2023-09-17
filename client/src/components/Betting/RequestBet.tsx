@@ -5,7 +5,11 @@ import {
   Card,
   CircularProgress,
   Divider,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
 } from "@mui/material";
 import { useAppSelector } from "../../redux/hooks";
@@ -13,7 +17,14 @@ import { selectPath } from "../../redux/envSlice";
 import { selectAdmin } from "../../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 import NoAccess from "../NoAccess";
-import { AlertT, Bet, BetOption, NewBetType, NewOptionType } from "../../types";
+import {
+  AlertT,
+  Bet,
+  BetOption,
+  MatchSimple,
+  NewBetType,
+  NewOptionType,
+} from "../../types";
 import AlertComp from "../Alert";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -25,17 +36,37 @@ import { flexbox } from "@mui/system";
 export default function RequestBet() {
   const url_path = useAppSelector(selectPath);
 
+  type Category =
+    | "Resultat"
+    | "Målscorer"
+    | "Kortspill"
+    | "Holde nullen"
+    | "Over/under"
+    | "Annet";
+  const CATEGORIES: Category[] = [
+    "Resultat",
+    "Målscorer",
+    "Kortspill",
+    "Holde nullen",
+    "Over/under",
+    "Annet",
+  ];
+  const [matches, setMatches] = React.useState<MatchSimple[]>([]);
+
+  const [chosenMatch, setChosenMatch] = React.useState<MatchSimple>();
+
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<number>();
 
-  const [title, setTitle] = React.useState<string>("");
-  const [category, setCategory] = React.useState<string>("");
+  const [title, setTitle] = React.useState<string>("Scorer mål: ");
+  const [category, setCategory] = React.useState<Category>("Målscorer");
   const [closeDate, setCloseDate] = React.useState<Dayjs | null>(
     dayjs().add(7, "day")
   );
 
   const [options, setOptions] = React.useState<NewOptionType[]>([
-    { option: "", latest_odds: null },
+    { option: "Ja", latest_odds: null },
+    { option: "Nei", latest_odds: null },
   ]);
 
   const [bets, setBets] = React.useState<Bet[]>([]);
@@ -101,9 +132,22 @@ export default function RequestBet() {
     "november",
     "desember",
   ];
+
   useEffect(() => {
     fetchExistingReqs();
   }, []);
+
+  const fetchMatches = async () => {
+    const response = await fetch(`${url_path}api/matchessimple`);
+    const resp = await response.json();
+    setResponseCode(response.status);
+    if (response.status == 200) {
+      setMatches(resp);
+      console.log(resp);
+    } else {
+      setResponseText(resp.detail);
+    }
+  };
 
   async function sendRequest() {
     if (closeDate == null) {
@@ -118,18 +162,19 @@ export default function RequestBet() {
       toggleAlert(true, "Du må ha minst ett spillalternativ", "error");
       return;
     }
-    if (category == "") {
-      toggleAlert(true, "Du må skrive enn kategori for spillet", "error");
+    if (!options.every((option) => option.latest_odds !== null)) {
+      toggleAlert(true, "Alle alternativene må ha en odds", "error");
       return;
     }
-    if (title == "") {
-      toggleAlert(true, "Du må skrive inn selve bettet", "error");
+    if (title == "" && category !== "Resultat") {
+      toggleAlert(true, "Du må skrive inn en beskrivelse av bettet", "error");
       return;
     }
-    let bet_packet: any = {
+    let bet_obj: NewBetType = {
       title: title,
       category: category,
-      close_date: closeDate,
+      close_date: closeDate.toDate(),
+      related_match: chosenMatch?.match_id,
       options: options,
     };
     const response = await fetch(`${url_path}api/requestbet`, {
@@ -138,7 +183,7 @@ export default function RequestBet() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwt")}`,
       },
-      body: JSON.stringify(bet_packet),
+      body: JSON.stringify(bet_obj),
     });
 
     const resp = await response.json();
@@ -147,11 +192,11 @@ export default function RequestBet() {
       toggleAlert(true, "Bettet ble requestet!", "success");
       setOptions([]);
       setTitle("");
-      setCategory("");
     } else {
       toggleAlert(true, resp["errorMsg"], "error");
     }
   }
+
   let totalodds = 0;
   options.forEach((option) => {
     if (typeof option.latest_odds === "number") {
@@ -164,6 +209,80 @@ export default function RequestBet() {
     optionsCopy.splice(index, 1);
     setOptions(optionsCopy);
   }
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  useEffect(() => {
+    if (chosenMatch && category === "Resultat") {
+      const defaultOptions: NewOptionType[] = [
+        {
+          latest_odds: null,
+          option: chosenMatch.home_team,
+        },
+        {
+          latest_odds: null,
+          option: "Uavgjort",
+        },
+        {
+          latest_odds: null,
+          option: chosenMatch.away_team,
+        },
+      ];
+      setOptions(defaultOptions);
+    } else if (chosenMatch && category === "Holde nullen") {
+      const defaultOptions: NewOptionType[] = [
+        {
+          latest_odds: null,
+          option: `${chosenMatch.home_team} - JA`,
+        },
+        {
+          latest_odds: null,
+          option: `${chosenMatch.home_team} - NEI`,
+        },
+        {
+          latest_odds: null,
+          option: `${chosenMatch.away_team} - JA`,
+        },
+        {
+          latest_odds: null,
+          option: `${chosenMatch.away_team} - NEI`,
+        },
+      ];
+      setOptions(defaultOptions);
+      setTitle("Laget holder nullen");
+    } else if (chosenMatch && category === "Over/under") {
+      const defaultOptions: NewOptionType[] = [
+        {
+          latest_odds: null,
+          option: `Over 0.5`,
+        },
+        {
+          latest_odds: null,
+          option: `Under 0.5`,
+        },
+        {
+          latest_odds: null,
+          option: `Over 1.5`,
+        },
+        {
+          latest_odds: null,
+          option: `Under 1.5`,
+        },
+        {
+          latest_odds: null,
+          option: `Over 2.5`,
+        },
+        {
+          latest_odds: null,
+          option: `Under 2.5`,
+        },
+      ];
+      setOptions(defaultOptions);
+      setTitle("Totalt antall må i kampen");
+    }
+  }, [chosenMatch, category]);
 
   if (responseCode == undefined) {
     return (
@@ -182,28 +301,77 @@ export default function RequestBet() {
   return (
     <>
       {/* Alert component to show error/success messages */}
-      <AlertComp
-        setAlert={setAlert}
-        _alert={_alert}
-        _alertType={_alertType}
-        toggleAlert={toggleAlert}
-      ></AlertComp>
-      <div style={{ marginTop: 30, display: "flex", justifyContent: "center" }}>
-        <Card sx={{ width: 400 }}>
-          <h2>Request-a-bet</h2>
-          <TextField
-            sx={{ width: 370 }}
-            multiline
-            label="Bet"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+
+      <div
+        style={{
+          marginTop: 30,
+          backgroundColor: "white",
+          maxWidth: 800,
+          margin: "0 auto",
+          paddingTop: 30,
+          paddingBottom: 30,
+          marginBottom: 50,
+        }}
+      >
+        <>
+          <h2>Request et bet</h2>
+          <FormControl size="small" sx={{ width: 400 }} variant="outlined">
+            <InputLabel id="category-label">Kategori</InputLabel>
+            <Select
+              labelId="category-label"
+              value={category}
+              onChange={(e) => setCategory(e.target.value as Category)}
+              label="Kategori"
+            >
+              {CATEGORIES.map((cat) => (
+                <MenuItem key={cat} value={cat}>
+                  {cat}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <br />
+          <br />
+          <FormControl size="small" sx={{ width: 400 }} variant="outlined">
+            <InputLabel id="match-label">Match</InputLabel>
+            <Select
+              labelId="match-label"
+              value={chosenMatch?.match_id || "none"}
+              onChange={(e) => {
+                const matchId = e.target.value;
+                if (matchId === "none") {
+                  setChosenMatch(undefined);
+                  setCloseDate(null);
+                } else {
+                  const selectedMatch = matches.find(
+                    (match) => match.match_id === matchId
+                  );
+                  setChosenMatch(selectedMatch);
+                  if (selectedMatch?.ko_time) {
+                    setCloseDate(dayjs(selectedMatch.ko_time));
+                  } else {
+                    setCloseDate(null);
+                  }
+                }
+              }}
+              label="Match"
+            >
+              <MenuItem value="none">Ingen tilknyttet kamp</MenuItem>
+              {matches.map((match) => (
+                <MenuItem key={match.match_id} value={match.match_id}>
+                  {match.home_team} - {match.away_team}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <br />
           <br />
           <TextField
-            sx={{ width: 370 }}
-            label="Kateogri"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            disabled={category === "Resultat" ? true : false}
+            sx={{ width: 400 }}
+            label="Beskrivelse av bet"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
           <br />
           <br />
@@ -217,37 +385,38 @@ export default function RequestBet() {
           </LocalizationProvider>
           <br />
           <br />
-          <h3>Spillalternativer:</h3>
+          <h3>Alternativ:</h3>
           {options.map((option: NewOptionType, index: number) => {
             return (
               <>
-                <div>
-                  <TextField
-                    label="Bet option"
-                    value={option.option}
-                    onChange={(e) => updateOption(e.target.value, index)}
-                  />
-                  <TextField
-                    sx={{ width: 100 }}
-                    type={"number"}
-                    label="Odds"
-                    value={option.latest_odds}
-                    onChange={(e) => updateOdds(e.target.value, index)}
-                  />
-
-                  <IconButton
-                    onClick={() => {
-                      removeOption(index);
-                    }}
-                  >
-                    <DeleteForeverIcon sx={{ fontSize: 40 }} />
-                  </IconButton>
-                  <br />
-                  <br />
-                </div>
+                <TextField
+                  sx={{ width: 200 }}
+                  size="small"
+                  label="Bet option"
+                  value={option.option}
+                  onChange={(e) => updateOption(e.target.value, index)}
+                />
+                <TextField
+                  sx={{ width: 100 }}
+                  size="small"
+                  type={"number"}
+                  label="Odds"
+                  value={option.latest_odds}
+                  onChange={(e) => updateOdds(e.target.value, index)}
+                />
+                <IconButton
+                  onClick={() => {
+                    removeOption(index);
+                  }}
+                >
+                  <DeleteForeverIcon sx={{ fontSize: 30 }} />
+                </IconButton>
+                <br />
+                <br />
               </>
             );
           })}
+          <br />
           <Button
             variant="outlined"
             onClick={() => {
@@ -258,29 +427,41 @@ export default function RequestBet() {
           </Button>{" "}
           <br />
           <br />
-          {/* <div>
-        Tilbakebetalingsprosent:{" "}
-        {((totalodds / options.length - 1) * 100).toFixed(1)}%
-      </div>
-      <br /> */}
+          <div>
+            <b>
+              Tilbakebetalingsprosent:{" "}
+              {((totalodds / options.length / options.length) * 100).toFixed(1)}
+              %
+            </b>
+            <br /> (Denne bør være opp mot 100%, men som oftest ikke over)
+          </div>
+          <br />
           <Button
-            variant="contained"
+            variant="outlined"
             onClick={() => {
               sendRequest();
             }}
           >
-            Send Bet
+            Request Bet
           </Button>
           <br />
           <br />
-        </Card>
+          <div style={{ maxWidth: 400, margin: "0 auto" }}>
+            <AlertComp
+              setAlert={setAlert}
+              _alert={_alert}
+              _alertType={_alertType}
+              toggleAlert={toggleAlert}
+            ></AlertComp>
+          </div>
+        </>
       </div>
 
       <Divider />
       <br />
       {bets.length > 0 ? (
         <>
-          <h3>Venter på godkjenning fra Lau:</h3>
+          <h3>Venter på godkjenning fra TSFFBet:</h3>
           <div className="bet-flex-container">
             {bets.map((bet: Bet) => {
               return (
@@ -289,7 +470,8 @@ export default function RequestBet() {
                     <Card sx={{ padding: 2 }}>
                       <>
                         {bet.title} <br />
-                        Innsendt av: <b>{bet.submitter}</b><br />
+                        Innsendt av: <b>{bet.submitter}</b>
+                        <br />
                         {bet.bet_options.map((option: BetOption) => {
                           return (
                             <>

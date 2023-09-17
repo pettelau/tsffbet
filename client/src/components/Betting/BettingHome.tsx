@@ -1,14 +1,20 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
   Button,
   Card,
   CircularProgress,
+  Divider,
   Tab,
   Tabs,
   ToggleButton,
   ToggleButtonGroup,
+  Typography,
 } from "@mui/material";
 import React, { useEffect } from "react";
-import { Bet, BetOption } from "../../types";
+import { Bet, BetOption, Match } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { addBet, removeBet, selectAccum } from "../../redux/accumSlice";
 import {
@@ -19,6 +25,7 @@ import {
 import { selectPath } from "../../redux/envSlice";
 import useWindowDimensions from "../../utils/deviceSizeInfo";
 import NoAccess from "../NoAccess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function BettingHome() {
   const dispatch = useAppDispatch();
@@ -46,11 +53,16 @@ export default function BettingHome() {
   const lastname = useAppSelector(selectLastname);
   const balance = useAppSelector(selectBalance);
 
+  const [matches, setMatches] = React.useState<Match[]>([]);
+
   const [bets, setBets] = React.useState<Bet[]>([]);
 
-  const [categories, setCategories] = React.useState<string[]>([]);
-  const [chosenCategory, setChosenCategory] =
-    React.useState<string>("Alle kategorier");
+  // const [categories, setCategories] = React.useState<string[]>([]);
+
+  const [groups, setGroups] = React.useState<string[]>([]);
+
+  const [chosenGroup, setChosenGroup] =
+    React.useState<string>("Begge avdelinger");
   const accumBets = useAppSelector(selectAccum);
 
   const [responseCode, setResponseCode] = React.useState<number>();
@@ -64,20 +76,55 @@ export default function BettingHome() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setBets(resp);
-      let cats: string[] = ["Alle kategorier"];
-      resp.forEach((bet: Bet) => {
-        if (cats.indexOf(bet.category.toLowerCase()) === -1) {
-          cats.push(bet.category.toLowerCase());
+      // let cats: string[] = ["Alle kategorier"];
+      // resp.forEach((bet: Bet) => {
+      //   if (cats.indexOf(bet.category.toLowerCase()) === -1) {
+      //     cats.push(bet.category.toLowerCase());
+      //   }
+      // });
+      // setCategories(cats);
+    } else {
+      setResponseText(resp.detail);
+    }
+  };
+
+  const fetchMatches = async () => {
+    const response = await fetch(`${url_path}api/matcheswithodds`);
+    const resp = await response.json();
+    setResponseCode(response.status);
+    if (response.status == 200) {
+      setMatches(resp);
+      console.log(resp);
+      let groups: string[] = ["Begge avdelinger"];
+      resp.forEach((match: Match) => {
+        if (groups.indexOf(match.group_name.toLowerCase()) === -1) {
+          groups.push(match.group_name.toLowerCase());
         }
       });
-      setCategories(cats);
+      setGroups(groups);
+    } else {
+      setResponseText(resp.detail);
+    }
+  };
+
+  const fetchMatchBets = async (match_id: number) => {
+    const response = await fetch(
+      `${url_path}api/matchbets?match_id=${match_id}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      }
+    );
+    const resp = await response.json();
+    setResponseCode(response.status);
+    if (response.status == 200) {
+      // setBets(resp);
     } else {
       setResponseText(resp.detail);
     }
   };
 
   useEffect(() => {
-    fetchBets();
+    fetchMatches();
   }, []);
 
   function addToAccum(bet: string, option: BetOption, index: number) {
@@ -88,14 +135,38 @@ export default function BettingHome() {
     }
   }
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setChosenCategory(newValue);
+    setChosenGroup(newValue);
   };
+
+  function formatDate(dateString: Date) {
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Intl.DateTimeFormat("default", options).format(
+      new Date(dateString)
+    );
+  }
+
+  // Custom sorting function
+  function sortOptions(
+    optionA: BetOption,
+    optionB: BetOption,
+    home: string,
+    away: string
+  ): number {
+    const order = [home, "Uavgjort", away];
+    return order.indexOf(optionA.option) - order.indexOf(optionB.option);
+  }
+
   if (responseCode == undefined) {
     return (
       <>
-      <br />
-      <br />
-      <br />
+        <br />
+        <br />
+        <br />
         <CircularProgress />
       </>
     );
@@ -112,77 +183,243 @@ export default function BettingHome() {
             backgroundColor: "white",
             margin: 2,
           }}
-          value={chosenCategory}
+          value={chosenGroup}
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
         >
-          {categories.map((cat: string) => {
-            return <Tab label={cat} value={cat} />;
+          {groups.map((group: string) => {
+            return <Tab label={group} value={group} />;
           })}
         </Tabs>
-        <div className="bet-flex-container">
-          {bets.map((bet: Bet) => {
+        <div className="match-accordions">
+          <Box
+            id="outer-1x2"
+            display="flex"
+            justifyContent="flex-end"
+            mb={2}
+            bgcolor="#f5f5f5"
+          >
+            {/* Odds */}
+            <Box display="flex">
+              <Box id="inner-1">
+                <strong>1</strong>
+              </Box>
+              <Box id="inner-2">
+                <strong>X</strong>
+              </Box>
+              <Box id="inner-3">
+                <strong>2</strong>
+              </Box>
+            </Box>
+          </Box>
+
+          {matches.map((match: Match) => {
             if (
-              chosenCategory == "Alle kategorier" ||
-              chosenCategory == bet.category.toLowerCase()
+              chosenGroup == "Begge avdelinger" ||
+              chosenGroup == match.group_name.toLowerCase()
             ) {
               return (
                 <>
-                  <div>
-                    <Card sx={{ padding: 2 }}>
-                      <>
-                        <b>{bet.title}</b>
-                        <br />
-                        <p
-                          style={{
-                            marginTop: 1,
-                            marginBottom: 1,
-                            color: "#828385",
-                          }}
+                  <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Box display="flex" flexDirection="column" width="100%">
+                        {/* Date part for small screens */}
+                        <Box
+                          display={{ xs: "block", sm: "none" }} // Display on small screens only
+                          mb={1} // Margin bottom for spacing
                         >
-                          Bettet stenger{" "}
-                          {new Date(bet.close_timestamp).getDate()}.{" "}
-                          {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
-                          {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
-                          {(
-                            "0" + new Date(bet.close_timestamp).getHours()
-                          ).slice(-2)}
-                          :
-                          {(
-                            "0" + new Date(bet.close_timestamp).getMinutes()
-                          ).slice(-2)}
-                        </p>
-                        {bet.bet_options.map((option: BetOption) => {
-                          let index = accumBets
-                            .map((c: any) => c.option.option_id)
-                            .indexOf(option.option_id);
+                          {match.ko_time ? (
+                            <>
+                              <div style={{ fontSize: "small" }}>
+                                {new Date(match.ko_time).getDate()}.{" "}
+                                {MONTHS[new Date(match.ko_time).getMonth()]}{" "}
+                                {new Date(match.ko_time).getFullYear()} kl.{" "}
+                                {(
+                                  "0" + new Date(match.ko_time).getHours()
+                                ).slice(-2)}
+                                :
+                                {(
+                                  "0" + new Date(match.ko_time).getMinutes()
+                                ).slice(-2)}
+                              </div>
+                            </>
+                          ) : (
+                            "N/A"
+                          )}
+                        </Box>
+
+                        {/* Main content */}
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          {/* Date and Teams */}
+                          <Box display="flex" alignItems="center">
+                            {/* Date for larger screens */}
+                            <Box
+                              display={{ xs: "none", sm: "block" }} // Display on larger screens only
+                              mr={2} // Margin right for spacing
+                            >
+                              {match.ko_time
+                                ? formatDate(match.ko_time)
+                                : "N/A"}
+                            </Box>
+                            <Box
+                              id="teams-odds"
+                              display="flex"
+                              flexDirection="column"
+                              alignItems="flex-start"
+                            >
+                              <span>{match.home_team}</span>
+                              <span>{match.away_team}</span>
+                            </Box>
+                          </Box>
+                          {/* Odds */}
+                          <Box display="flex">
+                            {match.match_bets
+                              .filter((bet: Bet) => bet.category === "Resultat")
+                              .map((bet: Bet) =>
+                                bet.bet_options
+                                  .sort((optionA, optionB) =>
+                                    sortOptions(
+                                      optionA,
+                                      optionB,
+                                      match.home_team,
+                                      match.away_team
+                                    )
+                                  )
+                                  .map((option: BetOption) => {
+                                    let index = accumBets
+                                      .map((c: any) => c.option.option_id)
+                                      .indexOf(option.option_id);
+                                    return (
+                                      <Button
+                                        id="odds-button"
+                                        size="small"
+                                        key={option.option_id}
+                                        variant={
+                                          index == -1 ? "outlined" : "contained"
+                                        }
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          addToAccum(bet.title, option, index);
+                                        }}
+                                        onFocus={(e) => e.stopPropagation()}
+                                        sx={{
+                                          m: 1,
+                                          mt: 1,
+                                          ":hover": {
+                                            color: "#ffffff",
+                                            backgroundColor: "#1d2528",
+                                            borderColor: "#1d2528",
+                                          },
+                                        }}
+                                      >
+                                        {option.latest_odds.toFixed(1)}
+                                      </Button>
+                                    );
+                                  })
+                              )}
+                          </Box>
+                        </Box>
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {match.match_bets
+                        .filter((bet: Bet) => bet.category !== "Resultat")
+                        .map((bet: Bet) => {
                           return (
                             <>
-                              <Button
-                                variant={index == -1 ? "outlined" : "contained"}
-                                // variant="contained"
-                                onClick={() => {
-                                  addToAccum(bet.title, option, index);
-                                }}
+                              <Card
                                 sx={{
-                                  m: 1,
-                                  mt: 1,
-                                  ":hover": {
-                                    color: "#ffffff",
-                                    backgroundColor: "#1d2528",
-                                    borderColor: "#1d2528",
-                                  },
+                                  padding: 2,
+                                  marginBottom: 2,
+                                  backgroundColor: "#c8e6ff",
                                 }}
                               >
-                                {option.option} - {option.latest_odds}
-                              </Button>
+                                <>
+                                  <b>{bet.title}</b>
+                                  <br />
+                                  <p
+                                    style={{
+                                      marginTop: 1,
+                                      marginBottom: 1,
+                                      color: "#828385",
+                                    }}
+                                  >
+                                    Bettet stenger{" "}
+                                    {new Date(bet.close_timestamp).getDate()}.{" "}
+                                    {
+                                      MONTHS[
+                                        new Date(bet.close_timestamp).getMonth()
+                                      ]
+                                    }{" "}
+                                    {new Date(
+                                      bet.close_timestamp
+                                    ).getFullYear()}{" "}
+                                    kl.{" "}
+                                    {(
+                                      "0" +
+                                      new Date(bet.close_timestamp).getHours()
+                                    ).slice(-2)}
+                                    :
+                                    {(
+                                      "0" +
+                                      new Date(bet.close_timestamp).getMinutes()
+                                    ).slice(-2)}
+                                  </p>
+                                  <p
+                                    style={{
+                                      marginTop: 1,
+                                      marginBottom: 1,
+                                      color: "#828385",
+                                    }}
+                                  >{bet.category}</p>
+                                  {bet.bet_options.map((option: BetOption) => {
+                                    let index = accumBets
+                                      .map((c: any) => c.option.option_id)
+                                      .indexOf(option.option_id);
+                                    return (
+                                      <>
+                                        <Button
+                                          variant={
+                                            index == -1
+                                              ? "outlined"
+                                              : "contained"
+                                          }
+                                          // variant="contained"
+                                          onClick={() => {
+                                            addToAccum(
+                                              bet.title,
+                                              option,
+                                              index
+                                            );
+                                          }}
+                                          sx={{
+                                            m: 1,
+                                            mt: 1,
+                                            backgroundColor: "white",
+                                            ":hover": {
+                                              color: "#ffffff",
+                                              backgroundColor: "#1d2528",
+                                              borderColor: "#1d2528",
+                                            },
+                                          }}
+                                        >
+                                          {option.option} - {option.latest_odds}
+                                        </Button>
+                                      </>
+                                    );
+                                  })}
+                                </>
+                              </Card>
                             </>
                           );
                         })}
-                      </>
-                    </Card>
-                  </div>
+                    </AccordionDetails>
+                  </Accordion>
                 </>
               );
             }

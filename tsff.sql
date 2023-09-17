@@ -40,7 +40,9 @@ CREATE TABLE bets (
     submitter character varying(200),
     added_timestamp timestamp with time zone DEFAULT now(),
     close_timestamp timestamp with time zone,
-    closed_early timestamp with time zone
+    closed_early timestamp with time zone,
+    related_match integer,
+    CONSTRAINT fk_related_match FOREIGN KEY (related_match) REFERENCES matches(match_id)
 );
 
 CREATE TABLE bet_options (
@@ -60,3 +62,17 @@ CREATE TABLE accum_options (
     CONSTRAINT fk_accums FOREIGN KEY (accum_id) REFERENCES accums(accum_id),
     CONSTRAINT fk_options FOREIGN KEY (option_id) REFERENCES bet_options(option_id)
 );
+
+CREATE TABLE matches (
+    match_id serial PRIMARY KEY,
+    ko_time timestamp with time zone,
+    group_name character varying(200),
+    home_team_id integer NOT NULL,
+    away_team_id integer NOT NULL,
+    home_goals integer,
+    away_goals integer,
+    CONSTRAINT fk_hteam FOREIGN KEY (home_team_id) REFERENCES teams(team_id),
+    CONSTRAINT fk_ateam FOREIGN KEY (away_team_id) REFERENCES teams(team_id)
+);
+
+

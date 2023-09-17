@@ -106,7 +106,9 @@ function Login() {
   }
 
   useEffect(() => {
-    loginDetails();
+    if (loggedInUser) {
+      loginDetails();
+    }
   }, [loggedInUser]);
 
   // Init login part 1

@@ -183,7 +183,13 @@ export default function AdminHome() {
       {isAdmin ? (
         <>
           <div>
-            Admin!!
+            <Button
+              onClick={() => {
+                navigate("/admin/newmatch");
+              }}
+            >
+              Add ny match
+            </Button>
             <br />
             <Button
               onClick={() => {

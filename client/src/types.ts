@@ -66,6 +66,31 @@ export type Team = {
   team_name: string;
 };
 
+export type Match = {
+  match_id: number;
+  ko_time: Date | undefined;
+  group_name: string;
+  home_team: string;
+  away_team: string;
+  home_goals: number | undefined;
+  away_goals: string | undefined;
+  match_bets: Bet[];
+};
+
+export type MatchSimple = {
+  match_id: number;
+  ko_time: Date | undefined;
+  home_team: string;
+  away_team: string;
+};
+
+export type NewMatchSimple = {
+  ko_time: Date;
+  home_team_id: number;
+  away_team_id: number;
+  group: string;
+};
+
 export type AccumBets = {
   title: string;
   user_odds: number;
@@ -111,6 +136,8 @@ export type UserDetails = {
 export type NewBetType = {
   title: string;
   category: string;
+  close_date: Date;
+  related_match: number | undefined;
   options: NewOptionType[];
 };
 
@@ -162,63 +189,6 @@ export type PublicUserData = {
   associated_team: string | null;
 };
 
-export type Game = {
-  game_id: number;
-  status: "in-progress" | "finished";
-  money_multiplier: number;
-  extra_cost_loser: number;
-  extra_cost_second_last: number;
-  created_on: Date;
-  players: GamePlayer[];
-};
-
-export type Player = {
-  player_id: number;
-  game_player_id: number;
-  nickname: string;
-  score: number;
-};
-
-export type PlayerPreGame = {
-  player_id: number;
-  game_player_id: number | undefined;
-  nickname: string;
-  score: number;
-};
-
-export type GamePlayer = {
-  nickname: string;
-  score: number;
-};
-
-export type Round = {
-  round_id: number | null;
-  num_cards: number;
-  dealer_index: number;
-  locked: boolean;
-  player_scores: PlayerScore[];
-};
-
-export type PlayerScore = {
-  player_scores_id: number | undefined;
-  num_tricks: number | null;
-  stand: boolean | null;
-};
-
-export type Prizes = {
-  winner: string;
-  loser: string;
-  winnerPrize: number;
-  second: string | undefined;
-  secondLoser: string | undefined;
-  secondPrize: number | undefined;
-};
-
-export type BondeUser = {
-  player_id: number;
-  nickname: string;
-};
-
 export type Stats = {
   num_users: number;
   num_accums: number;
@@ -233,27 +203,4 @@ export type OptionStake = {
   option: string;
   title: string;
   number_accums: number;
-};
-
-export type AvgDiffs = {
-  name: string;
-  value: number;
-};
-
-export type PieData = {
-  name: string;
-  value: number;
-};
-
-export type SimplePieChartProps = {
-  data: PieData[];
-};
-
-export type BarChartDataItem = {
-  name: string;
-  value: number;
-};
-
-export type PositiveAndNegativeBarChartProps = {
-  data: BarChartDataItem[];
 };
