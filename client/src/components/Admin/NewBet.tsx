@@ -104,10 +104,15 @@ export default function NewBet() {
 
   async function sendBet() {
     if (closeDate == null) {
-      toggleAlert(true, "Must include close date", "error");
+      toggleAlert(true, "Bettet må ha et stengetidspunkt", "error");
+    } else if (chosenMatch === undefined && title === "") {
+      toggleAlert(true, "Bettet må ha en beskrivelse", "error");
     } else {
       let bet_obj: NewBetType = {
-        title: title,
+        title:
+          title !== ""
+            ? title
+            : `${chosenMatch?.home_team} - ${chosenMatch?.away_team}`,
         category: category,
         close_date: closeDate.toDate(),
         related_match: chosenMatch?.match_id,
@@ -133,7 +138,7 @@ export default function NewBet() {
       }
     }
   }
-  
+
   let totalodds = 0;
   options.forEach((option) => {
     if (typeof option.latest_odds === "number") {
@@ -168,6 +173,7 @@ export default function NewBet() {
         },
       ];
       setOptions(defaultOptions);
+      setTitle("");
     } else if (chosenMatch && category === "Holde nullen") {
       const defaultOptions: NewOptionType[] = [
         {

@@ -171,7 +171,10 @@ export default function RequestBet() {
       return;
     }
     let bet_obj: NewBetType = {
-      title: title,
+      title:
+        title !== ""
+          ? title
+          : `${chosenMatch?.home_team} - ${chosenMatch?.away_team}`,
       category: category,
       close_date: closeDate.toDate(),
       related_match: chosenMatch?.match_id,
@@ -231,6 +234,7 @@ export default function RequestBet() {
         },
       ];
       setOptions(defaultOptions);
+      setTitle("");
     } else if (chosenMatch && category === "Holde nullen") {
       const defaultOptions: NewOptionType[] = [
         {
@@ -280,7 +284,27 @@ export default function RequestBet() {
         },
       ];
       setOptions(defaultOptions);
-      setTitle("Totalt antall må i kampen");
+      setTitle("Totalt antall mål i kampen");
+    } else if (chosenMatch && category === "Målscorer") {
+      const defaultOptions: NewOptionType[] = [
+        { option: "Ja", latest_odds: null },
+        { option: "Nei", latest_odds: null },
+      ];
+      setOptions(defaultOptions);
+      setTitle("Scorer mål: ");
+    } else if (chosenMatch) {
+      setTitle("");
+      setOptions([
+        { option: "", latest_odds: null },
+        { option: "", latest_odds: null },
+      ]);
+    } else {
+      setTitle("");
+      setOptions([
+        { option: "", latest_odds: null },
+        { option: "", latest_odds: null },
+      ]);
+      setCloseDate(dayjs().add(7, "day"));
     }
   }, [chosenMatch, category]);
 
