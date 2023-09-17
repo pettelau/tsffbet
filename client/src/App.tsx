@@ -70,7 +70,7 @@ const THEME = createTheme({
 
 export default function App() {
   const url_path = "/";
-  // const url_path = "http://localhost:8000/";
+  // const url_path = "http://localhost:8001/";
 
   async function loginDetails() {
     const response = await fetch(`${url_path}api/login/details`, {
