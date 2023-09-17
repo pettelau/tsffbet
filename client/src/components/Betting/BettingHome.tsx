@@ -68,6 +68,10 @@ export default function BettingHome() {
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<number>();
 
+  const [expandedAccordions, setExpandedAccordions] = React.useState<number[]>(
+    []
+  );
+
   const fetchBets = async () => {
     const response = await fetch(`${url_path}api/openbets`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
@@ -161,6 +165,18 @@ export default function BettingHome() {
     return order.indexOf(optionA.option) - order.indexOf(optionB.option);
   }
 
+  const toggleAccordion = (matchId: number) => {
+    if (expandedAccordions.includes(matchId)) {
+      setExpandedAccordions((prev) => prev.filter((id) => id !== matchId));
+    } else {
+      setExpandedAccordions((prev) => [...prev, matchId]);
+    }
+  };
+
+  function PlaceholderIcon() {
+    return <Box width={24} height={24} bgcolor="transparent" />;
+  }
+
   if (responseCode == undefined) {
     return (
       <>
@@ -219,10 +235,25 @@ export default function BettingHome() {
               chosenGroup == "Begge avdelinger" ||
               chosenGroup == match.group_name.toLowerCase()
             ) {
+              const isExpandable = match.match_bets.some(
+                (bet) => bet.category !== "Resultat"
+              );
               return (
                 <>
-                  <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Accordion
+                    key={match.match_id}
+                    expanded={
+                      isExpandable &&
+                      expandedAccordions.includes(match.match_id)
+                    }
+                    onChange={() => toggleAccordion(match.match_id)}
+                  >
+                    <AccordionSummary
+                      style={{ cursor: isExpandable ? "pointer" : "auto" }}
+                      expandIcon={
+                        isExpandable ? <ExpandMoreIcon /> : PlaceholderIcon()
+                      }
+                    >
                       <Box display="flex" flexDirection="column" width="100%">
                         {/* Date part for small screens */}
                         <Box
@@ -272,8 +303,24 @@ export default function BettingHome() {
                               flexDirection="column"
                               alignItems="flex-start"
                             >
-                              <span>{match.home_team}</span>
-                              <span>{match.away_team}</span>
+                              <span
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "clip",
+                                }}
+                              >
+                                {match.home_team}
+                              </span>
+                              <span
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {match.away_team}
+                              </span>
                             </Box>
                           </Box>
                           {/* Odds */}
@@ -376,7 +423,9 @@ export default function BettingHome() {
                                       marginBottom: 1,
                                       color: "#828385",
                                     }}
-                                  >{bet.category}</p>
+                                  >
+                                    {bet.category}
+                                  </p>
                                   {bet.bet_options.map((option: BetOption) => {
                                     let index = accumBets
                                       .map((c: any) => c.option.option_id)
