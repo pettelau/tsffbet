@@ -31,6 +31,8 @@ import BetFeed from "./components/Betting/BetFeed";
 import UserProfile from "./components/UserProfile";
 import BettingStats from "./components/Betting/BettingStats";
 import NewMatch from "./components/Admin/NewMatch";
+import Matches from "./components/Betting/Matches";
+import EditMatches from "./components/Admin/EditMatches";
 
 const THEME = createTheme({
   typography: {
@@ -70,8 +72,8 @@ const THEME = createTheme({
 });
 
 export default function App() {
-  const url_path = "/";
-  // const url_path = "http://localhost:8001/";
+  // const url_path = "/";
+  const url_path = "http://localhost:8001/";
 
   async function loginDetails() {
     const response = await fetch(`${url_path}api/login/details`, {
@@ -97,6 +99,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="bettinghome" element={<BettingHome />} />
+              <Route path="matches" element={<Matches />} />
               <Route path="myaccums" element={<MyAccums />} />
               <Route path="login" element={<Login />} />
               <Route path="userReg" element={<UserReg />} />
@@ -108,6 +111,7 @@ export default function App() {
               <Route path="admin" element={<AdminHome />} />
               <Route path="admin/newbet" element={<NewBet />} />
               <Route path="admin/newmatch" element={<NewMatch />} />
+              <Route path="admin/editmatches" element={<EditMatches />} />
               <Route path="admin/editbet" element={<EditBet />} />
             </Routes>
           </BrowserRouter>

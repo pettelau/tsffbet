@@ -26,6 +26,7 @@ import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import DynamicFeedIcon from "@mui/icons-material/DynamicFeed";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 
 import Tooltip from "@mui/material/Tooltip";
 import { useAppSelector } from "../redux/hooks";
@@ -102,6 +103,21 @@ export default function AppAppBar() {
                 <ReceiptIcon />
                 <Typography sx={{ color: "white", marginLeft: 1 }}>
                   Mine spill
+                </Typography>
+              </IconButton>
+              <IconButton
+                id="my-accums-button"
+                size="large"
+                edge="start"
+                color="inherit"
+                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                onClick={() => {
+                  navigate("/matches");
+                }}
+              >
+                <SportsSoccerIcon />
+                <Typography sx={{ color: "white", marginLeft: 1 }}>
+                  Resultater
                 </Typography>
               </IconButton>
               <IconButton
@@ -279,6 +295,16 @@ export default function AppAppBar() {
                 >
                   <ReceiptIcon sx={{ mr: 1 }} />
                   Mine spill
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/matches");
+                  }}
+                >
+                  <SportsSoccerIcon sx={{ mr: 1 }} />
+                  Resultater
                 </MenuItem>
                 <Divider />
 

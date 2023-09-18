@@ -378,13 +378,21 @@ async def all_matches(in_future: bool = True):
         """
         if in_future:
             matches_query += " WHERE m.ko_time > NOW()"
+        else:
+            matches_query += " WHERE m.ko_time < NOW()"
+
         matches = await database.fetch_all(matches_query)
 
         matches_with_odds = []
         for match in matches:
             print(match["match_id"])
+            if in_future:
+                bets_query = "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL and related_match = :match_id ORDER BY close_timestamp ASC"
+            else:
+                bets_query = "select * from bets where is_accepted = true and close_timestamp < NOW() and related_match = :match_id ORDER BY close_timestamp ASC"
+
             bets = await database.fetch_all(
-                "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL and related_match = :match_id ORDER BY close_timestamp ASC",
+                bets_query,
                 {"match_id": match["match_id"]},
             )
             print(bets)
