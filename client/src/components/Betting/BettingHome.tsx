@@ -100,7 +100,6 @@ export default function BettingHome() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setMatches(resp);
-      console.log(resp);
       let groups: string[] = ["Begge avdelinger"];
       resp.forEach((match: Match) => {
         if (groups.indexOf(match.group_name.toLowerCase()) === -1) {

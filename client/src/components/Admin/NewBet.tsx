@@ -96,7 +96,6 @@ export default function NewBet() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setMatches(resp);
-      console.log(resp);
     } else {
       setResponseText(resp.detail);
     }

@@ -143,7 +143,6 @@ export default function RequestBet() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setMatches(resp);
-      console.log(resp);
     } else {
       setResponseText(resp.detail);
     }
