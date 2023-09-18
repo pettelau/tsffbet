@@ -137,8 +137,53 @@ h3 {
   margin: 0 auto;
 }
 
+.match-accordions {
+  justify-content: center;
+  width: 95%;
+  margin: 0 auto;
+  max-width: 800px;
+}
 
 
+#teams-odds {
+  margin-right: 5px;
+  margin-left: 30px;
+}
+
+#outer-1x2 {
+  padding-right: 75px;
+}
+
+#inner-1 {
+  padding-right: 70px;
+}
+#inner-2 {
+  padding-right: 70px;
+}
+
+@media screen and (max-width: 650px) {
+  #outer-1x2 {
+    padding-right: 65px;
+  }
+  
+  #inner-1 {
+    padding-right: 52px;
+  }
+  #inner-2 {
+    padding-right: 52px;
+  }
+
+  #teams-odds {
+    margin-right: 5px;
+    margin-left: 5px;
+  }
+  .match-accordions {
+    width: 98%
+  }
+  #odds-button {
+    min-width: 45px;
+  }
+}
 
 @media screen and (max-width: 650px) {
   .table-div {

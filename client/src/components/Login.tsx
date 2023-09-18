@@ -225,22 +225,15 @@ function Login() {
           >
             <>
               <h1>Profilside</h1>
-              <h2>Brukerdetaljer:</h2>
-              {/* <Avatar sx={{ bgcolor: deepPurple[500] }}>
-              {firstname.charAt(0)}
-              {lastname == "" ? firstname.charAt(1) : lastname.charAt(0)}
-            </Avatar> */}
               Brukernavn: <b>{loggedInUser} </b>
               <br />
-              Fornavn: <b>{firstname} </b>
-              <br />
-              Etternavn: <b>{lastname} </b>
-              <br />
-              Tilknyttet lag:{" "}
+              <b>
+                {firstname} {lastname}
+              </b>
+              
               <b>{associated_team ? associated_team : "ingen"} </b>
               <br />
-              Saldo: <b>{balance} </b>
-              <br />
+              
               Bruker opprettet:
               <br />
               <b>

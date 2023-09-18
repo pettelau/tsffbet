@@ -48,6 +48,24 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)):
     return bets_with_options
 
 
+@app.get("/api/matchbets")
+async def get_open_bets(
+    match_id: int, token: str = Depends(authUtils.validate_access_token)
+):
+    bets = await database.fetch_all(
+        "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL and related_match = :match_id ORDER BY close_timestamp ASC",
+        {"match_id": match_id},
+    )
+    bets_with_options = []
+    for bet in bets:
+        options_query = "select option_id, latest_odds, option_status, option from bet_options where bet = :bet"
+        options = await database.fetch_all(options_query, {"bet": bet["bet_id"]})
+        bet_with_option = dict(bet)
+        bet_with_option["bet_options"] = options
+        bets_with_options.append(bet_with_option)
+    return bets_with_options
+
+
 @app.get("/api/requestedbets")
 async def get_requested_bets():
     try:
@@ -286,6 +304,116 @@ async def all_teams():
         return HTTPException(status_code=400, detail="Something went wrong")
 
 
+@app.get("/api/matches")
+async def all_matches(in_future: bool = True):
+    try:
+        matches_query = """
+        SELECT 
+            m.match_id, 
+            m.ko_time, 
+            m.group_name, 
+            m.home_goals, 
+            m.away_goals,
+            home_team.team_name AS home_team,
+            away_team.team_name AS away_team
+        FROM 
+            matches m
+        JOIN 
+            teams home_team ON m.home_team_id = home_team.team_id
+        JOIN 
+            teams away_team ON m.away_team_id = away_team.team_id
+        """
+        if in_future:
+            matches_query += " WHERE m.ko_time > NOW()"
+        matches = await database.fetch_all(matches_query)
+
+        return matches
+    except Exception:
+        return HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.get("/api/matchessimple")
+async def all_matches_simple(in_future: bool = True):
+    try:
+        matches_query = """
+        SELECT 
+            m.match_id, 
+            m.ko_time, 
+            home_team.team_name AS home_team,
+            away_team.team_name AS away_team
+        FROM 
+            matches m
+        JOIN 
+            teams home_team ON m.home_team_id = home_team.team_id
+        JOIN 
+            teams away_team ON m.away_team_id = away_team.team_id
+        """
+        if in_future:
+            matches_query += " WHERE m.ko_time > NOW()"
+        matches = await database.fetch_all(matches_query)
+
+        return matches
+    except Exception:
+        return HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.get("/api/matcheswithodds")
+async def all_matches(in_future: bool = None):
+    try:
+        matches_query = """
+        SELECT 
+            m.match_id, 
+            m.ko_time, 
+            m.group_name, 
+            m.home_goals, 
+            m.away_goals,
+            home_team.team_name AS home_team,
+            away_team.team_name AS away_team
+        FROM 
+            matches m
+        JOIN 
+            teams home_team ON m.home_team_id = home_team.team_id
+        JOIN 
+            teams away_team ON m.away_team_id = away_team.team_id
+        """
+        if in_future is not None:
+            if in_future:
+                matches_query += " WHERE m.ko_time > NOW()"
+            else:
+                matches_query += " WHERE m.ko_time < NOW()"
+
+        matches = await database.fetch_all(matches_query)
+
+        matches_with_odds = []
+        for match in matches:
+            print(match["match_id"])
+            if in_future:
+                bets_query = "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL and related_match = :match_id ORDER BY close_timestamp ASC"
+            else:
+                bets_query = "select * from bets where is_accepted = true and close_timestamp < NOW() and related_match = :match_id ORDER BY close_timestamp ASC"
+
+            bets = await database.fetch_all(
+                bets_query,
+                {"match_id": match["match_id"]},
+            )
+            print(bets)
+            bets_with_options = []
+            for bet in bets:
+                options_query = "select option_id, latest_odds, option_status, option from bet_options where bet = :bet"
+                options = await database.fetch_all(
+                    options_query, {"bet": bet["bet_id"]}
+                )
+                bet_with_option = dict(bet)
+                bet_with_option["bet_options"] = options
+                bets_with_options.append(bet_with_option)
+            match = dict(match)
+            match["match_bets"] = bets_with_options
+            matches_with_odds.append(match)
+        return matches_with_odds
+    except Exception:
+        return HTTPException(status_code=400, detail="Something went wrong")
+
+
 @app.get("/api/login/")
 async def login(user, password):
     try:
@@ -358,18 +486,19 @@ async def get_users(token: str = Depends(authUtils.validate_access_token)):
 
 @app.post("/api/admin/createbet")
 async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
-    if not is_admin(token["user"]):
+    if not await is_admin(token["user"]):
         raise HTTPException(status_code=403, detail="You are not admin")
 
     try:
         close_date = parser.parse(bet["close_date"])
         bet_id = await database.execute(
-            "INSERT INTO bets(category, title, is_accepted, submitter, close_timestamp) VALUES (:category, :title, true, :submitter, :close_date) RETURNING bet_id",
+            "INSERT INTO bets(category, title, is_accepted, submitter, close_timestamp, related_match) VALUES (:category, :title, true, :submitter, :close_date, :related_match) RETURNING bet_id",
             {
                 "category": bet["category"],
                 "title": bet["title"],
                 "submitter": token["user"],
                 "close_date": close_date,
+                "related_match": bet.get("related_match", None),
             },
         )
 
@@ -384,13 +513,79 @@ async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_t
             )
 
         return {"settleBet": True}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.post("/api/admin/creatematch")
+async def create_match(
+    match: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    if not await is_admin(token["user"]):
+        raise HTTPException(status_code=403, detail="You are not admin")
+
+    try:
+        ko_time = parser.parse(match["ko_time"])
+
+        new_match_query = "insert into matches (ko_time, group_name, home_team_id, away_team_id) values (:ko_time, :group_name, :home_team_id, :away_team_id)"
+        params = {
+            "ko_time": ko_time,
+            "group_name": match["group"],
+            "home_team_id": match["home_team_id"],
+            "away_team_id": match["away_team_id"],
+        }
+        await database.execute(new_match_query, params)
+        return {"createMatch": True}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.post("/api/admin/updatematchscore")
+async def update_match_score(
+    match_score: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    if not await is_admin(token["user"]):
+        raise HTTPException(status_code=403, detail="You are not admin")
+
+    try:
+        update_match_query = "update matches set home_goals = :home_goals, away_goals = :away_goals where match_id = :match_id"
+        params = {
+            "home_goals": match_score["home_goals"],
+            "away_goals": match_score["away_goals"],
+            "match_id": match_score["match_id"],
+        }
+        await database.execute(update_match_query, params)
+        return {"updateMatch": True}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.post("/api/admin/updatematchtime")
+async def update_match_time(
+    match_time: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    if not await is_admin(token["user"]):
+        raise HTTPException(status_code=403, detail="You are not admin")
+
+    try:
+        ko_time = parser.parse(match_time["ko_time"])
+        update_match_query = (
+            "update matches set ko_time = :ko_time where match_id = :match_id"
+        )
+        params = {
+            "ko_time": ko_time,
+            "match_id": match_time["match_id"],
+        }
+        await database.execute(update_match_query, params)
+        return {"updateMatchTime": True}
     except Exception:
         raise HTTPException(status_code=400, detail="Something went wrong")
 
 
 @app.post("/api/admin/acceptbet")
 async def accept_bet(bet: dict, token: str = Depends(authUtils.validate_access_token)):
-    if not is_admin(token["user"]):
+    if not await is_admin(token["user"]):
         raise HTTPException(status_code=403, detail="You are not admin")
 
     try:
@@ -407,7 +602,7 @@ async def accept_bet(bet: dict, token: str = Depends(authUtils.validate_access_t
 async def update_option(
     option: dict, token: str = Depends(authUtils.validate_access_token)
 ):
-    if not is_admin(token["user"]):
+    if not await is_admin(token["user"]):
         raise HTTPException(status_code=403, detail="You are not admin")
 
     try:
@@ -428,7 +623,7 @@ async def update_option(
 async def add_option(
     option: dict, token: str = Depends(authUtils.validate_access_token)
 ):
-    if not is_admin(token["user"]):
+    if not await is_admin(token["user"]):
         raise HTTPException(status_code=403, detail="You are not admin")
 
     try:

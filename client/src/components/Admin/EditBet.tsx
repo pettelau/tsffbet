@@ -46,9 +46,6 @@ export default function EditBet() {
   }
 
   const [allBets, setAllBets] = React.useState<BetAdmin[]>([]);
-  const [categories, setCategories] = React.useState<string[]>([]);
-  const [chosenCategory, setChosenCategory] =
-    React.useState<string>("Alle kategorier");
 
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<string>();
@@ -71,21 +68,10 @@ export default function EditBet() {
     if (response.status == 200) {
       setIsLoading(false);
       setAllBets((prevBets) => [...prevBets, ...resp]);
-      let cats: string[] = ["Alle kategorier"];
-      resp.forEach((bet: Bet) => {
-        if (cats.indexOf(bet.category) === -1) {
-          cats.push(bet.category);
-        }
-      });
-      setCategories(cats);
     } else {
       setResponseText(resp.detail);
     }
   };
-
-  // useEffect(() => {
-  //  fetchBets();
-  // }, []);
 
   useEffect(() => {
     fetchBets();
@@ -275,122 +261,128 @@ export default function EditBet() {
           {allBets.map((bet: BetAdmin, betindex) => {
             return (
               <>
-                <Accordion
-                  sx={{ backgroundColor: BET_STATUS_COLOR[bet.bet_status - 1] }}
-                >
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>{bet.title}</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {bet.bet_options.map((option, optionindex) => {
-                      return (
+                <div style={{ maxWidth: 800, margin: "0 auto" }}>
+                  <Accordion
+                    sx={{
+                      backgroundColor: BET_STATUS_COLOR[bet.bet_status - 1],
+                    }}
+                  >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>{bet.title}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {bet.bet_options.map((option, optionindex) => {
+                        return (
+                          <>
+                            <div
+                              style={{
+                                padding: 5,
+                                backgroundColor:
+                                  OPTION_STATUS_COLOR[option.option_status - 1],
+                              }}
+                            >
+                              <TextField
+                                label="Option text"
+                                value={option.option}
+                                onChange={(e) =>
+                                  handleOptionTextChange(
+                                    e.target.value,
+                                    betindex,
+                                    optionindex
+                                  )
+                                }
+                              />
+                              <TextField
+                                sx={{ width: 80 }}
+                                type={"number"}
+                                label="Option odds"
+                                value={option.latest_odds}
+                                onChange={(e) =>
+                                  handleOptionOddsChange(
+                                    e.target.value,
+                                    betindex,
+                                    optionindex
+                                  )
+                                }
+                              />
+                              <Button
+                                variant="outlined"
+                                onClick={() => {
+                                  updateOrAddOption(
+                                    betindex,
+                                    optionindex,
+                                    option.option_id,
+                                    bet.bet_id
+                                  );
+                                }}
+                              >
+                                {option.option_id == -1
+                                  ? "Legg til"
+                                  : "Oppdater"}
+                              </Button>
+                              <Select
+                                size="small"
+                                value={option.option_status}
+                                label="Age"
+                                onChange={(e) => {
+                                  handleOptionChange(
+                                    e.target.value,
+                                    betindex,
+                                    optionindex
+                                  );
+                                }}
+                              >
+                                <MenuItem value={1}>Open</MenuItem>
+                                <MenuItem value={2}>Won</MenuItem>
+                                <MenuItem value={3}>Lost</MenuItem>
+                              </Select>
+                              <br />
+                            </div>
+                          </>
+                        );
+                      })}
+                      <Button
+                        onClick={() => {
+                          addOption(betindex);
+                        }}
+                      >
+                        Legg til option
+                      </Button>
+                      <br />
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          settleBet(betindex);
+                        }}
+                      >
+                        Settle bet! (Irreversible)
+                      </Button>
+                      <br />
+                      {bet.is_accepted ? (
+                        ""
+                      ) : (
                         <>
-                          <div
-                            style={{
-                              padding: 5,
-                              backgroundColor:
-                                OPTION_STATUS_COLOR[option.option_status - 1],
+                          <Button
+                            variant="contained"
+                            onClick={() => {
+                              acceptBet(betindex);
                             }}
                           >
-                            <TextField
-                              label="Option text"
-                              value={option.option}
-                              onChange={(e) =>
-                                handleOptionTextChange(
-                                  e.target.value,
-                                  betindex,
-                                  optionindex
-                                )
-                              }
-                            />
-                            <TextField
-                              sx={{ width: 80 }}
-                              type={"number"}
-                              label="Option odds"
-                              value={option.latest_odds}
-                              onChange={(e) =>
-                                handleOptionOddsChange(
-                                  e.target.value,
-                                  betindex,
-                                  optionindex
-                                )
-                              }
-                            />
-                            <Button
-                              variant="outlined"
-                              onClick={() => {
-                                updateOrAddOption(
-                                  betindex,
-                                  optionindex,
-                                  option.option_id,
-                                  bet.bet_id
-                                );
-                              }}
-                            >
-                              {option.option_id == -1 ? "Legg til" : "Oppdater"}
-                            </Button>
-                            <Select
-                              size="small"
-                              value={option.option_status}
-                              label="Age"
-                              onChange={(e) => {
-                                handleOptionChange(
-                                  e.target.value,
-                                  betindex,
-                                  optionindex
-                                );
-                              }}
-                            >
-                              <MenuItem value={1}>Open</MenuItem>
-                              <MenuItem value={2}>Won</MenuItem>
-                              <MenuItem value={3}>Lost</MenuItem>
-                            </Select>
-                            <br />
-                          </div>
+                            Aksepter spill
+                          </Button>
                         </>
-                      );
-                    })}
-                    <Button
-                      onClick={() => {
-                        addOption(betindex);
-                      }}
-                    >
-                      Legg til option
-                    </Button>
-                    <br />
-                    <Button
-                      variant="contained"
-                      onClick={() => {
-                        settleBet(betindex);
-                      }}
-                    >
-                      Settle bet! (Irreversible)
-                    </Button>
-                    <br />
-                    {bet.is_accepted ? (
-                      ""
-                    ) : (
-                      <>
-                        <Button
-                          variant="contained"
-                          onClick={() => {
-                            acceptBet(betindex);
-                          }}
-                        >
-                          Aksepter spill
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      variant="contained"
-                      onClick={() => {
-                        closeBet(betindex);
-                      }}
-                    >
-                      Steng spill
-                    </Button>
-                  </AccordionDetails>
-                </Accordion>
+                      )}
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          closeBet(betindex);
+                        }}
+                      >
+                        Steng spill
+                      </Button>
+                    </AccordionDetails>
+                  </Accordion>
+                </div>
               </>
             );
           })}
