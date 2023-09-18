@@ -58,10 +58,9 @@ export default function BettingHome() {
   const [bets, setBets] = React.useState<Bet[]>([]);
   const [standaloneBets, setStandaloneBets] = React.useState<Bet[]>([]);
 
-  const [groups, setGroups] = React.useState<string[]>([]);
+  const [groups, setGroups] = React.useState<string[]>(["Alle odds"]);
 
-  const [chosenGroup, setChosenGroup] =
-    React.useState<string>("Begge avdelinger");
+  const [chosenGroup, setChosenGroup] = React.useState<string>("Alle odds");
   const accumBets = useAppSelector(selectAccum);
 
   const [responseCode, setResponseCode] = React.useState<number>();
@@ -94,14 +93,17 @@ export default function BettingHome() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setMatches(resp);
-      let groups: string[] = ["Begge avdelinger"];
-      resp.forEach((match: Match) => {
-        if (groups.indexOf(match.group_name.toLowerCase()) === -1) {
-          groups.push(match.group_name.toLowerCase());
-        }
-      });
-      groups.push("Alle odds");
-      setGroups(groups);
+      if (resp.length > 0) {
+        let groups: string[] = ["Begge avdelinger"];
+        resp.forEach((match: Match) => {
+          if (groups.indexOf(match.group_name.toLowerCase()) === -1) {
+            groups.push(match.group_name.toLowerCase());
+          }
+        });
+        groups.push("Alle odds");
+        setGroups(groups);
+        setChosenGroup("Begge avdelinger");
+      }
     } else {
       setResponseText(resp.detail);
     }
@@ -175,7 +177,7 @@ export default function BettingHome() {
   return (
     <>
       <div>
-        {matches.length > 0 ? (
+        {matches.length > 0 || standaloneBets.length > 0 ? (
           <>
             <Tabs
               sx={{
