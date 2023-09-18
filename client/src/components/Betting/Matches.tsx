@@ -82,6 +82,7 @@ export default function Matches() {
           groups.push(match.group_name.toLowerCase());
         }
       });
+      
       setGroups(groups);
     } else {
       setResponseText(resp.detail);
@@ -265,7 +266,7 @@ export default function Matches() {
                                   textOverflow: "clip",
                                 }}
                               >
-                                {match?.home_goals} {match.home_team}
+                                <b>{match?.home_goals}</b> {match.home_team}
                               </span>
                               <span
                                 style={{
@@ -274,7 +275,7 @@ export default function Matches() {
                                   textOverflow: "ellipsis",
                                 }}
                               >
-                                {match?.away_goals} {match.away_team}
+                                <b>{match?.away_goals}</b> {match.away_team}
                               </span>
                             </Box>
                           </Box>

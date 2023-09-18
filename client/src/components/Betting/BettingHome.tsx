@@ -93,7 +93,9 @@ export default function BettingHome() {
   };
 
   const fetchMatches = async () => {
-    const response = await fetch(`${url_path}api/matcheswithodds`);
+    const response = await fetch(
+      `${url_path}api/matcheswithodds?in_future=True`
+    );
     const resp = await response.json();
     setResponseCode(response.status);
     if (response.status == 200) {
@@ -105,6 +107,7 @@ export default function BettingHome() {
           groups.push(match.group_name.toLowerCase());
         }
       });
+      groups.push("Alle odds");
       setGroups(groups);
     } else {
       setResponseText(resp.detail);
@@ -138,7 +141,7 @@ export default function BettingHome() {
       dispatch(removeBet({ bet: bet, option: option }));
     }
   }
-  
+
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setChosenGroup(newValue);
   };
@@ -205,31 +208,41 @@ export default function BettingHome() {
           variant="scrollable"
           scrollButtons="auto"
         >
-          {groups.map((group: string) => {
-            return <Tab label={group} value={group} />;
+          {groups.flatMap((group: string, index: number) => {
+            if (index === groups.length - 1) {
+              return [
+                <Divider orientation="vertical" flexItem />,
+                <Tab label={group} value={group} />,
+              ];
+            }
+            return [<Tab label={group} value={group} />];
           })}
         </Tabs>
         <div className="match-accordions">
-          <Box
-            id="outer-1x2"
-            display="flex"
-            justifyContent="flex-end"
-            mb={2}
-            bgcolor="#f5f5f5"
-          >
-            {/* Odds */}
-            <Box display="flex">
-              <Box id="inner-1">
-                <strong>1</strong>
-              </Box>
-              <Box id="inner-2">
-                <strong>X</strong>
-              </Box>
-              <Box id="inner-3">
-                <strong>2</strong>
+          {chosenGroup !== "Alle odds" ? (
+            <Box
+              id="outer-1x2"
+              display="flex"
+              justifyContent="flex-end"
+              mb={2}
+              bgcolor="#f5f5f5"
+            >
+              {/* Odds */}
+              <Box display="flex">
+                <Box id="inner-1">
+                  <strong>1</strong>
+                </Box>
+                <Box id="inner-2">
+                  <strong>X</strong>
+                </Box>
+                <Box id="inner-3">
+                  <strong>2</strong>
+                </Box>
               </Box>
             </Box>
-          </Box>
+          ) : (
+            ""
+          )}
 
           {matches.map((match: Match) => {
             if (
@@ -470,6 +483,87 @@ export default function BettingHome() {
                         })}
                     </AccordionDetails>
                   </Accordion>
+                </>
+              );
+            } else if (chosenGroup == "Alle odds") {
+              return (
+                <>
+                  {match.match_bets.map((bet: Bet) => {
+                    return (
+                      <>
+                        <Card
+                          sx={{
+                            padding: 2,
+                            marginBottom: 2,
+                            backgroundColor: "white",
+                          }}
+                        >
+                          <>
+                            <b>{bet.title}</b>
+                            <br />
+                            <p
+                              style={{
+                                marginTop: 1,
+                                marginBottom: 1,
+                                color: "#828385",
+                              }}
+                            >
+                              Bettet stenger{" "}
+                              {new Date(bet.close_timestamp).getDate()}.{" "}
+                              {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
+                              {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
+                              {(
+                                "0" + new Date(bet.close_timestamp).getHours()
+                              ).slice(-2)}
+                              :
+                              {(
+                                "0" + new Date(bet.close_timestamp).getMinutes()
+                              ).slice(-2)}
+                            </p>
+                            <p
+                              style={{
+                                marginTop: 1,
+                                marginBottom: 1,
+                                color: "#828385",
+                              }}
+                            >
+                              {bet.category}
+                            </p>
+                            {bet.bet_options.map((option: BetOption) => {
+                              let index = accumBets
+                                .map((c: any) => c.option.option_id)
+                                .indexOf(option.option_id);
+                              return (
+                                <>
+                                  <Button
+                                    variant={
+                                      index == -1 ? "outlined" : "contained"
+                                    }
+                                    // variant="contained"
+                                    onClick={() => {
+                                      addToAccum(bet.title, option, index);
+                                    }}
+                                    sx={{
+                                      m: 1,
+                                      mt: 1,
+                                      backgroundColor: "white",
+                                      ":hover": {
+                                        color: "#ffffff",
+                                        backgroundColor: "#1d2528",
+                                        borderColor: "#1d2528",
+                                      },
+                                    }}
+                                  >
+                                    {option.option} - {option.latest_odds}
+                                  </Button>
+                                </>
+                              );
+                            })}
+                          </>
+                        </Card>
+                      </>
+                    );
+                  })}
                 </>
               );
             }

@@ -73,7 +73,7 @@ export type Match = {
   home_team: string;
   away_team: string;
   home_goals: number | undefined;
-  away_goals: string | undefined;
+  away_goals: number | undefined;
   match_bets: Bet[];
 };
 

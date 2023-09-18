@@ -358,7 +358,7 @@ async def all_matches_simple(in_future: bool = True):
 
 
 @app.get("/api/matcheswithodds")
-async def all_matches(in_future: bool = True):
+async def all_matches(in_future: bool = None):
     try:
         matches_query = """
         SELECT 
@@ -376,10 +376,11 @@ async def all_matches(in_future: bool = True):
         JOIN 
             teams away_team ON m.away_team_id = away_team.team_id
         """
-        if in_future:
-            matches_query += " WHERE m.ko_time > NOW()"
-        else:
-            matches_query += " WHERE m.ko_time < NOW()"
+        if in_future is not None:
+            if in_future:
+                matches_query += " WHERE m.ko_time > NOW()"
+            else:
+                matches_query += " WHERE m.ko_time < NOW()"
 
         matches = await database.fetch_all(matches_query)
 
@@ -536,6 +537,48 @@ async def create_match(
         }
         await database.execute(new_match_query, params)
         return {"createMatch": True}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.post("/api/admin/updatematchscore")
+async def update_match_score(
+    match_score: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    if not await is_admin(token["user"]):
+        raise HTTPException(status_code=403, detail="You are not admin")
+
+    try:
+        update_match_query = "update matches set home_goals = :home_goals, away_goals = :away_goals where match_id = :match_id"
+        params = {
+            "home_goals": match_score["home_goals"],
+            "away_goals": match_score["away_goals"],
+            "match_id": match_score["match_id"],
+        }
+        await database.execute(update_match_query, params)
+        return {"updateMatch": True}
+    except Exception:
+        raise HTTPException(status_code=400, detail="Something went wrong")
+
+
+@app.post("/api/admin/updatematchtime")
+async def update_match_time(
+    match_time: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    if not await is_admin(token["user"]):
+        raise HTTPException(status_code=403, detail="You are not admin")
+
+    try:
+        ko_time = parser.parse(match_time["ko_time"])
+        update_match_query = (
+            "update matches set ko_time = :ko_time where match_id = :match_id"
+        )
+        params = {
+            "ko_time": ko_time,
+            "match_id": match_time["match_id"],
+        }
+        await database.execute(update_match_query, params)
+        return {"updateMatchTime": True}
     except Exception:
         raise HTTPException(status_code=400, detail="Something went wrong")
 
