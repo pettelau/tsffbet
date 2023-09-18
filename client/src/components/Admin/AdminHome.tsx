@@ -184,6 +184,7 @@ export default function AdminHome() {
         <>
           <div>
             <Button
+              variant="contained"
               onClick={() => {
                 navigate("/admin/newmatch");
               }}
@@ -191,7 +192,19 @@ export default function AdminHome() {
               Add ny match
             </Button>
             <br />
+            <br />
             <Button
+              variant="contained"
+              onClick={() => {
+                navigate("/admin/editmatches");
+              }}
+            >
+              Endre match
+            </Button>
+            <br />
+            <br />
+            <Button
+              variant="contained"
               onClick={() => {
                 navigate("/admin/newbet");
               }}
@@ -199,7 +212,9 @@ export default function AdminHome() {
               Add nytt bet
             </Button>
             <br />
+            <br />
             <Button
+              variant="contained"
               onClick={() => {
                 navigate("/admin/editbet");
               }}
@@ -211,7 +226,7 @@ export default function AdminHome() {
             {users.map((user: AdminUserDetails, index: number) => {
               return (
                 <>
-                  <div>
+                  <div style={{ maxWidth: 800, margin: "0 auto" }}>
                     <Accordion>
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography>

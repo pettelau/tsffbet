@@ -56,7 +56,7 @@ export default function AppAppBar() {
   return (
     <div>
       <AppBar position="fixed">
-        {SIZE.width > 1350 ? (
+        {SIZE.width > 1160 ? (
           <Toolbar
             sx={{
               backgroundColor: "#13252b",
@@ -71,13 +71,12 @@ export default function AppAppBar() {
                 onClick={() => {
                   navigate("/");
                 }}
-                style={{ maxHeight: 30, marginRight: 25, marginTop: 8 }}
+                style={{ maxHeight: 20, marginRight: 25, marginTop: 10 }}
                 src={"/tsff_simple.png"}
               />
 
               <IconButton
                 id="betting-button"
-                size="large"
                 edge="start"
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
@@ -92,10 +91,13 @@ export default function AppAppBar() {
               </IconButton>
               <IconButton
                 id="my-accums-button"
-                size="large"
                 edge="start"
                 color="inherit"
-                sx={{ mr: 2, display: "flex", flexDirection: "row" }}
+                sx={{
+                  mr: 2,
+                  display: "flex",
+                  flexDirection: "row",
+                }}
                 onClick={() => {
                   navigate("/myaccums");
                 }}
@@ -107,7 +109,6 @@ export default function AppAppBar() {
               </IconButton>
               <IconButton
                 id="my-accums-button"
-                size="large"
                 edge="start"
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
@@ -122,7 +123,6 @@ export default function AppAppBar() {
               </IconButton>
               <IconButton
                 id="my-accums-button"
-                size="large"
                 edge="start"
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
@@ -132,12 +132,11 @@ export default function AppAppBar() {
               >
                 <ScheduleSendIcon />
                 <Typography sx={{ color: "white", marginLeft: 1 }}>
-                  Request-a-bet
+                  Request
                 </Typography>
               </IconButton>
               <IconButton
                 id="leaderboard-button"
-                size="large"
                 edge="start"
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
@@ -153,7 +152,6 @@ export default function AppAppBar() {
 
               <IconButton
                 id="feed-button"
-                size="large"
                 edge="start"
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
@@ -168,7 +166,6 @@ export default function AppAppBar() {
               </IconButton>
               <IconButton
                 id="feed-button"
-                size="large"
                 edge="start"
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
@@ -192,7 +189,6 @@ export default function AppAppBar() {
             >
               <IconButton
                 id="login-button"
-                size="large"
                 edge="start"
                 color="inherit"
                 aria-label="menu"
@@ -201,7 +197,7 @@ export default function AppAppBar() {
                   navigate("/login");
                 }}
               >
-                <Typography sx={{ color: "white", marginRight: 1 }}>
+                <Typography sx={{ color: "white", marginRight: -3 }}>
                   {loggedInUser == "" ? (
                     <Chip
                       icon={<PersonIcon />}
@@ -315,7 +311,7 @@ export default function AppAppBar() {
                   }}
                 >
                   <ScheduleSendIcon sx={{ mr: 1 }} />
-                  Request-a-bet
+                  Request
                 </MenuItem>
                 <Divider />
 
