@@ -48,6 +48,21 @@ async def get_open_bets(token: str = Depends(authUtils.validate_access_token)):
     return bets_with_options
 
 
+@app.get("/api/standalonebets")
+async def get_standalone_bets(token: str = Depends(authUtils.validate_access_token)):
+    bets = await database.fetch_all(
+        "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL and related_match IS NULL ORDER BY close_timestamp ASC"
+    )
+    bets_with_options = []
+    for bet in bets:
+        options_query = "select option_id, latest_odds, option_status, option from bet_options where bet = :bet"
+        options = await database.fetch_all(options_query, {"bet": bet["bet_id"]})
+        bet_with_option = dict(bet)
+        bet_with_option["bet_options"] = options
+        bets_with_options.append(bet_with_option)
+    return bets_with_options
+
+
 @app.get("/api/matchbets")
 async def get_open_bets(
     match_id: int, token: str = Depends(authUtils.validate_access_token)

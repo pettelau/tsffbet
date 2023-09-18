@@ -81,7 +81,7 @@ export default function Matches() {
           groups.push(match.group_name.toLowerCase());
         }
       });
-      
+
       setGroups(groups);
     } else {
       setResponseText(resp.detail);
@@ -148,42 +148,57 @@ export default function Matches() {
   return (
     <>
       <div>
-        <Tabs
-          sx={{
-            boxShadow: "3px 3px 5px 2px rgba(0,0,0,.1)",
-            backgroundColor: "white",
-            margin: 2,
-          }}
-          value={chosenGroup}
-          onChange={handleChange}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {groups.map((group: string) => {
-            return <Tab label={group} value={group} />;
-          })}
-        </Tabs>
+        {matches.length > 0 ? (
+          <>
+            {" "}
+            <Tabs
+              sx={{
+                boxShadow: "3px 3px 5px 2px rgba(0,0,0,.1)",
+                backgroundColor: "white",
+                margin: 2,
+              }}
+              value={chosenGroup}
+              onChange={handleChange}
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              {groups.map((group: string) => {
+                return <Tab label={group} value={group} />;
+              })}
+            </Tabs>
+          </>
+        ) : (
+          <><br />Ingen resultater å vise ...</>
+          
+        )}
+
         <div className="match-accordions">
-          <Box
-            id="outer-1x2"
-            display="flex"
-            justifyContent="flex-end"
-            mb={2}
-            bgcolor="#f5f5f5"
-          >
-            {/* Odds */}
-            <Box display="flex">
-              <Box id="inner-1">
-                <strong>1</strong>
+          {matches.length > 0 ? (
+            <>
+              <Box
+                id="outer-1x2"
+                display="flex"
+                justifyContent="flex-end"
+                mb={2}
+                bgcolor="#f5f5f5"
+              >
+                {/* Odds */}
+                <Box display="flex">
+                  <Box id="inner-1">
+                    <strong>1</strong>
+                  </Box>
+                  <Box id="inner-2">
+                    <strong>X</strong>
+                  </Box>
+                  <Box id="inner-3">
+                    <strong>2</strong>
+                  </Box>
+                </Box>
               </Box>
-              <Box id="inner-2">
-                <strong>X</strong>
-              </Box>
-              <Box id="inner-3">
-                <strong>2</strong>
-              </Box>
-            </Box>
-          </Box>
+            </>
+          ) : (
+            ""
+          )}
 
           {matches.map((match: Match) => {
             if (

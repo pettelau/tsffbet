@@ -56,8 +56,7 @@ export default function BettingHome() {
   const [matches, setMatches] = React.useState<Match[]>([]);
 
   const [bets, setBets] = React.useState<Bet[]>([]);
-
-  // const [categories, setCategories] = React.useState<string[]>([]);
+  const [standaloneBets, setStandaloneBets] = React.useState<Bet[]>([]);
 
   const [groups, setGroups] = React.useState<string[]>([]);
 
@@ -72,21 +71,16 @@ export default function BettingHome() {
     []
   );
 
-  const fetchBets = async () => {
-    const response = await fetch(`${url_path}api/openbets`, {
+  let allBets = [...standaloneBets];
+
+  const fetchStandaloneBets = async () => {
+    const response = await fetch(`${url_path}api/standalonebets`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
     });
     const resp = await response.json();
     setResponseCode(response.status);
     if (response.status == 200) {
-      setBets(resp);
-      // let cats: string[] = ["Alle kategorier"];
-      // resp.forEach((bet: Bet) => {
-      //   if (cats.indexOf(bet.category.toLowerCase()) === -1) {
-      //     cats.push(bet.category.toLowerCase());
-      //   }
-      // });
-      // setCategories(cats);
+      setStandaloneBets(resp);
     } else {
       setResponseText(resp.detail);
     }
@@ -113,24 +107,9 @@ export default function BettingHome() {
     }
   };
 
-  const fetchMatchBets = async (match_id: number) => {
-    const response = await fetch(
-      `${url_path}api/matchbets?match_id=${match_id}`,
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
-      }
-    );
-    const resp = await response.json();
-    setResponseCode(response.status);
-    if (response.status == 200) {
-      // setBets(resp);
-    } else {
-      setResponseText(resp.detail);
-    }
-  };
-
   useEffect(() => {
     fetchMatches();
+    fetchStandaloneBets();
   }, []);
 
   function addToAccum(bet: string, option: BetOption, index: number) {
@@ -196,29 +175,39 @@ export default function BettingHome() {
   return (
     <>
       <div>
-        <Tabs
-          sx={{
-            boxShadow: "3px 3px 5px 2px rgba(0,0,0,.1)",
-            backgroundColor: "white",
-            margin: 2,
-          }}
-          value={chosenGroup}
-          onChange={handleChange}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {groups.flatMap((group: string, index: number) => {
-            if (index === groups.length - 1) {
-              return [
-                <Divider orientation="vertical" flexItem />,
-                <Tab label={group} value={group} />,
-              ];
-            }
-            return [<Tab label={group} value={group} />];
-          })}
-        </Tabs>
+        {matches.length > 0 ? (
+          <>
+            <Tabs
+              sx={{
+                boxShadow: "3px 3px 5px 2px rgba(0,0,0,.1)",
+                backgroundColor: "white",
+                margin: 2,
+              }}
+              value={chosenGroup}
+              onChange={handleChange}
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              {groups.flatMap((group: string, index: number) => {
+                if (index === groups.length - 1) {
+                  return [
+                    <Divider orientation="vertical" flexItem />,
+                    <Tab label={group} value={group} />,
+                  ];
+                }
+                return [<Tab label={group} value={group} />];
+              })}
+            </Tabs>
+          </>
+        ) : (
+          <>
+            <br />
+            Ingen odds ute for øyeblikket
+          </>
+        )}
+
         <div className="match-accordions">
-          {chosenGroup !== "Alle odds" ? (
+          {chosenGroup !== "Alle odds" && matches.length > 0 ? (
             <Box
               id="outer-1x2"
               display="flex"
@@ -447,7 +436,7 @@ export default function BettingHome() {
                                       <>
                                         <Button
                                           variant={
-                                            index == -1
+                                            index === -1
                                               ? "outlined"
                                               : "contained"
                                           }
@@ -462,7 +451,8 @@ export default function BettingHome() {
                                           sx={{
                                             m: 1,
                                             mt: 1,
-                                            backgroundColor: "white",
+                                            backgroundColor:
+                                              index === -1 ? "white" : "",
                                             ":hover": {
                                               color: "#ffffff",
                                               backgroundColor: "#1d2528",
@@ -484,89 +474,85 @@ export default function BettingHome() {
                   </Accordion>
                 </>
               );
-            } else if (chosenGroup == "Alle odds") {
-              return (
-                <>
-                  {match.match_bets.map((bet: Bet) => {
-                    return (
-                      <>
-                        <Card
-                          sx={{
-                            padding: 2,
-                            marginBottom: 2,
-                            backgroundColor: "white",
-                          }}
-                        >
-                          <>
-                            <b>{bet.title}</b>
-                            <br />
-                            <p
-                              style={{
-                                marginTop: 1,
-                                marginBottom: 1,
-                                color: "#828385",
-                              }}
-                            >
-                              Bettet stenger{" "}
-                              {new Date(bet.close_timestamp).getDate()}.{" "}
-                              {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
-                              {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
-                              {(
-                                "0" + new Date(bet.close_timestamp).getHours()
-                              ).slice(-2)}
-                              :
-                              {(
-                                "0" + new Date(bet.close_timestamp).getMinutes()
-                              ).slice(-2)}
-                            </p>
-                            <p
-                              style={{
-                                marginTop: 1,
-                                marginBottom: 1,
-                                color: "#828385",
-                              }}
-                            >
-                              {bet.category}
-                            </p>
-                            {bet.bet_options.map((option: BetOption) => {
-                              let index = accumBets
-                                .map((c: any) => c.option.option_id)
-                                .indexOf(option.option_id);
-                              return (
-                                <>
-                                  <Button
-                                    variant={
-                                      index == -1 ? "outlined" : "contained"
-                                    }
-                                    // variant="contained"
-                                    onClick={() => {
-                                      addToAccum(bet.title, option, index);
-                                    }}
-                                    sx={{
-                                      m: 1,
-                                      mt: 1,
-                                      backgroundColor: "white",
-                                      ":hover": {
-                                        color: "#ffffff",
-                                        backgroundColor: "#1d2528",
-                                        borderColor: "#1d2528",
-                                      },
-                                    }}
-                                  >
-                                    {option.option} - {option.latest_odds}
-                                  </Button>
-                                </>
-                              );
-                            })}
-                          </>
-                        </Card>
-                      </>
-                    );
-                  })}
-                </>
-              );
+            } else if (chosenGroup === "Alle odds") {
+              allBets.push(...match.match_bets);
             }
           })}
+          {chosenGroup === "Alle odds"
+            ? allBets.map((bet: Bet) => {
+                return (
+                  <>
+                    <Card
+                      sx={{
+                        padding: 2,
+                        marginBottom: 2,
+                        backgroundColor: "white",
+                      }}
+                    >
+                      <>
+                        <b>{bet.title}</b>
+                        <br />
+                        <p
+                          style={{
+                            marginTop: 1,
+                            marginBottom: 1,
+                            color: "#828385",
+                          }}
+                        >
+                          Bettet stenger{" "}
+                          {new Date(bet.close_timestamp).getDate()}.{" "}
+                          {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
+                          {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
+                          {(
+                            "0" + new Date(bet.close_timestamp).getHours()
+                          ).slice(-2)}
+                          :
+                          {(
+                            "0" + new Date(bet.close_timestamp).getMinutes()
+                          ).slice(-2)}
+                        </p>
+                        <p
+                          style={{
+                            marginTop: 1,
+                            marginBottom: 1,
+                            color: "#828385",
+                          }}
+                        >
+                          {bet.category}
+                        </p>
+                        {bet.bet_options.map((option: BetOption) => {
+                          let index = accumBets
+                            .map((c: any) => c.option.option_id)
+                            .indexOf(option.option_id);
+                          return (
+                            <>
+                              <Button
+                                variant={index == -1 ? "outlined" : "contained"}
+                                onClick={() => {
+                                  addToAccum(bet.title, option, index);
+                                }}
+                                sx={{
+                                  m: 1,
+                                  mt: 1,
+                                  backgroundColor: index === -1 ? "white" : "",
+                                  ":hover": {
+                                    color: "#ffffff",
+                                    backgroundColor: "#1d2528",
+                                    borderColor: "#1d2528",
+                                  },
+                                }}
+                              >
+                                {option.option} - {option.latest_odds}
+                              </Button>
+                            </>
+                          );
+                        })}
+                      </>
+                    </Card>
+                  </>
+                );
+              })
+            : ""}
         </div>
       </div>
     </>
