@@ -348,7 +348,7 @@ async def all_matches(in_future: bool = True):
 
 
 @app.get("/api/matchessimple")
-async def all_matches_simple(in_future: bool = True):
+async def all_matches_simple(in_future: bool = None):
     try:
         matches_query = """
         SELECT 
@@ -363,8 +363,13 @@ async def all_matches_simple(in_future: bool = True):
         JOIN 
             teams away_team ON m.away_team_id = away_team.team_id
         """
-        if in_future:
-            matches_query += " WHERE m.ko_time > NOW()"
+        if in_future is not None:
+            if in_future:
+                matches_query += " WHERE m.ko_time > NOW() ORDER BY ko_time ASC"
+            else:
+                matches_query += " WHERE m.ko_time < NOW() ORDER BY m.ko_time DESC"
+        else:
+            matches_query += " ORDER BY ko_time DESC"
         matches = await database.fetch_all(matches_query)
 
         return matches
