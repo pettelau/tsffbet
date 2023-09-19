@@ -220,7 +220,7 @@ export default function Leaderboard() {
                           ":hover": { cursor: "pointer" },
                         }}
                         onClick={() => {
-                          navigate(`/user/${user.username}`);
+                          navigate(`/bruker/${user.username}`);
                         }}
                       >
                         {user.username}

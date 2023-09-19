@@ -191,7 +191,7 @@ export default function BettingHome() {
   }
   return (
     <>
-      <div>
+      <div style={{ marginBottom: 30 }}>
         {matches.length > 0 || standaloneBets.length > 0 ? (
           <>
             <Tabs
