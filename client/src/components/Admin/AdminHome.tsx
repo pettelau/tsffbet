@@ -186,7 +186,7 @@ export default function AdminHome() {
             <Button
               variant="contained"
               onClick={() => {
-                navigate("/admin/newmatch");
+                navigate("/admin/nymatch");
               }}
             >
               Add ny match
@@ -196,7 +196,7 @@ export default function AdminHome() {
             <Button
               variant="contained"
               onClick={() => {
-                navigate("/admin/editmatches");
+                navigate("/admin/endrematcher");
               }}
             >
               Endre match
@@ -206,7 +206,7 @@ export default function AdminHome() {
             <Button
               variant="contained"
               onClick={() => {
-                navigate("/admin/newbet");
+                navigate("/admin/nyttbet");
               }}
             >
               Add nytt bet
@@ -216,7 +216,7 @@ export default function AdminHome() {
             <Button
               variant="contained"
               onClick={() => {
-                navigate("/admin/editbet");
+                navigate("/admin/endrebets");
               }}
             >
               Endre bet

@@ -45,7 +45,7 @@ export default function NavBar() {
             aria-label="menu"
             sx={{ mr: 2 }}
             onClick={() => {
-              navigate("/login");
+              navigate("/logginn");
             }}
           >
             <PersonIcon />
@@ -58,7 +58,7 @@ export default function NavBar() {
             aria-label="menu"
             sx={{ mr: 2 }}
             onClick={() => {
-              navigate("/bettinghome");
+              navigate("/odds");
             }}
           >
             <LocalAtmIcon />

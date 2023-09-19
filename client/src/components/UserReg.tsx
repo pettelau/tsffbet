@@ -164,7 +164,7 @@ function UserReg() {
 
     const resp = await response.json();
     if (resp.userCreated) {
-      navigate("/login");
+      navigate("/logginn");
     } else {
       alertmsg = `Bruker ble ikke opprettet, noe gikk galt. Error message: ${resp.detail}`;
       toggleAlert(true, alertmsg, "error");

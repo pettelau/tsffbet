@@ -98,21 +98,21 @@ export default function App() {
             <AppAppBar />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="bettinghome" element={<BettingHome />} />
-              <Route path="matches" element={<Matches />} />
-              <Route path="myaccums" element={<MyAccums />} />
-              <Route path="login" element={<Login />} />
-              <Route path="userReg" element={<UserReg />} />
-              <Route path="requestbet" element={<RequestBet />} />
+              <Route path="odds" element={<BettingHome />} />
+              <Route path="resultater" element={<Matches />} />
+              <Route path="minekuponger" element={<MyAccums />} />
+              <Route path="logginn" element={<Login />} />
+              <Route path="brukerreg" element={<UserReg />} />
+              <Route path="request" element={<RequestBet />} />
               <Route path="leaderboard" element={<Leaderboard />} />
               <Route path="betfeed" element={<BetFeed />} />
               <Route path="stats" element={<BettingStats />} />
-              <Route path="user/:username" element={<UserProfile />} />
+              <Route path="bruker/:username" element={<UserProfile />} />
               <Route path="admin" element={<AdminHome />} />
-              <Route path="admin/newbet" element={<NewBet />} />
-              <Route path="admin/newmatch" element={<NewMatch />} />
-              <Route path="admin/editmatches" element={<EditMatches />} />
-              <Route path="admin/editbet" element={<EditBet />} />
+              <Route path="admin/nyttbet" element={<NewBet />} />
+              <Route path="admin/nymatch" element={<NewMatch />} />
+              <Route path="admin/endrematcher" element={<EditMatches />} />
+              <Route path="admin/endrebets" element={<EditBet />} />
             </Routes>
           </BrowserRouter>
           <Accumulator />

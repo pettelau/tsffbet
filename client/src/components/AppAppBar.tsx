@@ -81,7 +81,7 @@ export default function AppAppBar() {
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
                 onClick={() => {
-                  navigate("/bettinghome");
+                  navigate("/odds");
                 }}
               >
                 <LocalAtmIcon />
@@ -99,7 +99,7 @@ export default function AppAppBar() {
                   flexDirection: "row",
                 }}
                 onClick={() => {
-                  navigate("/myaccums");
+                  navigate("/minekuponger");
                 }}
               >
                 <ReceiptIcon />
@@ -113,7 +113,7 @@ export default function AppAppBar() {
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
                 onClick={() => {
-                  navigate("/matches");
+                  navigate("/kamper");
                 }}
               >
                 <SportsSoccerIcon />
@@ -127,7 +127,7 @@ export default function AppAppBar() {
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
                 onClick={() => {
-                  navigate("/requestbet");
+                  navigate("/request");
                 }}
               >
                 <ScheduleSendIcon />
@@ -194,7 +194,7 @@ export default function AppAppBar() {
                 aria-label="menu"
                 sx={{ mr: 2 }}
                 onClick={() => {
-                  navigate("/login");
+                  navigate("/logginn");
                 }}
               >
                 <Typography sx={{ color: "white", marginRight: -3 }}>
@@ -275,7 +275,7 @@ export default function AppAppBar() {
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    navigate("/bettinghome");
+                    navigate("/odds");
                   }}
                 >
                   <LocalAtmIcon sx={{ mr: 1 }} />
@@ -286,7 +286,7 @@ export default function AppAppBar() {
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    navigate("/myaccums");
+                    navigate("/minekuponger");
                   }}
                 >
                   <ReceiptIcon sx={{ mr: 1 }} />
@@ -296,7 +296,7 @@ export default function AppAppBar() {
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    navigate("/matches");
+                    navigate("/kamper");
                   }}
                 >
                   <SportsSoccerIcon sx={{ mr: 1 }} />
@@ -368,7 +368,7 @@ export default function AppAppBar() {
                 {loggedInUser == "" ? (
                   <Chip
                     onClick={() => {
-                      navigate("/login");
+                      navigate("/logginn");
                     }}
                     icon={
                       <PersonIcon sx={{ ":hover": { cursor: "pointer" } }} />
@@ -382,7 +382,7 @@ export default function AppAppBar() {
                   <>
                     <Chip
                       onClick={() => {
-                        navigate("/login");
+                        navigate("/logginn");
                       }}
                       icon={<PersonIcon />}
                       sx={{

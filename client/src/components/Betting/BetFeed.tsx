@@ -153,7 +153,7 @@ export default function BetFeed() {
                     <b
                       style={{ cursor: "pointer" }}
                       onClick={() => {
-                        navigate(`/user/${accum.username}`);
+                        navigate(`/bruker/${accum.username}`);
                       }}
                     >
                       {accum.username}
