@@ -113,7 +113,7 @@ export default function AppAppBar() {
                 color="inherit"
                 sx={{ mr: 2, display: "flex", flexDirection: "row" }}
                 onClick={() => {
-                  navigate("/kamper");
+                  navigate("/resultater");
                 }}
               >
                 <SportsSoccerIcon />
