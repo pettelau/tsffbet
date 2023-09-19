@@ -296,7 +296,7 @@ export default function AppAppBar() {
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    navigate("/kamper");
+                    navigate("/resultater");
                   }}
                 >
                   <SportsSoccerIcon sx={{ mr: 1 }} />
@@ -307,7 +307,7 @@ export default function AppAppBar() {
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    navigate("/requestbet");
+                    navigate("/request");
                   }}
                 >
                   <ScheduleSendIcon sx={{ mr: 1 }} />
