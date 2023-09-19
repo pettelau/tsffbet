@@ -688,6 +688,23 @@ async def close_bet(bet: dict, token: str = Depends(authUtils.validate_access_to
         raise HTTPException(status_code=400, detail="Something went wrong")
 
 
+@app.post("/api/admin/updaterelatedmatch")
+async def update_related_match_bet(
+    bet: dict, token: str = Depends(authUtils.validate_access_token)
+):
+    try:
+        if await is_admin(token["user"]):
+            await database.execute(
+                "UPDATE bets SET related_match = :match_id WHERE bet_id = :bet_id",
+                {"match_id": bet["match_id"], "bet_id": bet["bet_id"]},
+            )
+            return {"updateRelatedMatch": True}
+        else:
+            raise HTTPException(status_code=403, detail="You are not admin")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Something went wrong")
+
+
 @app.post("/api/admin/resetPassword")
 async def reset_password(
     payload: dict, token: str = Depends(authUtils.validate_access_token)

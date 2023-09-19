@@ -161,6 +161,21 @@ export default function BettingHome() {
     return <Box width={24} height={24} bgcolor="transparent" />;
   }
 
+  const formatOdds = (odds: number): string => {
+    // If odds are 10 or greater, return the whole number
+    if (odds >= 10) {
+      return odds.toFixed(0);
+    }
+
+    // If odds have 2 decimals, return with 2 decimals
+    if (Math.floor(odds * 100) % 10 !== 0) {
+      return odds.toFixed(2);
+    }
+
+    // Otherwise, return with 1 decimal
+    return odds.toFixed(1);
+  };
+
   if (responseCode == undefined) {
     return (
       <>
@@ -264,9 +279,9 @@ export default function BettingHome() {
                           display={{ xs: "block", sm: "none" }} // Display on small screens only
                           mb={1} // Margin bottom for spacing
                         >
-                          {match.ko_time ? (
-                            <>
-                              <div style={{ fontSize: "small" }}>
+                          <div style={{ marginLeft: "auto", marginRight: 0 }}>
+                            {match.ko_time ? (
+                              <>
                                 {new Date(match.ko_time).getDate()}.{" "}
                                 {MONTHS[new Date(match.ko_time).getMonth()]}{" "}
                                 {new Date(match.ko_time).getFullYear()} kl.{" "}
@@ -277,11 +292,11 @@ export default function BettingHome() {
                                 {(
                                   "0" + new Date(match.ko_time).getMinutes()
                                 ).slice(-2)}
-                              </div>
-                            </>
-                          ) : (
-                            "N/A"
-                          )}
+                              </>
+                            ) : (
+                              "N/A"
+                            )}
+                          </div>
                         </Box>
 
                         {/* Main content */}
@@ -294,6 +309,7 @@ export default function BettingHome() {
                           <Box display="flex" alignItems="center">
                             {/* Date for larger screens */}
                             <Box
+                              sx={{ width: 110 }}
                               display={{ xs: "none", sm: "block" }} // Display on larger screens only
                               mr={2} // Margin right for spacing
                             >
@@ -368,7 +384,7 @@ export default function BettingHome() {
                                           },
                                         }}
                                       >
-                                        {option.latest_odds.toFixed(1)}
+                                        {formatOdds(option.latest_odds)}
                                       </Button>
                                     );
                                   })

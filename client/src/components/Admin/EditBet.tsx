@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import {
+  Alert,
   AlertColor,
   Button,
   Checkbox,
@@ -8,6 +9,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Snackbar,
   TextField,
 } from "@mui/material";
 import { useAppSelector } from "../../redux/hooks";
@@ -15,7 +17,14 @@ import { selectPath } from "../../redux/envSlice";
 import { selectAdmin } from "../../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 import NoAccess from "../NoAccess";
-import { AlertT, Bet, BetAdmin, NewBetType, NewOptionType } from "../../types";
+import {
+  AlertT,
+  Bet,
+  BetAdmin,
+  MatchSimple,
+  NewBetType,
+  NewOptionType,
+} from "../../types";
 import { SendToMobileTwoTone } from "@mui/icons-material";
 import AlertComp from "../Alert";
 import Accordion from "@mui/material/Accordion";
@@ -47,8 +56,13 @@ export default function EditBet() {
 
   const [allBets, setAllBets] = React.useState<BetAdmin[]>([]);
 
+  const [matches, setMatches] = React.useState<MatchSimple[]>([]);
+
   const [responseCode, setResponseCode] = React.useState<number>();
   const [responseText, setResponseText] = React.useState<string>();
+
+  const [openSuccessSnackbar, setOpenSuccessSnackbar] = React.useState(false);
+  const [openErrorSnackbar, setOpenErrorSnackbar] = React.useState(false);
 
   const [offset, setOffset] = React.useState<number>(0);
   const [limit, setLimit] = React.useState<number>(15);
@@ -67,14 +81,31 @@ export default function EditBet() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setIsLoading(false);
+      console.log(resp);
       setAllBets((prevBets) => [...prevBets, ...resp]);
     } else {
-      setResponseText(resp.detail);
+      setResponseCode(response.status);
+      setResponseText(response.statusText);
+      setOpenErrorSnackbar(true);
+    }
+  };
+
+  const fetchMatches = async () => {
+    const response = await fetch(`${url_path}api/matchessimple`);
+    const resp = await response.json();
+    setResponseCode(response.status);
+    if (response.status == 200) {
+      setMatches(resp);
+    } else {
+      setResponseCode(response.status);
+      setResponseText(response.statusText);
+      setOpenErrorSnackbar(true);
     }
   };
 
   useEffect(() => {
     fetchBets();
+    fetchMatches();
   }, [offset]);
 
   if (responseCode == undefined) {
@@ -106,16 +137,6 @@ export default function EditBet() {
     setAllBets(oldValue);
   };
 
-  const handleOptionTextChange = (
-    event: any,
-    betindex: number,
-    optionindex: number
-  ) => {
-    let oldValue = [...allBets];
-    oldValue[betindex].bet_options[optionindex].option = event;
-    setAllBets(oldValue);
-  };
-
   const handleOptionOddsChange = (
     event: string,
     betindex: number,
@@ -143,9 +164,11 @@ export default function EditBet() {
 
     const resp = await response.json();
     if (resp["settleBet"]) {
-      toggleAlert(true, "Bettet ble settled!", "success");
+      setOpenSuccessSnackbar(true);
     } else {
-      toggleAlert(true, resp["errorMsg"], "error");
+      setResponseCode(response.status);
+      setResponseText(response.statusText);
+      setOpenErrorSnackbar(true);
     }
   }
 
@@ -162,9 +185,11 @@ export default function EditBet() {
 
     const resp = await response.json();
     if (response.ok) {
-      toggleAlert(true, "Bettet ble akseptert!", "success");
+      setOpenSuccessSnackbar(true);
     } else {
-      toggleAlert(true, resp["errorMsg"], "error");
+      setResponseCode(response.status);
+      setResponseText(response.statusText);
+      setOpenErrorSnackbar(true);
     }
   }
 
@@ -182,9 +207,39 @@ export default function EditBet() {
 
     const resp = await response.json();
     if (response.ok) {
-      toggleAlert(true, "Bettet ble stengt!", "success");
+      setOpenSuccessSnackbar(true);
     } else {
-      toggleAlert(true, resp["errorMsg"], "error");
+      setResponseCode(response.status);
+      setResponseText(response.statusText);
+      setOpenErrorSnackbar(true);
+    }
+  }
+
+  async function updateRelatedMatch(
+    bet_id: number,
+    match_id: number | undefined
+  ) {
+    if (match_id === undefined) {
+      return;
+    }
+    let payload = { bet_id: bet_id, match_id: match_id };
+
+    const response = await fetch(`${url_path}api/admin/updaterelatedmatch`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const resp = await response.json();
+    if (response.ok) {
+      setOpenSuccessSnackbar(true);
+    } else {
+      setResponseCode(response.status);
+      setResponseText(response.statusText);
+      setOpenErrorSnackbar(true);
     }
   }
 
@@ -207,9 +262,11 @@ export default function EditBet() {
 
       const resp = await response.json();
       if (response.ok) {
-        toggleAlert(true, "Option ble oppdatert!", "success");
+        setOpenSuccessSnackbar(true);
       } else {
-        toggleAlert(true, "Noe gikk galt", "error");
+        setResponseCode(response.status);
+        setResponseText(response.statusText);
+        setOpenErrorSnackbar(true);
       }
     } else {
       let newOption = {
@@ -228,9 +285,11 @@ export default function EditBet() {
 
       const resp = await response.json();
       if (response.ok) {
-        toggleAlert(true, "Option ble oppdatert!", "success");
+        setOpenSuccessSnackbar(true);
       } else {
-        toggleAlert(true, "Noe gikk galt", "error");
+        setResponseCode(response.status);
+        setResponseText(response.statusText);
+        setOpenErrorSnackbar(true);
       }
     }
   }
@@ -249,6 +308,24 @@ export default function EditBet() {
   return (
     <>
       {/* Alert component to show error/success messages */}
+      <Snackbar
+        open={openSuccessSnackbar}
+        autoHideDuration={5000}
+        onClose={() => setOpenSuccessSnackbar(false)}
+      >
+        <Alert onClose={() => setOpenSuccessSnackbar(false)} severity="success">
+          Bettet ble oppdatert!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={openErrorSnackbar}
+        autoHideDuration={5000}
+        onClose={() => setOpenErrorSnackbar(false)}
+      >
+        <Alert onClose={() => setOpenErrorSnackbar(false)} severity="error">
+          Noe galt skjedde: {responseCode}: {responseText}
+        </Alert>
+      </Snackbar>
       <AlertComp
         setAlert={setAlert}
         _alert={_alert}
@@ -271,6 +348,47 @@ export default function EditBet() {
                       <Typography>{bet.title}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
+                      <Select
+                        sx={{ width: 200 }}
+                        value={bet.related_match || ""}
+                        onChange={(e) => {
+                          const newRelatedMatch = e.target.value as number | "";
+                          setAllBets((prevBets: BetAdmin[]) =>
+                            prevBets.map((b) =>
+                              b.bet_id === bet.bet_id
+                                ? {
+                                    ...b,
+                                    related_match:
+                                      newRelatedMatch === ""
+                                        ? undefined
+                                        : newRelatedMatch,
+                                  }
+                                : b
+                            )
+                          );
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>Ingen</em>
+                        </MenuItem>
+                        {matches.map((match) => (
+                          <MenuItem key={match.match_id} value={match.match_id}>
+                            {`${match.home_team} vs ${match.away_team}`}
+                          </MenuItem>
+                        ))}
+                      </Select>{" "}
+                      <br />
+                      <Button
+                        disabled={
+                          bet.related_match === null ? true : false
+                        }
+                        variant="contained"
+                        onClick={() => {
+                          updateRelatedMatch(bet.bet_id, bet.related_match);
+                        }}
+                      >
+                        Oppdater tilknyttet kamp
+                      </Button>
                       {bet.bet_options.map((option, optionindex) => {
                         return (
                           <>
@@ -284,13 +402,24 @@ export default function EditBet() {
                               <TextField
                                 label="Option text"
                                 value={option.option}
-                                onChange={(e) =>
-                                  handleOptionTextChange(
-                                    e.target.value,
-                                    betindex,
-                                    optionindex
-                                  )
-                                }
+                                onChange={(e) => {
+                                  const newValue = e.target.value;
+                                  setAllBets((prevBets) =>
+                                    prevBets.map((b, idx) =>
+                                      idx === betindex
+                                        ? {
+                                            ...b,
+                                            bet_options: b.bet_options.map(
+                                              (opt, optIdx) =>
+                                                optIdx === optionindex
+                                                  ? { ...opt, option: newValue }
+                                                  : opt
+                                            ),
+                                          }
+                                        : b
+                                    )
+                                  );
+                                }}
                               />
                               <TextField
                                 sx={{ width: 80 }}
@@ -372,14 +501,19 @@ export default function EditBet() {
                           </Button>
                         </>
                       )}
-                      <Button
-                        variant="contained"
-                        onClick={() => {
-                          closeBet(betindex);
-                        }}
-                      >
-                        Steng spill
-                      </Button>
+                      {new Date(bet.close_timestamp) > new Date() &&
+                      bet.closed_early === null ? (
+                        <Button
+                          variant="contained"
+                          onClick={() => {
+                            closeBet(betindex);
+                          }}
+                        >
+                          Steng spill
+                        </Button>
+                      ) : (
+                        ""
+                      )}
                     </AccordionDetails>
                   </Accordion>
                 </div>

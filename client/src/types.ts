@@ -18,9 +18,12 @@ export type BetAdmin = {
   bet_id: number;
   submitter: string;
   category: string;
+  added_timestamp: Date;
   close_timestamp: Date;
+  closed_early: Date | undefined;
   bet_options: BetOptionAdmin[];
   is_accepted: undefined | Boolean;
+  related_match: number | undefined;
 };
 
 export type BetOption = {
