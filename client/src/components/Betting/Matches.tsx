@@ -168,8 +168,10 @@ export default function Matches() {
             </Tabs>
           </>
         ) : (
-          <><br />Ingen resultater å vise ...</>
-          
+          <>
+            <br />
+            Ingen resultater å vise ...
+          </>
         )}
 
         <div className="match-accordions">
@@ -260,6 +262,7 @@ export default function Matches() {
                           <Box display="flex" alignItems="center">
                             {/* Date for larger screens */}
                             <Box
+                              sx={{ width: 110 }}
                               display={{ xs: "none", sm: "block" }} // Display on larger screens only
                               mr={2} // Margin right for spacing
                             >
