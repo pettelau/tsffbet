@@ -373,7 +373,7 @@ async def all_matches_simple(in_future: bool = True):
 
 
 @app.get("/api/matcheswithodds")
-async def all_matches(in_future: bool = None):
+async def all_matches_odds(in_future: bool = None):
     try:
         matches_query = """
         SELECT 
@@ -393,10 +393,11 @@ async def all_matches(in_future: bool = None):
         """
         if in_future is not None:
             if in_future:
-                matches_query += " WHERE m.ko_time > NOW()"
+                matches_query += " WHERE m.ko_time > NOW() ORDER BY ko_time ASC"
             else:
-                matches_query += " WHERE m.ko_time < NOW()"
-
+                matches_query += " WHERE m.ko_time < NOW() ORDER BY m.ko_time DESC"
+        else:
+            matches_query += " ORDER BY ko_time ASC"
         matches = await database.fetch_all(matches_query)
 
         matches_with_odds = []
