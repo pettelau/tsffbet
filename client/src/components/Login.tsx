@@ -230,10 +230,16 @@ function Login() {
               <b>
                 {firstname} {lastname}
               </b>
-              
-              <b>{associated_team ? associated_team : "ingen"} </b>
               <br />
-              
+              <b
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  navigate(`/resultater/${associated_team}`);
+                }}
+              >
+                {associated_team ? associated_team : "ingen"}{" "}
+              </b>
+              <br />
               Bruker opprettet:
               <br />
               <b>
@@ -371,7 +377,7 @@ function Login() {
                   variant="contained"
                   id="register-button"
                   component={Link}
-                  to="/UserReg"
+                  to="/brukerreg"
                   sx={{
                     color: "#ffffff",
                     backgroundColor: "#1d2528",

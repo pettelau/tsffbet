@@ -32,17 +32,27 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          <Alert severity="warning">
-            <AlertTitle>Viktig info</AlertTitle>Pågangen og interessen på siden
-            har vært over all forventing - over 100 brukere på et par timer!
-            Utrolig gøy! Men sjansene for at bugs kan forekomme er stor nå i
-            starten. Jeg fikser feilene så fort som mulig, men ber om forståelse
-            og håper folk kommer tilbake senere selv om siden kanskje er nede
-            noe nå i begynnelsen🙏
+          <Alert severity="info">
+            <AlertTitle>Nyheter på siden</AlertTitle>
+            <b>- Resultater: </b>Under fanen "Resultater" finner du tidligere
+            kamper med historiske odds, tabell for de to avdelingene samt en
+            oversikt over sluttspillsfordelingene "AS IT STANDS" i de to
+            avdelingene!
+            <br />
+            <br />
+            <b>- Oddssiden: </b>Oddssiden er nå strukturert på kommende kamper,
+            og kampoddsene ser du ved siden av lagnavnene. Dersom det finnes
+            tilhørende odds til kampen, får du disse opp ved å trykke på kampen.
+            <br />
+            <br />
+            <b>- Enklere bet requests: </b>Nå kan (og bør) du knytte odds du
+            foreslår til en kommende kamp. I tillegg velger du kategori blant
+            noen forhåndsdefinerte kategorier. Da blir ting forhåpentligvis litt
+            mer strukturert og oversiktlig for alle.
           </Alert>
           <br />
           <Alert severity="warning">
-            <AlertTitle>Annen viktig info</AlertTitle>Foreløpig har jeg ikke noe
+            <AlertTitle>Innmelding av odds</AlertTitle>Foreløpig har jeg ikke noe
             godt system for innmelding av resultater fra bets, f.eks. målscorer-
             og kortspill som ikke ligger ute på tsff.no. Inntil videre kan dere
             sende SMS til 90636538 med resultater. Her stoler jeg på at det dere

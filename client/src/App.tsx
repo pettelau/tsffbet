@@ -33,6 +33,7 @@ import BettingStats from "./components/Betting/BettingStats";
 import NewMatch from "./components/Admin/NewMatch";
 import Matches from "./components/Betting/Matches";
 import EditMatches from "./components/Admin/EditMatches";
+import TeamMatches from "./components/Betting/TeamMatches";
 
 const THEME = createTheme({
   typography: {
@@ -48,6 +49,10 @@ const THEME = createTheme({
         contained: {
           backgroundColor: "#13252b",
           color: "white",
+          "&.Mui-disabled": {
+            opacity: 0.8,
+            color: "red",
+          },
         },
         outlined: {
           borderColor: "#13252b",
@@ -55,19 +60,21 @@ const THEME = createTheme({
           color: "#13252b",
         },
       },
+      variants: [
+        {
+          props: { variant: "contained", disabled: true },
+          style: {
+            opacity: 1, // Adjust the opacity value as needed
+          },
+        },
+        {
+          props: { variant: "outlined", disabled: true },
+          style: {
+            opacity: 1,
+          },
+        },
+      ],
     },
-    // MuiAlert: {
-    //   styleOverrides: {
-    //     // Target the "info" severity
-    //     standardInfo: {
-    //       backgroundColor: "#00b2aa",
-    //       color: "white",
-    //       "& .MuiAlert-icon": {
-    //         color: "#13252b",
-    //       }, // Replace 'yourDesiredColor' with the color you want
-    //     },
-    //   },
-    // },
   },
 });
 
@@ -100,6 +107,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="odds" element={<BettingHome />} />
               <Route path="resultater" element={<Matches />} />
+              <Route path="resultater/:team" element={<TeamMatches />} />
               <Route path="minekuponger" element={<MyAccums />} />
               <Route path="logginn" element={<Login />} />
               <Route path="brukerreg" element={<UserReg />} />

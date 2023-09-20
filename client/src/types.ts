@@ -94,6 +94,27 @@ export type NewMatchSimple = {
   group: string;
 };
 
+export type TeamData = {
+  games_played: number;
+  group_name: string;
+  points: number;
+  form: string;
+  goalsScored: number;
+  goalsConceded: number;
+};
+
+export type LeagueTableType = Record<string, TeamData>;
+
+export type SortedTeamData = {
+  team: string;
+  games_played: number;
+  group_name: string;
+  form: string;
+  points: number;
+  goalsScored: number;
+  goalsConceded: number;
+};
+
 export type AccumBets = {
   title: string;
   user_odds: number;

@@ -390,7 +390,7 @@ async def all_matches_simple(in_future: bool = None):
 
 
 @app.get("/api/matcheswithodds")
-async def all_matches_odds(in_future: bool = None):
+async def all_matches_odds(in_future: bool = None, team: str = None):
     try:
         matches_query = """
         SELECT 
@@ -408,14 +408,33 @@ async def all_matches_odds(in_future: bool = None):
         JOIN 
             teams away_team ON m.away_team_id = away_team.team_id
         """
+
+        conditions = []
+
+        if team:
+            conditions.append(
+                "(home_team.team_name = :home_team OR away_team.team_name = :away_team)"
+            )
+
         if in_future is not None:
             if in_future:
-                matches_query += " WHERE m.ko_time > NOW() ORDER BY ko_time ASC"
+                conditions.append("m.ko_time > NOW()")
             else:
-                matches_query += " WHERE m.ko_time < NOW() ORDER BY m.ko_time DESC"
+                conditions.append("m.ko_time < NOW()")
+
+        if conditions:
+            matches_query += " WHERE " + " AND ".join(conditions)
+
+        order_by = (
+            "m.ko_time ASC" if in_future or in_future is None else "m.ko_time DESC"
+        )
+        matches_query += " ORDER BY " + order_by
+        if team:
+            matches = await database.fetch_all(
+                matches_query, {"home_team": team, "away_team": team}
+            )
         else:
-            matches_query += " ORDER BY ko_time ASC"
-        matches = await database.fetch_all(matches_query)
+            matches = await database.fetch_all(matches_query)
 
         matches_with_odds = []
         for match in matches:
