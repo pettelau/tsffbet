@@ -163,14 +163,14 @@ h3 {
 
 @media screen and (max-width: 650px) {
   #outer-1x2 {
-    padding-right: 65px;
+    padding-right: 60px;
   }
   
   #inner-1 {
-    padding-right: 52px;
+    padding-right: 40px;
   }
   #inner-2 {
-    padding-right: 52px;
+    padding-right: 40px;
   }
 
   #teams-odds {
@@ -181,7 +181,9 @@ h3 {
     width: 98%
   }
   #odds-button {
-    min-width: 45px;
+    min-width: 40px;
+    margin-right: 5;
+    margin-left: 0;
   }
 }
 

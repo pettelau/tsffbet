@@ -147,7 +147,7 @@ export default function Matches() {
 
   return (
     <>
-      <div style={{ marginBottom: 30 }}>
+      <div style={{ marginBottom: 80 }}>
         {matches.length > 0 ? (
           <>
             {" "}
