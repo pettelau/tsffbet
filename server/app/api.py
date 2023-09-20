@@ -347,6 +347,18 @@ async def all_matches(in_future: bool = True):
         return HTTPException(status_code=400, detail="Something went wrong")
 
 
+@app.get("/api/matches9days")
+async def matches_9_days():
+    try:
+        matches_query = "select match_id, ko_time FROM matches WHERE ko_time >= CURRENT_DATE AND ko_time < CURRENT_DATE + INTERVAL '9 days'"
+
+        matches = await database.fetch_all(matches_query)
+
+        return matches
+    except Exception:
+        return HTTPException(status_code=400, detail="Something went wrong")
+
+
 @app.get("/api/matchessimple")
 async def all_matches_simple(in_future: bool = None):
     try:

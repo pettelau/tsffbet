@@ -182,6 +182,7 @@ h3 {
   }
   #odds-button {
     min-width: 40px;
+    max-width: 40px;
     margin-right: 5;
     margin-left: 0;
   }
