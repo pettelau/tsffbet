@@ -336,6 +336,12 @@ export default function EditBet() {
       {isAdmin ? (
         <>
           {allBets.map((bet: BetAdmin, betindex) => {
+            let totalprobability = 0;
+            bet.bet_options.forEach((option) => {
+              if (typeof option.latest_odds === "number") {
+                totalprobability += 1 / option.latest_odds;
+              }
+            });
             return (
               <>
                 <div style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -379,9 +385,7 @@ export default function EditBet() {
                       </Select>{" "}
                       <br />
                       <Button
-                        disabled={
-                          bet.related_match === null ? true : false
-                        }
+                        disabled={bet.related_match === null ? true : false}
                         variant="contained"
                         onClick={() => {
                           updateRelatedMatch(bet.bet_id, bet.related_match);
@@ -477,6 +481,13 @@ export default function EditBet() {
                       >
                         Legg til option
                       </Button>
+                      <br />
+                      Tilbakebetaling:{" "}
+                      {totalprobability > 0
+                        ? ((1 / totalprobability) * 100).toFixed(1)
+                        : "N/A"}
+                      %
+                      <br />
                       <br />
                       <Button
                         variant="contained"

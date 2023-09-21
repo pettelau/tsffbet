@@ -138,10 +138,10 @@ export default function NewBet() {
     }
   }
 
-  let totalodds = 0;
+  let totalprobability = 0;
   options.forEach((option) => {
     if (typeof option.latest_odds === "number") {
-      totalodds += option.latest_odds;
+      totalprobability += 1 / option.latest_odds;
     }
   });
 
@@ -360,8 +360,10 @@ export default function NewBet() {
             <br />
             <br />
             <div>
-              Tilbakebetalingsprosent:{" "}
-              {((totalodds / options.length / options.length) * 100).toFixed(1)}
+              Tilbakebetaling:{" "}
+              {totalprobability > 0
+                ? ((1 / totalprobability) * 100).toFixed(1)
+                : "N/A"}
               %
             </div>
             <br />

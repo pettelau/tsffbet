@@ -51,7 +51,6 @@ const THEME = createTheme({
           color: "white",
           "&.Mui-disabled": {
             opacity: 0.8,
-            color: "red",
           },
         },
         outlined: {
@@ -79,8 +78,8 @@ const THEME = createTheme({
 });
 
 export default function App() {
-  const url_path = "/";
-  // const url_path = "http://localhost:8001/";
+  // const url_path = "/";
+  const url_path = "http://localhost:8001/";
 
   async function loginDetails() {
     const response = await fetch(`${url_path}api/login/details`, {
