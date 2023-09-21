@@ -7,6 +7,7 @@ import {
   Card,
   CircularProgress,
   Divider,
+  IconButton,
   Tab,
   Tabs,
   ToggleButton,
@@ -26,6 +27,8 @@ import { selectPath } from "../../redux/envSlice";
 import useWindowDimensions from "../../utils/deviceSizeInfo";
 import NoAccess from "../NoAccess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import OddsMovementModal from "./OddsMovement";
 
 export default function BettingHome() {
   const dispatch = useAppDispatch();
@@ -71,6 +74,17 @@ export default function BettingHome() {
   );
 
   let allBets = [...standaloneBets];
+
+  const [selectedBetId, setSelectedBetId] = React.useState<number | null>(null);
+
+  const handleOpenModal = (betId: number) => {
+    console.log("here");
+    setSelectedBetId(betId);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedBetId(null);
+  };
 
   const fetchStandaloneBets = async () => {
     const response = await fetch(`${url_path}api/standalonebets`, {
@@ -347,48 +361,65 @@ export default function BettingHome() {
                           <Box display="flex">
                             {match.match_bets
                               .filter((bet: Bet) => bet.category === "Resultat")
-                              .map((bet: Bet) =>
-                                bet.bet_options
-                                  .sort((optionA, optionB) =>
-                                    sortOptions(
-                                      optionA,
-                                      optionB,
-                                      match.home_team,
-                                      match.away_team
-                                    )
-                                  )
-                                  .map((option: BetOption) => {
-                                    let index = accumBets
-                                      .map((c: any) => c.option.option_id)
-                                      .indexOf(option.option_id);
-                                    return (
-                                      <Button
-                                        id="odds-button"
-                                        size="small"
-                                        key={option.option_id}
-                                        variant={
-                                          index == -1 ? "outlined" : "contained"
-                                        }
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          addToAccum(bet.title, option, index);
-                                        }}
-                                        onFocus={(e) => e.stopPropagation()}
-                                        sx={{
-                                          m: 1,
-                                          mt: 1,
-                                          ":hover": {
-                                            color: "#ffffff",
-                                            backgroundColor: "#1d2528",
-                                            borderColor: "#1d2528",
-                                          },
-                                        }}
-                                      >
-                                        {formatOdds(option.latest_odds)}
-                                      </Button>
-                                    );
-                                  })
-                              )}
+                              .map((bet: Bet) => {
+                                return (
+                                  <>
+                                    <IconButton
+                                      onClick={() =>
+                                        handleOpenModal(bet.bet_id)
+                                      }
+                                    >
+                                      <TimelineIcon />
+                                    </IconButton>
+                                    {bet.bet_options
+                                      .sort((optionA, optionB) =>
+                                        sortOptions(
+                                          optionA,
+                                          optionB,
+                                          match.home_team,
+                                          match.away_team
+                                        )
+                                      )
+                                      .map((option: BetOption) => {
+                                        let index = accumBets
+                                          .map((c: any) => c.option.option_id)
+                                          .indexOf(option.option_id);
+                                        return (
+                                          <Button
+                                            id="odds-button"
+                                            size="small"
+                                            key={option.option_id}
+                                            variant={
+                                              index == -1
+                                                ? "outlined"
+                                                : "contained"
+                                            }
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              addToAccum(
+                                                bet.title,
+                                                option,
+                                                index
+                                              );
+                                            }}
+                                            onFocus={(e) => e.stopPropagation()}
+                                            sx={{
+                                              m: 1,
+                                              mt: 1,
+                                              ":hover": {
+                                                color: "#ffffff",
+                                                backgroundColor: "#1d2528",
+                                                borderColor: "#1d2528",
+                                              },
+                                            }}
+                                          >
+                                            {formatOdds(option.latest_odds)}
+                                          </Button>
+                                        );
+                                      })}
+                                  </>
+                                );
+                              })}
                           </Box>
                         </Box>
                       </Box>
@@ -573,6 +604,13 @@ export default function BettingHome() {
             : ""}
         </div>
       </div>
+      {selectedBetId && (
+        <OddsMovementModal
+          betId={selectedBetId}
+          open={selectedBetId !== null ? true : false}
+          onClose={handleCloseModal}
+        />
+      )}
     </>
   );
 }

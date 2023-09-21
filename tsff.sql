@@ -47,7 +47,7 @@ CREATE TABLE bets (
 
 CREATE TABLE bet_options (
     option_id serial PRIMARY KEY,
-    latest_odds numeric NOT NULL,
+    latest_odds numeric(10,3) NOT NULL,
     option_status integer DEFAULT 1 NOT NULL,
     option character varying(200) NOT NULL,
     bet integer,
@@ -73,6 +73,14 @@ CREATE TABLE matches (
     away_goals integer,
     CONSTRAINT fk_hteam FOREIGN KEY (home_team_id) REFERENCES teams(team_id),
     CONSTRAINT fk_ateam FOREIGN KEY (away_team_id) REFERENCES teams(team_id)
+);
+
+CREATE TABLE option_history (
+    option_history_id serial PRIMARY KEY,
+    update_timestamp timestamp with time zone DEFAULT NOW() NOT NULL,
+    new_odds numeric(10,3) NOT NULL,
+    option_id integer,
+    CONSTRAINT fk_bet_options FOREIGN KEY (option_id) REFERENCES bet_options(option_id)
 );
 
 

@@ -39,6 +39,12 @@ export type BetOptionAdmin = {
   option_status: 1 | 2 | 3 | 4;
 };
 
+export type HistoricOdds = {
+  option: string;
+  update_timestamp: Date;
+  new_odds: number;
+};
+
 // export type AdminBet = {
 //     title: string;
 //     bet_status: 1 | 2 | 3 | 4;

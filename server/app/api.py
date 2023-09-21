@@ -81,6 +81,16 @@ async def get_open_bets(
     return bets_with_options
 
 
+@app.get("/api/historicodds")
+async def get_bet_history(bet_id: int):
+    new_odds_query = "select option, new_odds, update_timestamp from option_history left join bet_options on option_history.option_id = bet_options.option_id left join bets on bet_options.bet = bets.bet_id where bet_id = :bet_id"
+    odds_history = await database.fetch_all(
+        new_odds_query,
+        {"bet_id": bet_id},
+    )
+    return odds_history
+
+
 @app.get("/api/requestedbets")
 async def get_requested_bets():
     try:
@@ -555,13 +565,17 @@ async def create_bet(bet: dict, token: str = Depends(authUtils.validate_access_t
         )
 
         for option in bet["options"]:
-            await database.execute(
-                "INSERT INTO bet_options(latest_odds, option, bet) VALUES (:latest_odds, :option, :bet)",
+            option_id = await database.execute(
+                "INSERT INTO bet_options(latest_odds, option, bet) VALUES (:latest_odds, :option, :bet) RETURNING option_id",
                 {
                     "latest_odds": float(option["latest_odds"]),
                     "option": option["option"],
                     "bet": bet_id,
                 },
+            )
+            await database.execute(
+                "INSERT INTO option_history(new_odds, option_id) VALUES (:new_odds, :option_id)",
+                {"new_odds": float(option["latest_odds"]), "option_id": option_id},
             )
 
         return {"settleBet": True}
@@ -658,6 +672,21 @@ async def update_option(
         raise HTTPException(status_code=403, detail="You are not admin")
 
     try:
+        # Check if odds if different from database first
+        old_odds = await database.fetch_one(
+            "SELECT latest_odds from bet_options WHERE option_id = :option_id",
+            {"option_id": option["option_id"]},
+        )
+        if old_odds != option["latest_odds"]:
+            await database.execute(
+                "INSERT INTO option_history(new_odds, option_id) VALUES (:new_odds, :option_id)",
+                {
+                    "new_odds": option["latest_odds"],
+                    "option_id": option["option_id"],
+                },
+            )
+
+        # Update the option with new values
         await database.execute(
             "UPDATE bet_options SET option = :option, latest_odds = :latest_odds WHERE option_id = :option_id",
             {
@@ -800,13 +829,17 @@ async def request_bet(bet: dict, token: str = Depends(authUtils.validate_access_
         )
 
         for option in bet["options"]:
-            await database.execute(
-                "INSERT INTO bet_options(latest_odds, option, bet) VALUES (:latest_odds, :option, :bet)",
+            option_id = await database.execute(
+                "INSERT INTO bet_options(latest_odds, option, bet) VALUES (:latest_odds, :option, :bet) RETURNING option_id",
                 {
                     "latest_odds": float(option["latest_odds"]),
                     "option": option["option"],
                     "bet": bet_id,
                 },
+            )
+            await database.execute(
+                "INSERT INTO option_history(new_odds, option_id) VALUES (:new_odds, :option_id)",
+                {"new_odds": float(option["latest_odds"]), "option_id": option_id},
             )
 
         return {"requestBet": True}
