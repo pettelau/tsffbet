@@ -293,7 +293,13 @@ export default function BettingHome() {
                           display={{ xs: "block", sm: "none" }} // Display on small screens only
                           mb={1} // Margin bottom for spacing
                         >
-                          <div style={{ marginLeft: "auto", marginRight: 0 }}>
+                          <div
+                            style={{
+                              marginLeft: "auto",
+                              marginRight: 0,
+                              fontSize: "smaller",
+                            }}
+                          >
                             {match.ko_time ? (
                               <>
                                 {new Date(match.ko_time).getDate()}.{" "}
@@ -439,6 +445,12 @@ export default function BettingHome() {
                               >
                                 <>
                                   <b>{bet.title}</b>
+                                  <IconButton
+                                    sx={{ height: 20, marginLeft: 0.3 }}
+                                    onClick={() => handleOpenModal(bet.bet_id)}
+                                  >
+                                    <TimelineIcon />
+                                  </IconButton>
                                   <br />
                                   <p
                                     style={{
@@ -477,6 +489,7 @@ export default function BettingHome() {
                                   >
                                     {bet.category}
                                   </p>
+
                                   {bet.bet_options.map((option: BetOption) => {
                                     let index = accumBets
                                       .map((c: any) => c.option.option_id)

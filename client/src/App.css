@@ -250,6 +250,7 @@ h3 {
 
 
 #teams-odds {
+
   margin-right: 5px;
   margin-left: 30px;
 }
@@ -263,6 +264,10 @@ h3 {
 }
 #inner-2 {
   padding-right: 70px;
+}
+
+#oddsMovementChart {
+  padding: 40px;
 }
 
 @media screen and (max-width: 650px) {
@@ -289,6 +294,16 @@ h3 {
     max-width: 40px;
     margin-right: 5;
     margin-left: 0;
+  }
+
+  #oddsMovementChart {
+    padding: 10px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  #teams-odds {
+    font-size: smaller;
   }
 }
 

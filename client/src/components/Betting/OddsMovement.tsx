@@ -15,7 +15,6 @@ const style = {
   bgcolor: "background.paper",
   borderRadius: "10px",
   boxShadow: 24,
-  p: 4,
 };
 
 interface ModalProps {
@@ -60,7 +59,7 @@ export default function OddsMovementModal({
     <>
       <Modal open={open} onClose={onClose}>
         <>
-          <Box sx={style}>
+          <Box id="oddsMovementChart" sx={style}>
             <div style={{ textAlign: "center" }}>
               <OddsMovementChart oddsMovements={oddsMovements} />
               <br />

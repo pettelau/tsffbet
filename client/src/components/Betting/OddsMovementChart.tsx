@@ -2,6 +2,49 @@ import { HistoricOdds } from "../../types";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 
+// Norwegian date display
+Highcharts.setOptions({
+  lang: {
+    months: [
+      "Januar",
+      "Februar",
+      "Mars",
+      "April",
+      "Mai",
+      "Juni",
+      "Juli",
+      "August",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ],
+    weekdays: [
+      "Søndag",
+      "Mandag",
+      "Tirsdag",
+      "Onsdag",
+      "Torsdag",
+      "Fredag",
+      "Lørdag",
+    ],
+    shortMonths: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ],
+  },
+});
+
 interface OddsMovementChartProps {
   oddsMovements: HistoricOdds[];
 }
@@ -40,15 +83,37 @@ export default function OddsMovementChart({
     optionsMap[option].push([timestamp, new_odds]);
   });
 
+  const allArraysHaveLengthOne = Object.values(optionsMap).every(
+    (array) => array.length === 1
+  );
+
+  // Now, allArraysHaveLengthOne will be true if all arrays in optionsMap have length 1, and false otherwise.
+
   // Convert the optionsMap to a series array and handle options with only one record
   const series = Object.keys(optionsMap).map((option) => {
     let data = optionsMap[option];
     if (data.length === 1) {
       data = [
         [minTimestamp, data[0][1]], // use the same odds value for minTimestamp
-        [maxTimestamp, data[0][1]], // use the same odds value for maxTimestamp
+        [
+          allArraysHaveLengthOne ? new Date().getTime() : maxTimestamp,
+          data[0][1],
+        ], // use the same odds value for maxTimestamp
       ];
     }
+
+    // check if option are missing a point for the last timestamp
+    // Difference must be greater than one minute
+    // 60 000 is number of milliseconds in 1 minute.
+    const allSmallerThanMaxTimestamp = data.every(
+      (odds) => maxTimestamp - odds[0] > 60000
+    );
+
+    // add an extra point if the option is missing for the last timestamp
+    if (allSmallerThanMaxTimestamp) {
+      data.push([maxTimestamp, data[data.length - 1][1]]);
+    }
+
     return {
       name: option,
       data: data.sort((a, b) => a[0] - b[0]), // sort data points by timestamp
@@ -57,23 +122,31 @@ export default function OddsMovementChart({
 
   const options = {
     title: {
-      text: "Odds Movement",
+      text: "📈 Oddsbevegelser 📉",
     },
     xAxis: {
       type: "datetime",
+      dateTimeLabelFormats: {
+        millisecond: "%H:%M:%S",
+        second: "%H:%M:%S",
+        minute: "%H:%M",
+        hour: "%H:%M",
+        day: "%e. %b",
+        week: "%e. %b",
+        month: "%b '%y",
+        year: "%Y",
+      },
     },
     yAxis: {
       title: {
         text: "Odds",
       },
     },
+    tooltip: {
+      xDateFormat: "%A, %e. %B %Y %H:%M:%S", 
+    },
     series: series,
   };
 
-  return (
-    <HighchartsReact
-      highcharts={Highcharts}
-      options={options}
-    />
-  );
+  return <HighchartsReact highcharts={Highcharts} options={options} />;
 }
