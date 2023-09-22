@@ -1,6 +1,8 @@
 import { HistoricOdds } from "../../types";
-import Highcharts from "highcharts";
+import Highcharts, { TooltipFormatterContextObject } from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+
+import moment from "moment-timezone";
 
 // Norwegian date display
 Highcharts.setOptions({
@@ -143,7 +145,12 @@ export default function OddsMovementChart({
       },
     },
     tooltip: {
-      xDateFormat: "%A, %e. %B %Y %H:%M:%S", 
+      formatter: function (this: TooltipFormatterContextObject): string {
+        const norwegianTime = moment(this.x)
+          .tz("Europe/Oslo")
+          .format("dddd, D. MMMM YYYY HH:mm:ss");
+        return `${norwegianTime} <br/> <b>${this.series.name}:</b> ${this.y}`;
+      },
     },
     series: series,
   };
