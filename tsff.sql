@@ -83,4 +83,13 @@ CREATE TABLE option_history (
     CONSTRAINT fk_bet_options FOREIGN KEY (option_id) REFERENCES bet_options(option_id)
 );
 
+CREATE TABLE weather_data (
+    data_id serial PRIMARY KEY,
+    air_temperature numeric(4,1) NOT NULL,
+    cloud_area_fraction numeric(4,1) NOT NULL,
+    wind_speed numeric(4,1) NOT NULL,
+    weather_icon character varying(300),
+    match_id integer UNIQUE NOT NULL,
+    CONSTRAINT fk_weather_match FOREIGN KEY (match_id) REFERENCES matches(match_id)
+);
 

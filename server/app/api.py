@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel
 from fastapi import HTTPException
 from fastapi import FastAPI, Depends
@@ -400,7 +400,9 @@ async def all_matches_simple(in_future: bool = None):
 
 
 @app.get("/api/matcheswithodds")
-async def all_matches_odds(in_future: bool = None, team: str = None):
+async def all_matches_odds(
+    in_future: bool = None, team: str = None, weather: bool = False
+):
     try:
         matches_query = """
         SELECT 
@@ -448,7 +450,6 @@ async def all_matches_odds(in_future: bool = None, team: str = None):
 
         matches_with_odds = []
         for match in matches:
-            print(match["match_id"])
             if in_future:
                 bets_query = "select * from bets where bet_status = 1 and is_accepted = true and close_timestamp > NOW() and closed_early IS NULL and related_match = :match_id ORDER BY close_timestamp ASC"
             else:
@@ -458,7 +459,6 @@ async def all_matches_odds(in_future: bool = None, team: str = None):
                 bets_query,
                 {"match_id": match["match_id"]},
             )
-            print(bets)
             bets_with_options = []
             for bet in bets:
                 options_query = "select option_id, latest_odds, option_status, option from bet_options where bet = :bet"
@@ -471,6 +471,12 @@ async def all_matches_odds(in_future: bool = None, team: str = None):
             match = dict(match)
             match["match_bets"] = bets_with_options
             matches_with_odds.append(match)
+            if weather:
+                weather_query = "select air_temperature, cloud_area_fraction, wind_speed, weather_icon from weather_data natural join matches where match_id = :match_id"
+                weather_data = await database.fetch_one(
+                    weather_query, {"match_id": match["match_id"]}
+                )
+                match["weather"] = weather_data
         return matches_with_odds
     except Exception:
         return HTTPException(status_code=400, detail="Something went wrong")
@@ -1009,3 +1015,47 @@ async def update_password(
         raise HTTPException(
             status_code=500, detail="Something wrong. Could not update password"
         )
+
+
+class WeatherData(BaseModel):
+    air_temperature: float
+    cloud_area_fraction: float
+    wind_speed: float
+    weather_icon: Optional[str]
+
+
+from sqlalchemy import text
+
+
+@app.post("/api/admin/weatherupdate")
+async def update_weatherdata(weather_data: Dict[str, WeatherData]):
+    try:
+        print(weather_data)
+        query = """
+            INSERT INTO weather_data (air_temperature, cloud_area_fraction, wind_speed, weather_icon, match_id)
+            VALUES (:air_temperature, :cloud_area_fraction, :wind_speed, :weather_icon, :match_id)
+            ON CONFLICT (match_id) 
+            DO UPDATE SET 
+                air_temperature = :air_temperature, 
+                cloud_area_fraction = :cloud_area_fraction, 
+                wind_speed = :wind_speed, 
+                weather_icon = :weather_icon
+        """
+
+        for match_id_str, data in weather_data.items():
+            match_id = int(match_id_str)
+            await database.execute(
+                query,
+                {
+                    "air_temperature": data.air_temperature,
+                    "cloud_area_fraction": data.cloud_area_fraction,
+                    "wind_speed": data.wind_speed,
+                    "weather_icon": data.weather_icon,
+                    "match_id": match_id,
+                },
+            )
+
+        return {"updateWeather": True}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Something went wrong: {str(e)}")

@@ -101,7 +101,7 @@ export default function BettingHome() {
 
   const fetchMatches = async () => {
     const response = await fetch(
-      `${url_path}api/matcheswithodds?in_future=True`
+      `${url_path}api/matcheswithodds?in_future=True&weather=True`
     );
     const resp = await response.json();
     setResponseCode(response.status);
@@ -330,12 +330,35 @@ export default function BettingHome() {
                             {/* Date for larger screens */}
                             <Box
                               sx={{ width: 110 }}
-                              display={{ xs: "none", sm: "block" }} // Display on larger screens only
+                              display={{ xs: "none", sm: "flex" }} // Display on larger screens only
                               mr={2} // Margin right for spacing
+                              flexDirection="column"
+                              alignItems="flex-start"
                             >
-                              {match.ko_time
-                                ? formatDate(match.ko_time)
-                                : "N/A"}
+                              <span
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "clip",
+                                }}
+                              >
+                                {match.ko_time
+                                  ? formatDate(match.ko_time)
+                                  : "N/A"}
+                              </span>
+                              <span
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "clip",
+                                }}
+                              >
+                                {match.weather ? (
+                                  <><img src={"/public/"}></img>{match.weather.air_temperature}°</>
+                                ) : (
+                                  ""
+                                )}
+                              </span>
                             </Box>
                             <Box
                               id="teams-odds"

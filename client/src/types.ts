@@ -84,6 +84,14 @@ export type Match = {
   home_goals: number | undefined;
   away_goals: number | undefined;
   match_bets: Bet[];
+  weather: Weather | undefined;
+};
+
+export type Weather = {
+  air_temperature: number;
+  cloud_area_fraction: number;
+  wind_speed: number;
+  weather_icon: string;
 };
 
 export type MatchSimple = {

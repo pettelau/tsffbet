@@ -270,7 +270,7 @@ h3 {
   padding: 40px;
 }
 
-@media screen and (max-width: 650px) {
+@media screen and (max-width: 700px) {
   #outer-1x2 {
     padding-right: 60px;
   }
