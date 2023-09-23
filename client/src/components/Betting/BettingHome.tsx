@@ -441,9 +441,11 @@ export default function BettingHome() {
                                 return (
                                   <>
                                     <IconButton
-                                      onClick={() =>
-                                        handleOpenModal(bet.bet_id)
-                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenModal(bet.bet_id);
+                                      }}
+                                      onFocus={(e) => e.stopPropagation()}
                                     >
                                       <TimelineIcon />
                                     </IconButton>
