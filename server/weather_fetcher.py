@@ -2,10 +2,10 @@ import requests
 import datetime
 import json
 
-# BASE_URL = "http://localhost:8001/"
+BASE_URL = "http://localhost:8001/"
 # BASE_URL = "/"
 # Constants
-MATCHES_URL = f"http://localhost:8001/api/matches9days"
+MATCHES_URL = f"{BASE_URL}api/matches9days"
 WEATHER_API_URL = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=63.405074&lon=10.392409"
 
 headers = {
