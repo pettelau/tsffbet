@@ -142,7 +142,6 @@ async def get_stats(
             """,
             {"limit": limit, "offset": offset},
         )
-        print(dict(num_users))
         stats = {
             "num_users": num_users["count"],
             "num_accums": num_accums["count"],
@@ -305,7 +304,6 @@ async def get_accums(
 @app.get("/api/userAvailability/{user}")
 async def user_availability(user: str):
     try:
-        print("her")
         res = await database.fetch_one(
             "select exists(select 1 from users where username = :username)",
             {"username": user},
@@ -1031,7 +1029,6 @@ from sqlalchemy import text
 @app.post("/api/admin/weatherupdate")
 async def update_weatherdata(weather_data: Dict[str, WeatherData]):
     try:
-        print(weather_data)
         query = """
             INSERT INTO weather_data (air_temperature, cloud_area_fraction, wind_speed, precipitation, weather_icon, match_id)
             VALUES (:air_temperature, :cloud_area_fraction, :wind_speed, :precipitation, :weather_icon, :match_id)
