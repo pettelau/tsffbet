@@ -78,7 +78,6 @@ export default function BettingHome() {
   const [selectedBetId, setSelectedBetId] = React.useState<number | null>(null);
 
   const handleOpenModal = (betId: number) => {
-    console.log("here");
     setSelectedBetId(betId);
   };
 

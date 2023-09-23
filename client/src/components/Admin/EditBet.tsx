@@ -81,7 +81,6 @@ export default function EditBet() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setIsLoading(false);
-      console.log(resp);
       setAllBets((prevBets) => [...prevBets, ...resp]);
     } else {
       setResponseCode(response.status);
