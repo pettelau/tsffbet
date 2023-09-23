@@ -23,7 +23,7 @@ export default function TeamMatches() {
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
 
   const fetchMatches = async () => {
-    const response = await fetch(`${url_path}api/matcheswithodds?team=${team}`);
+    const response = await fetch(`${url_path}api/matcheswithodds?team=${team}&weather=True`);
     const resp = await response.json();
     setResponseCode(response.status);
     if (response.status == 200) {

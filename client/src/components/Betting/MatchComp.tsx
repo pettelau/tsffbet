@@ -13,11 +13,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useAppSelector } from "../../redux/hooks";
 import { selectAccum } from "../../redux/accumSlice";
 
-export default function MatchAccordion({
-  match,
-}: {
-  match: Match;
-}) {
+export default function MatchAccordion({ match }: { match: Match }) {
   const accumBets = useAppSelector(selectAccum);
 
   const MONTHS = [
@@ -51,6 +47,9 @@ export default function MatchAccordion({
     return <Box width={24} height={24} bgcolor="transparent" />;
   }
 
+  // To separate finished and upcoming games
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
   // Custom sorting function
   function sortOptions(
     optionA: BetOption,
@@ -61,7 +60,6 @@ export default function MatchAccordion({
     const order = [home, "Uavgjort", away];
     return order.indexOf(optionA.option) - order.indexOf(optionB.option);
   }
-
 
   function formatDate(dateString: Date) {
     const options: Intl.DateTimeFormatOptions = {
@@ -96,19 +94,47 @@ export default function MatchAccordion({
               display={{ xs: "block", sm: "none" }} // Display on small screens only
               mb={1} // Margin bottom for spacing
             >
-              {match.ko_time ? (
+              <div
+                style={{
+                  margin: "0 auto",
+                  fontSize: "smaller",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <>
-                  <div style={{ fontSize: "small" }}>
-                    {new Date(match.ko_time).getDate()}.{" "}
-                    {MONTHS[new Date(match.ko_time).getMonth()]}{" "}
-                    {new Date(match.ko_time).getFullYear()} kl.{" "}
-                    {("0" + new Date(match.ko_time).getHours()).slice(-2)}:
-                    {("0" + new Date(match.ko_time).getMinutes()).slice(-2)}
-                  </div>
+                  {match.ko_time ? (
+                    <>
+                      {new Date(match.ko_time).getDate()}.{" "}
+                      {MONTHS[new Date(match.ko_time).getMonth()].slice(0, 3)}{" "}
+                      {new Date(match.ko_time).getFullYear()} kl.{" "}
+                      {("0" + new Date(match.ko_time).getHours()).slice(-2)}:
+                      {("0" + new Date(match.ko_time).getMinutes()).slice(-2)}
+                    </>
+                  ) : (
+                    "N/A"
+                  )}
+                  {match.weather ? (
+                    <>
+                      {" |"}
+                      <img
+                        style={{
+                          height: 20,
+                          marginRight: 4,
+                          marginLeft: 8,
+                        }}
+                        src={`/weather-icon/${match.weather.weather_icon}.svg`}
+                      ></img>
+                      {match.weather.air_temperature.toFixed(0)}°{" • "}
+                      {match.weather.precipitation} mm{" • "}
+                      {match.weather.wind_speed.toFixed(0)} m/s
+                    </>
+                  ) : (
+                    ""
+                  )}
                 </>
-              ) : (
-                "N/A"
-              )}
+              </div>
             </Box>
 
             {/* Main content */}
@@ -122,13 +148,65 @@ export default function MatchAccordion({
                 {/* Date for larger screens */}
                 <Box
                   sx={{ width: 110 }}
-                  display={{ xs: "none", sm: "block" }} // Display on larger screens only
+                  display={{ xs: "none", sm: "flex" }} // Display on larger screens only
                   mr={2} // Margin right for spacing
+                  flexDirection="column"
+                  alignItems="flex-start"
                 >
-                  {match.ko_time ? formatDate(match.ko_time) : "N/A"}
+                  {match.weather ? (
+                    <>
+                      <span
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "clip",
+                        }}
+                      >
+                        {match.ko_time ? formatDate(match.ko_time) : "N/A"}
+                      </span>
+                      <span
+                        style={{
+                          height: 24,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "clip",
+                          display: "flex",
+                          alignItems: "center",
+                          fontSize: "smaller",
+                        }}
+                      >
+                        <>
+                          <img
+                            style={{ height: 20, marginRight: 4 }}
+                            src={`/weather-icon/${match.weather.weather_icon}.svg`}
+                          ></img>
+                          {match.weather.air_temperature.toFixed(0)}°{" • "}
+                          {match.weather.precipitation} mm{" • "}
+                          {match.weather.wind_speed.toFixed(0)} m/s
+                        </>
+                      </span>
+                    </>
+                  ) : (
+                    <span
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "clip",
+                      }}
+                    >
+                      {match.ko_time ? formatDate(match.ko_time) : "N/A"}
+                    </span>
+                  )}
                 </Box>
                 <Box
-                  id="teams-odds"
+                  // id="teams-matches-prev"
+                  id={
+                    match.ko_time !== undefined
+                      ? new Date(match.ko_time) > twoHoursAgo
+                        ? "teams-matches-upcoming"
+                        : "teams-matches-prev"
+                      : ""
+                  }
                   display="flex"
                   flexDirection="column"
                   alignItems="flex-start"

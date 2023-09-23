@@ -99,7 +99,7 @@ export default function Matches() {
 
   const fetchMatches = async () => {
     const response = await fetch(
-      `${url_path}api/matcheswithodds?in_future=False`
+      `${url_path}api/matcheswithodds?in_future=False&weather=True`
     );
     const resp = await response.json();
     setResponseCode(response.status);

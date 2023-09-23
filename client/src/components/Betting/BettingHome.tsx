@@ -329,7 +329,7 @@ export default function BettingHome() {
                                       marginRight: 4,
                                       marginLeft: 8,
                                     }}
-                                    src={`weather-icon/${match.weather.weather_icon}.svg`}
+                                    src={`/weather-icon/${match.weather.weather_icon}.svg`}
                                   ></img>
                                   {match.weather.air_temperature.toFixed(0)}°
                                   {" • "}
@@ -386,7 +386,7 @@ export default function BettingHome() {
                                     <>
                                       <img
                                         style={{ height: 20, marginRight: 4 }}
-                                        src={`weather-icon/${match.weather.weather_icon}.svg`}
+                                        src={`/weather-icon/${match.weather.weather_icon}.svg`}
                                       ></img>
                                       {match.weather.air_temperature.toFixed(0)}
                                       °{" • "}
