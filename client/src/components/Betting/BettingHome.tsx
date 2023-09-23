@@ -305,7 +305,9 @@ export default function BettingHome() {
                               {match.ko_time ? (
                                 <>
                                   {new Date(match.ko_time).getDate()}.{" "}
-                                  {MONTHS[new Date(match.ko_time).getMonth()]}{" "}
+                                  {MONTHS[
+                                    new Date(match.ko_time).getMonth()
+                                  ].slice(0, 3)}{" "}
                                   {new Date(match.ko_time).getFullYear()} kl.{" "}
                                   {(
                                     "0" + new Date(match.ko_time).getHours()

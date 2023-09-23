@@ -304,6 +304,9 @@ h3 {
 @media screen and (max-width: 500px) {
   #teams-odds {
     font-size: smaller;
+    margin-right: 5px;
+    margin-left: -7px;
+    
   }
 }
 
