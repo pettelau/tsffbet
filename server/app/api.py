@@ -472,7 +472,7 @@ async def all_matches_odds(
             match["match_bets"] = bets_with_options
             matches_with_odds.append(match)
             if weather:
-                weather_query = "select air_temperature, cloud_area_fraction, wind_speed, weather_icon from weather_data natural join matches where match_id = :match_id"
+                weather_query = "select air_temperature, cloud_area_fraction, wind_speed, precipitation, weather_icon from weather_data natural join matches where match_id = :match_id"
                 weather_data = await database.fetch_one(
                     weather_query, {"match_id": match["match_id"]}
                 )
@@ -1021,6 +1021,7 @@ class WeatherData(BaseModel):
     air_temperature: float
     cloud_area_fraction: float
     wind_speed: float
+    precipitation: Optional[float]
     weather_icon: Optional[str]
 
 
@@ -1032,13 +1033,14 @@ async def update_weatherdata(weather_data: Dict[str, WeatherData]):
     try:
         print(weather_data)
         query = """
-            INSERT INTO weather_data (air_temperature, cloud_area_fraction, wind_speed, weather_icon, match_id)
-            VALUES (:air_temperature, :cloud_area_fraction, :wind_speed, :weather_icon, :match_id)
+            INSERT INTO weather_data (air_temperature, cloud_area_fraction, wind_speed, precipitation, weather_icon, match_id)
+            VALUES (:air_temperature, :cloud_area_fraction, :wind_speed, :precipitation, :weather_icon, :match_id)
             ON CONFLICT (match_id) 
             DO UPDATE SET 
                 air_temperature = :air_temperature, 
                 cloud_area_fraction = :cloud_area_fraction, 
                 wind_speed = :wind_speed, 
+                precipitation = :precipitation,
                 weather_icon = :weather_icon
         """
 
@@ -1050,6 +1052,7 @@ async def update_weatherdata(weather_data: Dict[str, WeatherData]):
                     "air_temperature": data.air_temperature,
                     "cloud_area_fraction": data.cloud_area_fraction,
                     "wind_speed": data.wind_speed,
+                    "precipitation": data.precipitation if data.precipitation is not None else 0,
                     "weather_icon": data.weather_icon,
                     "match_id": match_id,
                 },

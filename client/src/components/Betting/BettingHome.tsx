@@ -295,27 +295,50 @@ export default function BettingHome() {
                         >
                           <div
                             style={{
-                              marginLeft: "auto",
-                              marginRight: 0,
+                              margin: "0 auto",
                               fontSize: "smaller",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                             }}
                           >
-                            {match.ko_time ? (
-                              <>
-                                {new Date(match.ko_time).getDate()}.{" "}
-                                {MONTHS[new Date(match.ko_time).getMonth()]}{" "}
-                                {new Date(match.ko_time).getFullYear()} kl.{" "}
-                                {(
-                                  "0" + new Date(match.ko_time).getHours()
-                                ).slice(-2)}
-                                :
-                                {(
-                                  "0" + new Date(match.ko_time).getMinutes()
-                                ).slice(-2)}
-                              </>
-                            ) : (
-                              "N/A"
-                            )}
+                            <>
+                              {match.ko_time ? (
+                                <>
+                                  {new Date(match.ko_time).getDate()}.{" "}
+                                  {MONTHS[new Date(match.ko_time).getMonth()]}{" "}
+                                  {new Date(match.ko_time).getFullYear()} kl.{" "}
+                                  {(
+                                    "0" + new Date(match.ko_time).getHours()
+                                  ).slice(-2)}
+                                  :
+                                  {(
+                                    "0" + new Date(match.ko_time).getMinutes()
+                                  ).slice(-2)}
+                                </>
+                              ) : (
+                                "N/A"
+                              )}
+                              {match.weather ? (
+                                <>
+                                  {" |"}
+                                  <img
+                                    style={{
+                                      height: 20,
+                                      marginRight: 4,
+                                      marginLeft: 8,
+                                    }}
+                                    src={`weather-icon/${match.weather.weather_icon}.svg`}
+                                  ></img>
+                                  {match.weather.air_temperature.toFixed(0)}°
+                                  {" • "}
+                                  {match.weather.precipitation} mm{" • "}
+                                  {match.weather.wind_speed.toFixed(0)} m/s
+                                </>
+                              ) : (
+                                ""
+                              )}
+                            </>
                           </div>
                         </Box>
 
@@ -335,30 +358,55 @@ export default function BettingHome() {
                               flexDirection="column"
                               alignItems="flex-start"
                             >
-                              <span
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "clip",
-                                }}
-                              >
-                                {match.ko_time
-                                  ? formatDate(match.ko_time)
-                                  : "N/A"}
-                              </span>
-                              <span
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "clip",
-                                }}
-                              >
-                                {match.weather ? (
-                                  <><img src={"/public/"}></img>{match.weather.air_temperature}°</>
-                                ) : (
-                                  ""
-                                )}
-                              </span>
+                              {match.weather ? (
+                                <>
+                                  <span
+                                    style={{
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "clip",
+                                    }}
+                                  >
+                                    {match.ko_time
+                                      ? formatDate(match.ko_time)
+                                      : "N/A"}
+                                  </span>
+                                  <span
+                                    style={{
+                                      height: 24,
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "clip",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      fontSize: "smaller",
+                                    }}
+                                  >
+                                    <>
+                                      <img
+                                        style={{ height: 20, marginRight: 4 }}
+                                        src={`weather-icon/${match.weather.weather_icon}.svg`}
+                                      ></img>
+                                      {match.weather.air_temperature.toFixed(0)}
+                                      °{" • "}
+                                      {match.weather.precipitation} mm{" • "}
+                                      {match.weather.wind_speed.toFixed(0)} m/s
+                                    </>
+                                  </span>
+                                </>
+                              ) : (
+                                <span
+                                  style={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "clip",
+                                  }}
+                                >
+                                  {match.ko_time
+                                    ? formatDate(match.ko_time)
+                                    : "N/A"}
+                                </span>
+                              )}
                             </Box>
                             <Box
                               id="teams-odds"

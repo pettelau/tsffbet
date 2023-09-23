@@ -91,6 +91,7 @@ export type Weather = {
   air_temperature: number;
   cloud_area_fraction: number;
   wind_speed: number;
+  precipitation: number;
   weather_icon: string;
 };
 

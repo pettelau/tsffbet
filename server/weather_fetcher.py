@@ -49,19 +49,25 @@ def get_closest_weather(ko_time):
         data = timeseries[closest_index]["data"]
         weather_data = data["instant"]["details"]
         weather_icon = None
+        precipitation = None
         if "next_1_hours" in data:
             weather_icon = data["next_1_hours"]["summary"]["symbol_code"]
+            precipitation = data["next_1_hours"]["details"]["precipitation_amount"]
         elif "next_6_hours" in data:  # If not, check if 'next_6_hours' is available
             weather_icon = data["next_6_hours"]["summary"]["symbol_code"]
+            precipitation = data["next_6_hours"]["details"]["precipitation_amount"]
         elif "next_12_hours" in data:  # If not, check if 'next_12_hours' is available
             weather_icon = data["next_12_hours"]["summary"]["symbol_code"]
+            precipitation = data["next_12_hours"]["details"]["precipitation_amount"]
 
         return {
             "air_temperature": weather_data["air_temperature"],
             "cloud_area_fraction": weather_data["cloud_area_fraction"],
             "wind_speed": weather_data["wind_speed"],
+            "precipitation": precipitation,
             "weather_icon": weather_icon,
         }
+
     else:
         return None
 
@@ -71,13 +77,11 @@ weather_updates = {}
 for match in matches:
     match_date = match["ko_time"]
     weather_updates[match["match_id"]] = get_closest_weather(match_date)
-    print("done")
 
-print(weather_updates)
 
 # Send the weather updates to the /weatherupdate endpoint
 response = requests.post(f"{BASE_URL}api/admin/weatherupdate", json=weather_updates)
 if response.status_code == 200:
-    print("Weather data updated successfully!")
+    print(f"{datetime.datetime.now()}: Weather data updated successfully!")
 else:
-    print(f"Error updating weather data: {response.text}")
+    print(f"{datetime.datetime.now()}: Error updating weather data: {response.text}")

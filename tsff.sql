@@ -88,6 +88,7 @@ CREATE TABLE weather_data (
     air_temperature numeric(4,1) NOT NULL,
     cloud_area_fraction numeric(4,1) NOT NULL,
     wind_speed numeric(4,1) NOT NULL,
+    precipitation numeric(4,1),
     weather_icon character varying(300),
     match_id integer UNIQUE NOT NULL,
     CONSTRAINT fk_weather_match FOREIGN KEY (match_id) REFERENCES matches(match_id)
