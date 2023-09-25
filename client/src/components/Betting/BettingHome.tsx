@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect } from "react";
-import { Bet, BetOption, Match } from "../../types";
+import { Bet, BetOption, BetWithMatch, Match } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { addBet, removeBet, selectAccum } from "../../redux/accumSlice";
 import {
@@ -60,6 +60,7 @@ export default function BettingHome() {
 
   const [bets, setBets] = React.useState<Bet[]>([]);
   const [standaloneBets, setStandaloneBets] = React.useState<Bet[]>([]);
+  const [matchBets, setMatchBets] = React.useState<BetWithMatch[]>([]);
 
   const [groups, setGroups] = React.useState<string[]>(["Alle odds"]);
 
@@ -72,8 +73,6 @@ export default function BettingHome() {
   const [expandedAccordions, setExpandedAccordions] = React.useState<number[]>(
     []
   );
-
-  let allBets = [...standaloneBets];
 
   const [selectedBetId, setSelectedBetId] = React.useState<number | null>(null);
 
@@ -106,6 +105,18 @@ export default function BettingHome() {
     setResponseCode(response.status);
     if (response.status == 200) {
       setMatches(resp);
+
+      let allMatchBets: BetWithMatch[] = [];
+
+      for (let match of resp as Match[]) {
+        let matchBetsWithId = match.match_bets.map((bet) => ({
+          ...bet,
+          match_id: match.match_id,
+        }));
+        allMatchBets.push(...matchBetsWithId);
+      }
+      setMatchBets(allMatchBets);
+
       if (resp.length > 0) {
         let groups: string[] = ["Begge avdelinger"];
         resp.forEach((match: Match) => {
@@ -127,11 +138,16 @@ export default function BettingHome() {
     fetchStandaloneBets();
   }, []);
 
-  function addToAccum(bet: string, option: BetOption, index: number) {
+  function addToAccum(
+    bet: string,
+    option: BetOption,
+    index: number,
+    match_id: number | undefined
+  ) {
     if (index == -1) {
-      dispatch(addBet({ bet: bet, option: option }));
+      dispatch(addBet({ bet: bet, option: option, match_id }));
     } else {
-      dispatch(removeBet({ bet: bet, option: option }));
+      dispatch(removeBet({ bet: bet, option: option, match_id }));
     }
   }
 
@@ -479,7 +495,8 @@ export default function BettingHome() {
                                               addToAccum(
                                                 bet.title,
                                                 option,
-                                                index
+                                                index,
+                                                match.match_id
                                               );
                                             }}
                                             onFocus={(e) => e.stopPropagation()}
@@ -581,7 +598,8 @@ export default function BettingHome() {
                                             addToAccum(
                                               bet.title,
                                               option,
-                                              index
+                                              index,
+                                              match.match_id
                                             );
                                           }}
                                           sx={{
@@ -610,12 +628,11 @@ export default function BettingHome() {
                   </Accordion>
                 </>
               );
-            } else if (chosenGroup === "Alle odds") {
-              allBets.push(...match.match_bets);
             }
           })}
-          {chosenGroup === "Alle odds"
-            ? allBets.map((bet: Bet) => {
+          {chosenGroup === "Alle odds" ? (
+            <>
+              {standaloneBets.map((bet: Bet) => {
                 return (
                   <>
                     <Card
@@ -665,7 +682,12 @@ export default function BettingHome() {
                               <Button
                                 variant={index == -1 ? "outlined" : "contained"}
                                 onClick={() => {
-                                  addToAccum(bet.title, option, index);
+                                  addToAccum(
+                                    bet.title,
+                                    option,
+                                    index,
+                                    undefined
+                                  );
                                 }}
                                 sx={{
                                   m: 1,
@@ -687,8 +709,89 @@ export default function BettingHome() {
                     </Card>
                   </>
                 );
-              })
-            : ""}
+              })}
+              {matchBets.map((bet: BetWithMatch) => {
+                return (
+                  <>
+                    <Card
+                      sx={{
+                        padding: 2,
+                        marginBottom: 2,
+                        backgroundColor: "white",
+                      }}
+                    >
+                      <>
+                        <b>{bet.title}</b>
+                        <br />
+                        <p
+                          style={{
+                            marginTop: 1,
+                            marginBottom: 1,
+                            color: "#828385",
+                          }}
+                        >
+                          Bettet stenger{" "}
+                          {new Date(bet.close_timestamp).getDate()}.{" "}
+                          {MONTHS[new Date(bet.close_timestamp).getMonth()]}{" "}
+                          {new Date(bet.close_timestamp).getFullYear()} kl.{" "}
+                          {(
+                            "0" + new Date(bet.close_timestamp).getHours()
+                          ).slice(-2)}
+                          :
+                          {(
+                            "0" + new Date(bet.close_timestamp).getMinutes()
+                          ).slice(-2)}
+                        </p>
+                        <p
+                          style={{
+                            marginTop: 1,
+                            marginBottom: 1,
+                            color: "#828385",
+                          }}
+                        >
+                          {bet.category}
+                        </p>
+                        {bet.bet_options.map((option: BetOption) => {
+                          let index = accumBets
+                            .map((c: any) => c.option.option_id)
+                            .indexOf(option.option_id);
+                          return (
+                            <>
+                              <Button
+                                variant={index == -1 ? "outlined" : "contained"}
+                                onClick={() => {
+                                  addToAccum(
+                                    bet.title,
+                                    option,
+                                    index,
+                                    bet.match_id
+                                  );
+                                }}
+                                sx={{
+                                  m: 1,
+                                  mt: 1,
+                                  backgroundColor: index === -1 ? "white" : "",
+                                  ":hover": {
+                                    color: "#ffffff",
+                                    backgroundColor: "#1d2528",
+                                    borderColor: "#1d2528",
+                                  },
+                                }}
+                              >
+                                {option.option} - {option.latest_odds}
+                              </Button>
+                            </>
+                          );
+                        })}
+                      </>
+                    </Card>
+                  </>
+                );
+              })}
+            </>
+          ) : (
+            ""
+          )}
         </div>
       </div>
       {selectedBetId && (

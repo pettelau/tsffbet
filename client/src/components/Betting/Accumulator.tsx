@@ -61,17 +61,62 @@ export default function Accumulator() {
     setAlertType({ type: type, msg: msg });
   }
 
+  function checkDuplicates(bets: AccumBetOption[]) {
+    let hasDuplicateMatchId = false;
+    let hasDuplicateBet = false;
+    let matchIdSet = new Set();
+    let betSet = new Set();
+
+    for (let accumBetOption of bets) {
+      let { match_id, bet } = accumBetOption;
+
+      // Check for duplicate match_id
+      if (match_id !== undefined) {
+        if (matchIdSet.has(match_id)) {
+          hasDuplicateMatchId = true;
+        } else {
+          matchIdSet.add(match_id);
+        }
+      }
+
+      // Check for duplicate bet
+      if (betSet.has(bet)) {
+        hasDuplicateBet = true;
+      } else {
+        betSet.add(bet);
+      }
+
+      // If both booleans are true, no need to continue the loop
+      if (hasDuplicateMatchId && hasDuplicateBet) {
+        break;
+      }
+    }
+    return { hasDuplicateMatchId, hasDuplicateBet };
+  }
+
   useEffect(() => {
-    var valueArr = bets.map(function (bet) {
-      return bet.bet;
-    });
-    var isDuplicate = valueArr.some(function (item, idx) {
-      return valueArr.indexOf(item) != idx;
-    });
-    if (isDuplicate) {
+    // var valueArr = bets.map(function (bet) {
+    //   return bet.bet;
+    // });
+    // var isDuplicate = valueArr.some(function (item, idx) {
+    //   return valueArr.indexOf(item) != idx;
+    // });
+
+    const { hasDuplicateMatchId, hasDuplicateBet } = checkDuplicates(bets);
+    if (hasDuplicateBet) {
       toggleAlert(
         true,
         "Du kan ikke ha flere valg fra samme bet i én kupong",
+        "error"
+      );
+    } else {
+      setAlert(false);
+    }
+
+    if (hasDuplicateMatchId) {
+      toggleAlert(
+        true,
+        "Du kan ikke ha flere valg fra samme match i én kupong",
         "error"
       );
     } else {
@@ -90,17 +135,19 @@ export default function Accumulator() {
   }
 
   async function createAccum() {
-    var valueArr = bets.map(function (bet) {
-      return bet.bet;
-    });
-    var isDuplicate = valueArr.some(function (item, idx) {
-      return valueArr.indexOf(item) != idx;
-    });
+    // var valueArr = bets.map(function (bet) {
+    //   return bet.bet;
+    // });
+    // var isDuplicate = valueArr.some(function (item, idx) {
+    //   return valueArr.indexOf(item) != idx;
+    // });
 
-    if (isDuplicate) {
+    const { hasDuplicateMatchId, hasDuplicateBet } = checkDuplicates(bets);
+
+    if (hasDuplicateBet || hasDuplicateMatchId) {
       toggleAlert(
         true,
-        "Du kan ikke ha flere valg fra samme bet i én kupong",
+        "Du kan ikke ha flere valg fra samme bet eller match i én kupong",
         "error"
       );
       return;
@@ -171,7 +218,7 @@ export default function Accumulator() {
       {!isCollapsed ? (
         <>
           <div className="Accum">
-            <div style={{ padding: "20px" }}>
+            <div style={{ padding: "8px" }}>
               <AlertComp
                 setAlert={setAlert}
                 _alert={_alert}

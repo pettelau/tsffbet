@@ -12,6 +12,19 @@ export type Bet = {
   bet_options: BetOption[];
   is_accepted: undefined | Boolean;
 };
+
+export type BetWithMatch = {
+  title: string;
+  bet_status: 1 | 2 | 3 | 4;
+  bet_id: number;
+  submitter: string;
+  category: string;
+  close_timestamp: Date;
+  bet_options: BetOption[];
+  is_accepted: undefined | Boolean;
+  match_id: number;
+};
+
 export type BetAdmin = {
   title: string;
   bet_status: 1 | 2 | 3 | 4;
@@ -63,6 +76,7 @@ export type HistoricOdds = {
 export type AccumBetOption = {
   bet: string;
   option: BetOption;
+  match_id: number | undefined;
 };
 
 export type UserAvailability = {
