@@ -1,5 +1,6 @@
 import React from "react";
 import "./App.css";
+import "./index.css"
 // import { HashRouter as Router, Routes, Route } from "react-router-dom";
 
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
@@ -34,14 +35,18 @@ import NewMatch from "./components/Admin/NewMatch";
 import Matches from "./components/Betting/Matches";
 import EditMatches from "./components/Admin/EditMatches";
 import TeamMatches from "./components/Betting/TeamMatches";
+import HomeNew from "./components/HomeNew";
+import NavBarTW from "./components/NavBarTW";
+import ExampleNav from "./components/NavBarTW";
 
 const THEME = createTheme({
   typography: {
-    fontFamily: `'Quicksand', sans-serif`,
-    fontSize: 14,
-    fontWeightLight: 300,
-    fontWeightRegular: 400,
-    fontWeightMedium: 500,
+    fontFamily: `'Inter var', sans-serif`,
+    fontSize: 13,
+    fontWeightLight: 250,
+    fontWeightRegular: 300,
+    fontWeightMedium: 350,
+    fontWeightBold: 500
   },
   components: {
     MuiButton: {
@@ -101,9 +106,11 @@ export default function App() {
       <Provider store={store}>
         <div className="App">
           <BrowserRouter>
-            <AppAppBar />
+            {/* <AppAppBar /> */}
+            <ExampleNav />
             <Routes>
-              <Route path="/" element={<Home />} />
+              {/* <Route path="/" element={<Home />} /> */}
+              <Route path="/" element={<HomeNew />} />
               <Route path="odds" element={<BettingHome />} />
               <Route path="resultater" element={<Matches />} />
               <Route path="resultater/:team" element={<TeamMatches />} />
