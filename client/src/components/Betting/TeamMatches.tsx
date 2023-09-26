@@ -23,21 +23,27 @@ export default function TeamMatches() {
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
 
   const fetchMatches = async () => {
-    const response = await fetch(`${url_path}api/matcheswithodds?team=${team}&weather=True`);
-    const resp = await response.json();
-    setResponseCode(response.status);
-    if (response.status == 200) {
-      setMatches(resp);
-      // let groups: string[] = ["Begge avdelinger"];
-      // resp.forEach((match: Match) => {
-      //   if (groups.indexOf(match.group_name.toLowerCase()) === -1) {
-      //     groups.push(match.group_name.toLowerCase());
-      //   }
-      // });
+    if (team) {
+      const encodedTeamName = encodeURIComponent(team);
 
-      // setGroups(groups);
-    } else {
-      setResponseText(resp.detail);
+      const response = await fetch(
+        `${url_path}api/matcheswithodds?team=${encodedTeamName}&weather=True`
+      );
+      const resp = await response.json();
+      setResponseCode(response.status);
+      if (response.status == 200) {
+        setMatches(resp);
+        // let groups: string[] = ["Begge avdelinger"];
+        // resp.forEach((match: Match) => {
+        //   if (groups.indexOf(match.group_name.toLowerCase()) === -1) {
+        //     groups.push(match.group_name.toLowerCase());
+        //   }
+        // });
+
+        // setGroups(groups);
+      } else {
+        setResponseText(resp.detail);
+      }
     }
   };
 
