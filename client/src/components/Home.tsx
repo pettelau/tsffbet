@@ -33,31 +33,23 @@ export default function Home() {
           }}
         >
           <Alert severity="info">
-            <AlertTitle>Nyheter på siden</AlertTitle>
-            <b>- Resultater: </b>Under fanen "Resultater" finner du tidligere
-            kamper med historiske odds, tabell for de to avdelingene samt en
-            oversikt over sluttspillsfordelingene "AS IT STANDS" i de to
-            avdelingene!
-            <br />
-            <br />
-            <b>- Oddssiden: </b>Oddssiden er nå strukturert på kommende kamper,
-            og kampoddsene ser du ved siden av lagnavnene. Dersom det finnes
-            tilhørende odds til kampen, får du disse opp ved å trykke på kampen.
-            <br />
-            <br />
-            <b>- Enklere bet requests: </b>Nå kan (og bør) du knytte odds du
-            foreslår til en kommende kamp. I tillegg velger du kategori blant
-            noen forhåndsdefinerte kategorier. Da blir ting forhåpentligvis litt
-            mer strukturert og oversiktlig for alle.
+            <AlertTitle>Kom med innspill!</AlertTitle>
+            Nå har det blitt en god del spill på siden, og noen har virkelig
+            fått en snøballeffekt (creds til blant annet mafioso og Thalles),
+            mens noen er blakke. Jeg ønsker at det skal være mulig for alle å
+            spille videre, og kanskje minimere forskjellene litt i
+            "konkurransen". Har du noen gode idéer til hvordan vi kan oppnå
+            dette? Send meg en melding på 906 36 538! Tar imot alle forslag med
+            takk 😁
           </Alert>
           <br />
-          <Alert severity="warning">
+          {/* <Alert severity="warning">
             <AlertTitle>Innmelding av odds</AlertTitle>Foreløpig har jeg ikke noe
             godt system for innmelding av resultater fra bets, f.eks. målscorer-
             og kortspill som ikke ligger ute på tsff.no. Inntil videre kan dere
             sende SMS til 90636538 med resultater. Her stoler jeg på at det dere
             melder inn er korrekt.
-          </Alert>
+          </Alert> */}
           <br />
           Studentfotballen tar stadig nye steg, og jeg følte det nå var på tide
           med en helt egen bettingside for TSFF! <br />
