@@ -252,8 +252,10 @@ export type Stats = {
 
 export type OptionStake = {
   option_id: number;
+  close_timestamp: Date;
   total_stake: number;
   option: string;
+  option_status: 1 | 2 | 3 | 4;
   title: string;
   number_accums: number;
 };
