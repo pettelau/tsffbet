@@ -46,8 +46,9 @@ export default function BettingStats() {
   const [showOnlyFuture, setShowOnlyFuture] = useState<boolean>(false);
 
   const fetchStats = async () => {
+    setIsLoading(true);
     const response = await fetch(
-      `${url_path}api/stats?offset=${offset}&limit=${limit}`,
+      `${url_path}api/stats?offset=${offset}&limit=${limit}&onlyfuture=${showOnlyFuture}`,
       {
         headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
       }
@@ -56,6 +57,7 @@ export default function BettingStats() {
     setResponseCode(response.status);
 
     if (response.ok) {
+      setIsLoading(false);
       setStats((prevStats) => {
         if (!prevStats) return resp;
 
@@ -65,6 +67,8 @@ export default function BettingStats() {
         };
       });
     } else {
+      setIsLoading(false);
+      setResponseCode(response.status);
       setResponseText(resp.detail);
     }
   };
@@ -76,6 +80,18 @@ export default function BettingStats() {
   useEffect(() => {
     fetchStats();
   }, [offset]);
+
+  useEffect(() => {
+    setStats((prevStats) => {
+      if (!prevStats) return undefined;
+
+      return {
+        ...prevStats,
+        total_stakes: [],
+      };
+    });
+    fetchStats();
+  }, [showOnlyFuture]);
 
   if (responseCode == undefined) {
     return (
@@ -157,33 +173,27 @@ export default function BettingStats() {
               <TableBody>
                 {stats.total_stakes.map(
                   (option: OptionStake, index: number) => {
-                    if (
-                      (showOnlyFuture &&
-                        new Date(option.close_timestamp) > new Date()) ||
-                      !showOnlyFuture
-                    ) {
-                      return (
-                        <TableRow
-                          sx={{
-                            backgroundColor:
-                              index % 2 === 0 ? "white" : "gainsboro",
-                          }}
-                        >
-                          <TableCell sx={{ padding: 1 }}>
-                            {option.title}
-                          </TableCell>
-                          <TableCell sx={{ padding: 1 }}>
-                            {option.option}
-                          </TableCell>
-                          <TableCell align="center">
-                            <b>{option.total_stake.toLocaleString()} kr</b>
-                          </TableCell>
-                          <TableCell align="center">
-                            {option.number_accums}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }
+                    return (
+                      <TableRow
+                        sx={{
+                          backgroundColor:
+                            index % 2 === 0 ? "white" : "gainsboro",
+                        }}
+                      >
+                        <TableCell sx={{ padding: 1 }}>
+                          {option.title}
+                        </TableCell>
+                        <TableCell sx={{ padding: 1 }}>
+                          {option.option}
+                        </TableCell>
+                        <TableCell align="center">
+                          <b>{option.total_stake.toLocaleString()} kr</b>
+                        </TableCell>
+                        <TableCell align="center">
+                          {option.number_accums}
+                        </TableCell>
+                      </TableRow>
+                    );
                   }
                 )}
               </TableBody>

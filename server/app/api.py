@@ -111,6 +111,7 @@ async def get_requested_bets():
 async def get_stats(
     offset: int = 0,
     limit: int = 20,
+    onlyfuture: bool = False,
     token: str = Depends(authUtils.validate_access_token),
 ):
     try:
@@ -118,8 +119,7 @@ async def get_stats(
         num_accums = await database.fetch_one("SELECT COUNT(*) FROM accums")
         balance_sum_total = await database.fetch_one("SELECT SUM(balance) FROM users")
         accum_sum_total = await database.fetch_one("SELECT SUM(stake) FROM accums")
-        total_stakes = await database.fetch_all(
-            """SELECT 
+        query = """SELECT 
                 accum_options.option_id, 
                 bets.close_timestamp,
                 SUM(stake) AS total_stake, 
@@ -135,6 +135,10 @@ async def get_stats(
                 accums ON accum_options.accum_id = accums.accum_id 
             LEFT JOIN 
                 bets ON bet_options.bet = bets.bet_id
+                """
+        if onlyfuture:
+            query += " WHERE bets.close_timestamp > NOW() "
+        query += """
             GROUP BY 
                 accum_options.option_id, 
                 option, 
@@ -143,7 +147,10 @@ async def get_stats(
                 bet_options.option_status
             ORDER BY total_stake DESC
             LIMIT :limit OFFSET :offset
-            """,
+            """
+
+        total_stakes = await database.fetch_all(
+            query,
             {"limit": limit, "offset": offset},
         )
         stats = {
