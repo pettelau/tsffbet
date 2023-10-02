@@ -148,7 +148,7 @@ export default function UserProfile() {
           ? publicUserData.associated_team
           : "Ikke tilknyttet noe lag"}{" "}
         <br />
-        Balanse: {publicUserData.balance} kr
+        Balanse: {publicUserData.balance.toFixed(1)} kr
         <br />
         Sist innlogget:{" "}
         {new Date(

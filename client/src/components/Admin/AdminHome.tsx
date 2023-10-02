@@ -238,7 +238,7 @@ export default function AdminHome() {
                         <>
                           Username: {user.username} <br />
                           User_id: {user.user_id} <br />
-                          Balance: {user.balance} <br />
+                          Balance: {user.balance.toFixed(1)} <br />
                           Created on:{" "}
                           {new Date(user.created_on).getDate() +
                             " " +
