@@ -8,10 +8,12 @@ import {
   CircularProgress,
   Divider,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
+  Switch,
 } from "@mui/material";
 import { Stats, OptionStake } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -26,6 +28,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 export default function BettingStats() {
   const url_path = useAppSelector(selectPath);
@@ -39,6 +42,8 @@ export default function BettingStats() {
   const [limit, setLimit] = useState<number>(15);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [showOnlyFuture, setShowOnlyFuture] = useState<boolean>(false);
 
   const fetchStats = async () => {
     const response = await fetch(
@@ -62,6 +67,10 @@ export default function BettingStats() {
     } else {
       setResponseText(resp.detail);
     }
+  };
+
+  const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setShowOnlyFuture(event.target.checked);
   };
 
   useEffect(() => {
@@ -117,6 +126,16 @@ export default function BettingStats() {
           />{" "}
           <br /> <br />
           <h2>💸Spillene med flest plasserte kronasjer💸</h2>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showOnlyFuture}
+                onChange={handleSwitchChange}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+            }
+            label="Vis bare kommende spill"
+          />
           <div className="table-div-stats">
             <Table aria-label="simple table">
               <TableHead>
@@ -138,27 +157,33 @@ export default function BettingStats() {
               <TableBody>
                 {stats.total_stakes.map(
                   (option: OptionStake, index: number) => {
-                    return (
-                      <TableRow
-                        sx={{
-                          backgroundColor:
-                            index % 2 === 0 ? "white" : "gainsboro",
-                        }}
-                      >
-                        <TableCell sx={{ padding: 1 }}>
-                          {option.title}
-                        </TableCell>
-                        <TableCell sx={{ padding: 1 }}>
-                          {option.option}
-                        </TableCell>
-                        <TableCell align="center">
-                          <b>{option.total_stake.toLocaleString()} kr</b>
-                        </TableCell>
-                        <TableCell align="center">
-                          {option.number_accums}
-                        </TableCell>
-                      </TableRow>
-                    );
+                    if (
+                      (showOnlyFuture &&
+                        new Date(option.close_timestamp) > new Date()) ||
+                      !showOnlyFuture
+                    ) {
+                      return (
+                        <TableRow
+                          sx={{
+                            backgroundColor:
+                              index % 2 === 0 ? "white" : "gainsboro",
+                          }}
+                        >
+                          <TableCell sx={{ padding: 1 }}>
+                            {option.title}
+                          </TableCell>
+                          <TableCell sx={{ padding: 1 }}>
+                            {option.option}
+                          </TableCell>
+                          <TableCell align="center">
+                            <b>{option.total_stake.toLocaleString()} kr</b>
+                          </TableCell>
+                          <TableCell align="center">
+                            {option.number_accums}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
                   }
                 )}
               </TableBody>

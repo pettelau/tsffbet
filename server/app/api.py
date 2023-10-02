@@ -121,8 +121,10 @@ async def get_stats(
         total_stakes = await database.fetch_all(
             """SELECT 
                 accum_options.option_id, 
+                bets.close_timestamp,
                 SUM(stake) AS total_stake, 
                 option, 
+                bet_options.option_status,
                 title,
                 COUNT(DISTINCT(accums.accum_id)) as number_accums
             FROM 
@@ -136,7 +138,9 @@ async def get_stats(
             GROUP BY 
                 accum_options.option_id, 
                 option, 
-                title
+                title,
+                bets.close_timestamp,
+                bet_options.option_status
             ORDER BY total_stake DESC
             LIMIT :limit OFFSET :offset
             """,
@@ -1049,7 +1053,9 @@ async def update_weatherdata(weather_data: Dict[str, WeatherData]):
                     "air_temperature": data.air_temperature,
                     "cloud_area_fraction": data.cloud_area_fraction,
                     "wind_speed": data.wind_speed,
-                    "precipitation": data.precipitation if data.precipitation is not None else 0,
+                    "precipitation": data.precipitation
+                    if data.precipitation is not None
+                    else 0,
                     "weather_icon": data.weather_icon,
                     "match_id": match_id,
                 },
