@@ -82,6 +82,7 @@ export default function BettingStats() {
   }, [offset]);
 
   useEffect(() => {
+    setOffset(0);
     setStats((prevStats) => {
       if (!prevStats) return undefined;
 
