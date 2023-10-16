@@ -35,6 +35,10 @@ import useWindowDimensions from "../utils/deviceSizeInfo";
 
 import { AlignHorizontalCenter } from "@mui/icons-material";
 
+import { useLocation } from "react-router-dom";
+import { stats } from "../utils/stats"; // Import the stats-instance
+import { useEffect } from "react";
+
 // test
 
 export default function AppAppBar() {
@@ -52,6 +56,12 @@ export default function AppAppBar() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const location = useLocation();
+
+  useEffect(() => {
+    stats.pageview();
+  }, [location.pathname, location.search]);
 
   return (
     <div>
