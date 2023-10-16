@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   Alert,
@@ -77,22 +77,49 @@ export default function BettingStats() {
     setShowOnlyFuture(event.target.checked);
   };
 
-  useEffect(() => {
-    fetchStats();
-  }, [offset]);
+  const showOnlyFutureRef = useRef(showOnlyFuture);
+
+  // useEffect(() => {
+  //   fetchStats();
+  // }, [offset]);
+
+  // useEffect(() => {
+  //   setStats((prevStats) => {
+  //     if (!prevStats) return undefined;
+
+  //     return {
+  //       ...prevStats,
+  //       total_stakes: [],
+  //     };
+  //   });
+  //   setOffset(0);
+  // }, [showOnlyFuture]);
 
   useEffect(() => {
-    setOffset(0);
-    setStats((prevStats) => {
-      if (!prevStats) return undefined;
+    // Check if showOnlyFuture has changed
+    if (showOnlyFuture !== showOnlyFutureRef.current) {
+      // Reset stats and offset
+      setStats((prevStats) => {
+        if (!prevStats) return undefined;
 
-      return {
-        ...prevStats,
-        total_stakes: [],
-      };
-    });
-    fetchStats();
-  }, [showOnlyFuture]);
+        return {
+          ...prevStats,
+          total_stakes: [],
+        };
+      });
+      if (offset === 0) {
+        fetchStats();
+      } else {
+        setOffset(0);
+      }
+
+      // Update the ref to the new value
+      showOnlyFutureRef.current = showOnlyFuture;
+    } else {
+      // Fetch stats
+      fetchStats();
+    }
+  }, [offset, showOnlyFuture]);
 
   if (responseCode == undefined) {
     return (
