@@ -57,7 +57,7 @@ function getRowEndGame(index: number) {
 
 function getFormButtons(form: string) {
   if (form.length > 3) {
-    form = form.slice(form.length - 3);
+    form = form.slice(0, 3);
   }
   let formDivs = [];
   for (const res of form) {
