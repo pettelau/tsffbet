@@ -75,10 +75,16 @@ export default function Matches() {
 
   // Separate matches based on group name
   const groupAMatches = matches.filter(
-    (match) => match.group_name === "Avdeling A"
+    (match) =>
+      match.group_name === "Avdeling A" &&
+      match.home_goals !== null &&
+      match.away_goals !== null
   );
   const groupBMatches = matches.filter(
-    (match) => match.group_name === "Avdeling B"
+    (match) =>
+      match.group_name === "Avdeling B" &&
+      match.home_goals !== null &&
+      match.away_goals !== null
   );
 
   const groupAtable = generateLeagueTable(groupAMatches);
