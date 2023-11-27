@@ -32,15 +32,15 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          <Alert severity="info">
-            <AlertTitle>Kom med innspill!</AlertTitle>
-            Nå har det blitt en god del spill på siden, og noen har virkelig
-            fått en snøballeffekt (creds til blant annet mafioso og Thalles),
-            mens noen er blakke. Jeg ønsker at det skal være mulig for alle å
-            spille videre, og kanskje minimere forskjellene litt i
-            "konkurransen". Har du noen gode idéer til hvordan vi kan oppnå
-            dette? Send meg en melding på 906 36 538! Tar imot alle forslag med
-            takk 😁
+          <Alert severity="success">
+            <AlertTitle>TAKK FOR I ÅR!</AlertTitle>
+            Det har vært utrolig kult med så mye interesse rundt denne
+            bettingsiden dette semesteret! Mye mer enn forventet!! Gratulerer
+            til Mattis, Ask og Thalles med henholvsvis 1., 2., og 3. plass!
+            Mafiabossen fra Hattfjelldal ble til slutt litt for grådig... <br />
+            <br />
+            Vi ses etter jul! Mulig det blir noen forandringer i form av en
+            konkurranse, vi får se! Odds blir det uansett. God jul!
           </Alert>
           <br />
           {/* <Alert severity="warning">
